@@ -36,6 +36,7 @@
 #include <array>
 #include <mutex>
 #include <set>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -81,9 +82,9 @@ struct GuildPerkPlayerData : public DataMap::Base
 {
     ObjectGuid lastGatherLoot;          // the node or corpse already rolled
     uint32 mendTimer = 0;               // ms since the last mending
-    // Auras already lengthened, by spell and application time: a refreshed
-    // flask keeps its time, a stacked one is not lengthened twice.
-    std::set<std::pair<uint32, int64>> extended;
+    // Consumable auras just applied, lengthened on the next player tick: the
+    // cast sets their duration again after applying them.
+    std::vector<uint32> pendingConsumables;
 };
 
 class GuildPerkMgr
@@ -123,6 +124,8 @@ public:
 
 private:
     GuildPerkMgr() = default;
+
+    void LengthenConsumables(Player* player, GuildPerkPlayerData* data);
 
     GuildPerkConfig _config;
 

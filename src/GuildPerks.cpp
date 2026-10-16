@@ -367,28 +367,41 @@ void GuildPerkMgr::OnResurrect(Player* player, float restorePercent)
 
 void GuildPerkMgr::OnAuraApply(Player* player, Aura* aura)
 {
-    if (!aura || aura->GetDuration() <= 0 || aura->GetDuration() != aura->GetMaxDuration())
+    if (!aura || aura->GetMaxDuration() <= 0)
         return;
+
+    if (Amount(GUILD_PERK_CONSUMABLES, player) <= 0.0f || !IsLengthenedConsumable(aura))
+        return;
+
+    // Not here: a cast applies its aura, then sets its duration again
+    // (Spell::DoSpellHitOnUnit). Lengthened on the next tick of the player.
+    auto* data = player->CustomData.GetDefault<GuildPerkPlayerData>(DATA_KEY);
+    if (data->pendingConsumables.size() < 16)
+        data->pendingConsumables.push_back(aura->GetId());
+}
+
+void GuildPerkMgr::LengthenConsumables(Player* player, GuildPerkPlayerData* data)
+{
+    std::vector<uint32> pending;
+    pending.swap(data->pendingConsumables);
 
     float const minutes = Amount(GUILD_PERK_CONSUMABLES, player);
-    if (minutes <= 0.0f || !IsLengthenedConsumable(aura))
+    if (minutes <= 0.0f)
         return;
 
-    // Lengthened once per application: a flask stacked or refreshed later
-    // keeps the time it has.
-    auto* data = player->CustomData.GetDefault<GuildPerkPlayerData>(DATA_KEY);
-    std::pair<uint32, int64> const key(aura->GetId(), int64(aura->GetApplyTime()));
-    if (!data->extended.insert(key).second)
-        return;
-    if (data->extended.size() > 64)
+    for (uint32 spellId : pending)
     {
-        data->extended.clear();
-        data->extended.insert(key);
-    }
+        Aura* aura = player->GetAura(spellId);
+        // ONCE PER APPLICATION: an aura still at its own full time is new or
+        // refreshed by a new flask. One already lengthened, or loaded at
+        // login with the time it had, has a longer maximum than its own.
+        if (!aura || aura->GetDuration() <= 0 || aura->GetMaxDuration() > aura->CalcMaxDuration())
+            continue;
 
-    int32 const duration = aura->GetMaxDuration() + int32(minutes * MINUTE * IN_MILLISECONDS);
-    aura->SetMaxDuration(duration);
-    aura->SetDuration(duration);
+        int32 const bonus = int32(minutes * MINUTE * IN_MILLISECONDS);
+        aura->SetMaxDuration(aura->GetMaxDuration() + bonus);
+        aura->SetDuration(aura->GetDuration() + bonus);
+    }
 }
 
 void GuildPerkMgr::OnHearthstone(Player* player)
@@ -405,6 +418,9 @@ void GuildPerkMgr::OnUpdate(Player* player, uint32 diff)
     // mod-stellar-tarot mends: the field is written (the client follows), and
     // a piece that was broken gets its stats back.
     auto* data = player->CustomData.GetDefault<GuildPerkPlayerData>(DATA_KEY);
+    if (!data->pendingConsumables.empty())
+        LengthenConsumables(player, data);
+
     data->mendTimer += diff;
     if (data->mendTimer < _config.durabilityInterval * IN_MILLISECONDS)
         return;
