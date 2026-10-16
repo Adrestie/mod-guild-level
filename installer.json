@@ -3,6 +3,7 @@
   "module": "mod-guild-level",
   "title": "Guild Level",
   "fields": {
+    "game": "required",
     "worldserver": "required",
     "sources": "required",
     "mysql": "required"
