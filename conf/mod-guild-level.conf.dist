@@ -158,8 +158,11 @@ GuildLevel.Perk.Consumables       = "20:30"
 #    Rez     offers a resurrection to the dead of the group on the same map,
 #            out of combat, with GuildLevel.Active.Rez.Percent of their health
 #            and mana (the level 10 perk makes it full for guildmates).
-#    Bank    a guild vault in front of the player for .Duration seconds
-#            (.Entry: a gameobject of the guild bank type; 187294 is the game's).
+#    Bank    a Guild Chest in front of the player for .Duration seconds:
+#            Cataclysm's Mobile Banking chest, converted for 3.3.5a, with a
+#            blue banner for the Alliance (.Entry.Alliance, 920000) and a red
+#            one for the Horde (.Entry.Horde, 920001). Any gameobject of the
+#            guild bank type does: 187294 is the game's own Guild Vault.
 #    Vendor  a reagent vendor and repairer in front of the player for
 #            .Duration seconds (.Entry: creature 92001 of the module).
 #    Home    to the guild house: it comes with the guild house. For now the
@@ -174,7 +177,8 @@ GuildLevel.Active.Rez.Percent       = 35
 GuildLevel.Active.Bank.Level        = 23
 GuildLevel.Active.Bank.Cooldown     = 3600
 GuildLevel.Active.Bank.Duration     = 300
-GuildLevel.Active.Bank.Entry        = 187294
+GuildLevel.Active.Bank.Entry.Alliance = 920000
+GuildLevel.Active.Bank.Entry.Horde  = 920001
 GuildLevel.Active.Vendor.Level      = 24
 GuildLevel.Active.Vendor.Cooldown   = 3600
 GuildLevel.Active.Vendor.Duration   = 300

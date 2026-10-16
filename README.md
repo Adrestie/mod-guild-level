@@ -14,8 +14,18 @@ climbs **25 levels**, then **9 Paragon levels**.
 No client patch: core hooks, one characters table, texts in `module_string`,
 and one hidden server-side spell. The module owns the tranches **92-93**
 (92000-93999) of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
-spell 92000 is the perks' aura, creature 92001 the guild supplier, the rest
-is kept for the guild house and the talents to come.
+spell 92000 is the perks' aura, creature 92001 the guild supplier, displays
+92010-92011 and gameobjects 920000-920001 the Guild Chest; the rest is kept for
+the guild house and the talents to come.
+
+**A client patch for one thing**: the Guild Chest of `.gperk bank` is
+Cataclysm's Mobile Banking chest, converted for 3.3.5a by
+`tools/convert_guild_chest.py` from what wow.export exports of a modern
+client. Its files (`data/art/World/GuildLevel/GuildChest`) and its display rows
+(`data/dbc/guild_level_GameObjectDisplayInfo.dbc`) go into the game client with
+the WoW-mods installer. The model loses what 3.3.5a cannot draw: the guild's
+own colours and emblem on the banner (baked blue for the Alliance, red for the
+Horde) and the reflections of the metal.
 
 ## Guild experience
 
@@ -132,7 +142,7 @@ one dead, nothing could be placed) starts no cooldown.
 |---|---|---|---|
 | 21 | `.gperk raid` | Every member of the group or raid gets a summon to accept, as from a summoning stone. Out of combat, not in a battleground or an arena; dead members and members in a battleground are left out. | 1 h |
 | 22 | `.gperk rez` | Every dead member of the group on the same map and instance gets a resurrection to accept, where the player stands, with 35% of their health and mana (full for guildmates, thanks to the level 10 perk). Out of combat. | 10 min |
-| 23 | `.gperk bank` | A guild vault (the game's own, gameobject 187294) stands in front of the player for 5 minutes. Not in a battleground or an arena. | 1 h |
+| 23 | `.gperk bank` | The Guild Chest of Cataclysm's Mobile Banking stands in front of the player for 5 minutes: blue banner for the Alliance (gameobject 920000), red for the Horde (920001). Not in a battleground or an arena. | 1 h |
 | 24 | `.gperk vendor` | The Guild Supplier (creature 92001), a reagent vendor who repairs, waits in front of the player for 5 minutes. Not in a battleground or an arena. | 1 h |
 | 25 | `.gperk home` | To the guild house: **it comes with the guild house**. For now the command says so and starts no cooldown. | 1 h |
 
@@ -195,7 +205,8 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Active.<Perk>.Level` | 21 to 25 | Guild level of each active perk (Raid, Rez, Bank, Vendor, Home). |
 | `GuildLevel.Active.<Perk>.Cooldown` | 3600 (Rez 600) | Seconds; 0 = none. |
 | `GuildLevel.Active.Rez.Percent` | 35 | Health and mana of the resurrection offered. |
-| `GuildLevel.Active.Bank.Duration` / `.Entry` | 300 / 187294 | Seconds the vault stays; its gameobject. |
+| `GuildLevel.Active.Bank.Duration` | 300 | Seconds the chest stays. |
+| `GuildLevel.Active.Bank.Entry.Alliance` / `.Horde` | 920000 / 920001 | The chest of each faction (any gameobject of the guild bank type; 187294 is the game's Guild Vault). |
 | `GuildLevel.Active.Vendor.Duration` / `.Entry` | 300 / 92001 | Seconds the supplier stays; its creature. |
 
 A perk is a list of `level:amount` steps that add up once reached: `1:5 11:10`
@@ -349,9 +360,11 @@ in a group, characters with a client to accept summons and resurrections.
     `.gperk rez` offers him a resurrection; accepted, he comes back next to the
     player, with full health and mana if he is a guildmate (35% otherwise).
     Cooldown 10 min. With no one dead: refused, no cooldown.
-39. **Vault:** at level 23, `.gperk bank`: a Guild Vault stands two yards in
-    front of the player; right-click opens the guild bank. After 5 minutes it
-    disappears. Cooldown 1 h.
+39. **Chest:** at level 23, `.gperk bank`: the Guild Chest of Cataclysm stands
+    two yards in front of the player, with a blue banner for an Alliance
+    player, red for a Horde one; right-click opens the guild bank. After 5
+    minutes it disappears. Cooldown 1 h. Without the client files of the
+    module, the client draws nothing where the chest stands.
 40. **Supplier:** at level 24, `.gperk vendor`: the Guild Supplier stands in
     front of the player, sells the 19 reagents and repairs. After 5 minutes he
     disappears. Cooldown 1 h.

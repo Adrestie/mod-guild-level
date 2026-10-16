@@ -37,8 +37,10 @@ class Player;
 
 // The supplier summoned by `.gperk vendor` (data/sql/world): tranche 92.
 constexpr uint32 GUILD_SUPPLIER_ENTRY = 92001;
-// The guild vault of the base game summoned by `.gperk bank`.
-constexpr uint32 GUILD_VAULT_ENTRY = 187294;
+// The Guild Chests summoned by `.gperk bank` (data/sql/world): Cataclysm's
+// Mobile Banking chest, converted for 3.3.5a, Alliance and Horde.
+constexpr uint32 GUILD_CHEST_ALLIANCE_ENTRY = 920000;
+constexpr uint32 GUILD_CHEST_HORDE_ENTRY = 920001;
 
 enum GuildActivePerk : uint8
 {
@@ -55,7 +57,8 @@ struct GuildActivePerkConfig
     std::array<uint8, GUILD_ACTIVE_COUNT> level = { 21, 22, 23, 24, 25 };
     std::array<uint32, GUILD_ACTIVE_COUNT> cooldown = { 3600, 600, 3600, 3600, 3600 };   // seconds
     uint32 rezPercent = 35;             // health and mana of the resurrection offered
-    uint32 bankEntry = GUILD_VAULT_ENTRY;
+    uint32 bankEntryAlliance = GUILD_CHEST_ALLIANCE_ENTRY;
+    uint32 bankEntryHorde = GUILD_CHEST_HORDE_ENTRY;
     uint32 bankDuration = 300;          // seconds
     uint32 vendorEntry = GUILD_SUPPLIER_ENTRY;
     uint32 vendorDuration = 300;        // seconds

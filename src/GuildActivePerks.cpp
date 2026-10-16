@@ -80,7 +80,8 @@ void GuildActivePerkMgr::LoadConfig()
         c.cooldown[i] = sConfigMgr->GetOption<uint32>(prefix + ".Cooldown", c.cooldown[i]);
     }
     c.rezPercent = std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Active.Rez.Percent", 35), 1, 100);
-    c.bankEntry = sConfigMgr->GetOption<uint32>("GuildLevel.Active.Bank.Entry", GUILD_VAULT_ENTRY);
+    c.bankEntryAlliance = sConfigMgr->GetOption<uint32>("GuildLevel.Active.Bank.Entry.Alliance", GUILD_CHEST_ALLIANCE_ENTRY);
+    c.bankEntryHorde = sConfigMgr->GetOption<uint32>("GuildLevel.Active.Bank.Entry.Horde", GUILD_CHEST_HORDE_ENTRY);
     c.bankDuration = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Active.Bank.Duration", 300), 10);
     c.vendorEntry = sConfigMgr->GetOption<uint32>("GuildLevel.Active.Vendor.Entry", GUILD_SUPPLIER_ENTRY);
     c.vendorDuration = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Active.Vendor.Duration", 300), 10);
@@ -275,9 +276,11 @@ bool GuildActivePerkMgr::SummonVault(ChatHandler* handler, Player* player)
         return false;
     }
 
+    // The chest of the player's faction: a blue or a red banner.
+    uint32 const entry = player->GetTeamId() == TEAM_HORDE ? _config.bankEntryHorde : _config.bankEntryAlliance;
     float x, y, z, o;
     InFront(player, x, y, z, o);
-    if (!player->SummonGameObject(_config.bankEntry, x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, _config.bankDuration))
+    if (!player->SummonGameObject(entry, x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, _config.bankDuration))
     {
         Say(handler, GUILD_LEVEL_STR_ACTIVE_FAILED);
         return false;

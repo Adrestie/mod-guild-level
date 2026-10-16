@@ -77,10 +77,45 @@
           "where": "name = 'gperk' OR name LIKE 'gperk %'"
         },
         {
+          "table": "gameobjectdisplayinfo_dbc",
+          "where": "ID IN (92010, 92011)"
+        },
+        {
+          "table": "gameobject_template",
+          "where": "entry IN (920000, 920001)"
+        },
+        {
+          "table": "gameobject_template_locale",
+          "where": "entry IN (920000, 920001)"
+        },
+        {
           "table": "updates",
           "where": "name IN ({sql_files:world})"
         }
       ]
     }
-  }
+  },
+  "dbc": [
+    {
+      "file": "GameObjectDisplayInfo.dbc",
+      "fields": 19,
+      "text_fields": [
+        1
+      ],
+      "client": "data/dbc/guild_level_GameObjectDisplayInfo.dbc"
+    }
+  ],
+  "game_files": {
+    "sources": [
+      "data/art"
+    ],
+    "owned_folders": [
+      "World/GuildLevel"
+    ]
+  },
+  "exclude_from_sources": [
+    "data/art",
+    "data/dbc",
+    "tools"
+  ]
 }
