@@ -9,7 +9,8 @@
   },
   "signature": [
     "src/guild_level_loader.cpp",
-    "src/GuildLevel.cpp"
+    "src/GuildLevel.cpp",
+    "src/GuildPerks.cpp"
   ],
   "configuration": {
     "file": "mod-guild-level.conf",
@@ -43,6 +44,14 @@
         {
           "table": "command",
           "where": "name = 'guildlevel' OR name LIKE 'guildlevel %'"
+        },
+        {
+          "table": "spell_dbc",
+          "where": "ID = 92000"
+        },
+        {
+          "table": "spell_script_names",
+          "where": "ScriptName = 'spell_guild_level_hearthstone'"
         },
         {
           "table": "updates",

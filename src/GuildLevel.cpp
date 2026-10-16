@@ -16,6 +16,7 @@
  */
 
 #include "GuildLevel.h"
+#include "GuildPerks.h"
 
 #include "Chat.h"
 #include "Common.h"
@@ -171,6 +172,7 @@ void GuildLevelMgr::Climb(uint32 guildId, GuildLevelState& state)
         if (state.xp < need)
             return;
         state.xp -= need;
+        _changed.insert(guildId);
 
         if (state.level < GUILD_LEVEL_MAX)
         {
@@ -258,6 +260,7 @@ GuildLevelState GuildLevelMgr::SetLevel(uint32 guildId, uint8 level)
     GuildLevelState& state = _guilds[guildId];
     state.level = std::min(level, GUILD_LEVEL_MAX);
     state.paragon = 0;
+    _changed.insert(guildId);
     state.xp = 0;
     SaveNow(guildId, state);
     _dirty.erase(guildId);
@@ -270,6 +273,7 @@ GuildLevelState GuildLevelMgr::SetParagon(uint32 guildId, uint8 paragon)
     GuildLevelState& state = _guilds[guildId];
     state.level = GUILD_LEVEL_MAX;
     state.paragon = std::min(paragon, GUILD_PARAGON_MAX);
+    _changed.insert(guildId);
     state.xp = 0;
     SaveNow(guildId, state);
     _dirty.erase(guildId);
@@ -322,13 +326,19 @@ void GuildLevelMgr::Update(uint32 diff)
     // The announcements were queued by the map threads: the guilds and their
     // member lists belong to the world thread, where we are now.
     std::vector<Announcement> pending;
+    std::unordered_set<uint32> changed;
     {
         std::lock_guard<std::mutex> guard(_lock);
         pending.swap(_announcements);
+        changed.swap(_changed);
     }
     if (_config.announce)
         for (Announcement const& announcement : pending)
             Announce(announcement);
+
+    // The perks follow the level: auras of the members online, at once.
+    for (uint32 guildId : changed)
+        sGuildPerkMgr->RefreshGuild(guildId);
 
     _saveTimer += diff;
     if (_saveTimer >= _config.saveInterval * IN_MILLISECONDS)
