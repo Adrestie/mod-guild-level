@@ -1,0 +1,86 @@
+#
+# mod-guild-level — configuration
+#
+# Members of one guild who kill monsters together earn guild experience. The
+# guild climbs 25 levels, then 9 Paragon levels.
+#
+# Every value below is also the built-in default, so a setting left out changes
+# nothing. Reloaded by `.reload config`.
+#
+# Copy this file to your configs/modules directory and drop the .dist extension.
+#
+
+[worldserver]
+
+###############################################################################
+#
+#    GuildLevel.Enable
+#        0 = no guild earns experience. Levels already reached are kept, and
+#        the GM commands still work.
+#
+
+GuildLevel.Enable               = 1
+
+###############################################################################
+#
+#    EXPERIENCE
+#
+#    When a monster dies, every member of the group it rewards (the killer and
+#    the members within reward distance, alive) who belongs to the killer's
+#    guild brings the guild the experience the kill is worth to him alone: not
+#    split by the group, before any personal bonus, the server's kill rate
+#    included. Three guildmates killing a monster worth 100 experience each
+#    bring the guild 300. A monster gray to a member brings nothing from him.
+#
+#    GuildLevel.MinMembers
+#        Guildmates the group needs at the kill before the guild earns
+#        anything. 2 = two members of the same guild at least. 1 lets a member
+#        playing alone earn for his guild.
+#
+#    GuildLevel.Rate
+#        Multiplies everything the guild earns. Decimals are allowed.
+#
+
+GuildLevel.MinMembers           = 2
+GuildLevel.Rate                 = 1.0
+
+###############################################################################
+#
+#    CURVES
+#
+#    The experience each step costs, separated by spaces or commas. The bar
+#    starts again from zero at each step, and what is left over goes on to
+#    the next one.
+#
+#    GuildLevel.Curve.Levels
+#        25 amounts: the first takes a new guild (level 0) to level 1, the last
+#        takes level 24 to level 25.
+#
+#    GuildLevel.Curve.Paragon
+#        9 amounts, past level 25: the first takes the guild to Paragon 1, the
+#        last to Paragon 9. Paragon 9 is the end: the guild earns nothing more
+#        (its lifetime total still counts).
+#
+#    A shorter list repeats its last amount; extra amounts are ignored. For
+#    scale: a level 80 monster is worth about 500 experience to a level 80
+#    character, so five guildmates bring their guild about 2,500 per kill. With
+#    these curves, level 25 takes about 11 million experience in all, and
+#    Paragon 9 another 23 million.
+#
+
+GuildLevel.Curve.Levels         = "20000 30000 45000 60000 80000 100000 125000 150000 180000 210000 250000 290000 330000 380000 430000 490000 550000 620000 700000 780000 870000 960000 1060000 1170000 1300000"
+GuildLevel.Curve.Paragon        = "1500000 1750000 2000000 2250000 2500000 2750000 3000000 3500000 4000000"
+
+###############################################################################
+#
+#    GuildLevel.Announce
+#        Each level and Paragon level reached is told to every member of the
+#        guild online, in the green of the guild channel, in his language.
+#
+#    GuildLevel.SaveInterval
+#        Seconds between two writes of the guilds' experience to the database.
+#        A level reached is written at once, and everything on shutdown.
+#
+
+GuildLevel.Announce             = 1
+GuildLevel.SaveInterval         = 60
