@@ -100,8 +100,11 @@ GuildLevel.SaveInterval         = 60
 #    level 1 and +15 from level 11. "" turns the perk off.
 #
 #    GuildLevel.Perk.Experience      % more experience, from every source.
-#    GuildLevel.Perk.Durability      % less durability lost. NOT APPLIED: the
-#                                    core has no hook for durability loss.
+#    GuildLevel.Perk.Durability      damaged pieces worn mended by 1 point of
+#                                    durability every period, each a different
+#                                    piece drawn at random.
+#    GuildLevel.Perk.Durability.Interval
+#                                    seconds between two mendings.
 #    GuildLevel.Perk.Honor           % more honor, from every source.
 #    GuildLevel.Perk.Hearthstone     minutes off the Hearthstone cooldown.
 #    GuildLevel.Perk.Gathering       items more on a lucky mining, herbalism or
@@ -124,7 +127,8 @@ GuildLevel.SaveInterval         = 60
 
 GuildLevel.Perks.Enable           = 1
 GuildLevel.Perk.Experience        = "1:5 11:10"
-GuildLevel.Perk.Durability        = "2:5 12:15"
+GuildLevel.Perk.Durability        = "2:1 12:1"
+GuildLevel.Perk.Durability.Interval = 60
 GuildLevel.Perk.Honor             = "3:5 13:10"
 GuildLevel.Perk.Hearthstone       = "4:5 14:10"
 GuildLevel.Perk.Gathering         = "5:1 15:2"

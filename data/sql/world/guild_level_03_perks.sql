@@ -35,7 +35,8 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (8690, 'spell
 --   111  experience %, honor %, reputation %, mounted speed %
 --   112  vendor %, gold to the guild bank %, Hearthstone minutes
 --   113  gathering chance %, extra items, resurrection (114 / 115), consumable minutes
-DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` IN (5, 110, 111, 112, 113, 114, 115, 116);
+--   117  damaged items mended, seconds between two mendings
+DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` IN (5, 110, 111, 112, 113, 114, 115, 116, 117);
 INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level',   5, '[Guild] Bountiful gathering: {} more {}.'),
 ('mod-guild-level', 110, 'Perks of a level {} guild:'),
@@ -44,9 +45,10 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level', 113, 'Gathering: {}% chance of {} more. Full resurrection by a guildmate: {}. Flasks, elixirs and food buffs: +{} min.'),
 ('mod-guild-level', 114, 'yes'),
 ('mod-guild-level', 115, 'no'),
-('mod-guild-level', 116, 'The perks are turned off (GuildLevel.Perks.Enable = 0).');
+('mod-guild-level', 116, 'The perks are turned off (GuildLevel.Perks.Enable = 0).'),
+('mod-guild-level', 117, 'Durability: {} damaged item(s) worn mended by 1 point every {} seconds.');
 
-DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` IN (5, 110, 111, 112, 113, 114, 115, 116);
+DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` IN (5, 110, 111, 112, 113, 114, 115, 116, 117);
 INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level',   5, 'frFR', '[Guilde] Récolte abondante : {} {} de plus.'),
 ('mod-guild-level', 110, 'frFR', 'Bonus d''une guilde de niveau {} :'),
@@ -56,6 +58,7 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 114, 'frFR', 'oui'),
 ('mod-guild-level', 115, 'frFR', 'non'),
 ('mod-guild-level', 116, 'frFR', 'Les bonus sont désactivés (GuildLevel.Perks.Enable = 0).'),
+('mod-guild-level', 117, 'frFR', 'Durabilité : {} objet(s) porté(s) abîmé(s) réparé(s) de 1 point toutes les {} secondes.'),
 
 ('mod-guild-level',   5, 'deDE', '[Gilde] Reiche Ernte: {} weitere {}.'),
 ('mod-guild-level', 110, 'deDE', 'Boni einer Gilde der Stufe {}:'),
@@ -65,6 +68,7 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 114, 'deDE', 'ja'),
 ('mod-guild-level', 115, 'deDE', 'nein'),
 ('mod-guild-level', 116, 'deDE', 'Die Boni sind deaktiviert (GuildLevel.Perks.Enable = 0).'),
+('mod-guild-level', 117, 'deDE', 'Haltbarkeit: {} beschädigte(r) getragene(r) Gegenstand/Gegenstände alle {} Sekunden um 1 Punkt repariert.'),
 
 ('mod-guild-level',   5, 'esES', '[Hermandad] Recolección abundante: {} más de {}.'),
 ('mod-guild-level', 110, 'esES', 'Ventajas de una hermandad de nivel {}:'),
@@ -74,6 +78,7 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 114, 'esES', 'sí'),
 ('mod-guild-level', 115, 'esES', 'no'),
 ('mod-guild-level', 116, 'esES', 'Las ventajas están desactivadas (GuildLevel.Perks.Enable = 0).'),
+('mod-guild-level', 117, 'esES', 'Durabilidad: {} objeto(s) equipado(s) dañado(s) reparado(s) 1 punto cada {} segundos.'),
 
 ('mod-guild-level',   5, 'esMX', '[Hermandad] Recolección abundante: {} más de {}.'),
 ('mod-guild-level', 110, 'esMX', 'Ventajas de una hermandad de nivel {}:'),
@@ -83,6 +88,7 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 114, 'esMX', 'sí'),
 ('mod-guild-level', 115, 'esMX', 'no'),
 ('mod-guild-level', 116, 'esMX', 'Las ventajas están desactivadas (GuildLevel.Perks.Enable = 0).'),
+('mod-guild-level', 117, 'esMX', 'Durabilidad: {} objeto(s) equipado(s) dañado(s) reparado(s) 1 punto cada {} segundos.'),
 
 ('mod-guild-level',   5, 'ruRU', '[Гильдия] Богатый сбор: ещё {} — {}.'),
 ('mod-guild-level', 110, 'ruRU', 'Бонусы гильдии {}-го уровня:'),
@@ -91,7 +97,8 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 113, 'ruRU', 'Сбор: {}% шанс получить ещё {}. Полное воскрешение согильдийцем: {}. Настои, эликсиры и еда: +{} мин.'),
 ('mod-guild-level', 114, 'ruRU', 'да'),
 ('mod-guild-level', 115, 'ruRU', 'нет'),
-('mod-guild-level', 116, 'ruRU', 'Бонусы отключены (GuildLevel.Perks.Enable = 0).');
+('mod-guild-level', 116, 'ruRU', 'Бонусы отключены (GuildLevel.Perks.Enable = 0).'),
+('mod-guild-level', 117, 'ruRU', 'Прочность: {} повреждённых надетых предметов чинится на 1 единицу каждые {} с.');
 
 DELETE FROM `command` WHERE `name` = 'guildlevel perks';
 INSERT INTO `command` (`name`, `security`, `help`) VALUES

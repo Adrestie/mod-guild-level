@@ -61,7 +61,7 @@ namespace
     constexpr std::array<PerkOption, GUILD_PERK_COUNT> PERK_OPTIONS =
     { {
         { "GuildLevel.Perk.Experience",   "1:5 11:10" },
-        { "GuildLevel.Perk.Durability",   "2:5 12:15" },
+        { "GuildLevel.Perk.Durability",   "2:1 12:1" },
         { "GuildLevel.Perk.Honor",        "3:5 13:10" },
         { "GuildLevel.Perk.Hearthstone",  "4:5 14:10" },
         { "GuildLevel.Perk.Gathering",    "5:1 15:2" },
@@ -158,6 +158,7 @@ void GuildPerkMgr::LoadConfig()
         c.steps[i] = ReadSteps(PERK_OPTIONS[i].option,
             sConfigMgr->GetOption<std::string>(PERK_OPTIONS[i].option, PERK_OPTIONS[i].steps));
     c.gatheringChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.Perk.Gathering.Chance", 20.0f), 0.0f, 100.0f);
+    c.durabilityInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Perk.Durability.Interval", 60), 1);
     _config = c;
 }
 
@@ -397,6 +398,46 @@ void GuildPerkMgr::OnHearthstone(Player* player)
         player->ModifySpellCooldown(SPELL_HEARTHSTONE, -int32(minutes * MINUTE * IN_MILLISECONDS));
 }
 
+void GuildPerkMgr::OnUpdate(Player* player, uint32 diff)
+{
+    // Every period, as many damaged pieces worn as the perk says, each a
+    // different one drawn at random, get 1 point of durability back. The way
+    // mod-stellar-tarot mends: the field is written (the client follows), and
+    // a piece that was broken gets its stats back.
+    auto* data = player->CustomData.GetDefault<GuildPerkPlayerData>(DATA_KEY);
+    data->mendTimer += diff;
+    if (data->mendTimer < _config.durabilityInterval * IN_MILLISECONDS)
+        return;
+    data->mendTimer = 0;
+
+    uint32 count = uint32(Amount(GUILD_PERK_DURABILITY, player));
+    if (!count || !player->IsAlive())
+        return;
+
+    std::vector<uint8> damaged;
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+        if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+        {
+            uint32 const max = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+            if (max && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < max)
+                damaged.push_back(slot);
+        }
+
+    while (count-- && !damaged.empty())
+    {
+        std::size_t const pick = urand(0, uint32(damaged.size() - 1));
+        uint8 const slot = damaged[pick];
+        damaged.erase(damaged.begin() + pick);
+
+        Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        uint32 const current = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+        item->SetUInt32Value(ITEM_FIELD_DURABILITY, current + 1);
+        item->SetState(ITEM_CHANGED, player);
+        if (!current)
+            player->_ApplyItemMods(item, slot, true);
+    }
+}
+
 void GuildPerkMgr::Show(ChatHandler* handler, uint8 level) const
 {
     auto say = [handler](uint32 id, auto&&... args)
@@ -421,4 +462,5 @@ void GuildPerkMgr::Show(ChatHandler* handler, uint8 level) const
     uint32 const extra = uint32(Amount(GUILD_PERK_GATHERING, level));
     say(GUILD_LEVEL_STR_PERKS_MISC, extra ? _config.gatheringChance : 0.0f, extra,
         Amount(GUILD_PERK_RESURRECTION, level) > 0.0f ? on : off, Amount(GUILD_PERK_CONSUMABLES, level));
+    say(GUILD_LEVEL_STR_PERKS_DURABILITY, Amount(GUILD_PERK_DURABILITY, level), _config.durabilityInterval);
 }

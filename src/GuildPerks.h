@@ -54,7 +54,7 @@ constexpr uint32 SPELL_HEARTHSTONE = 8690;
 enum GuildPerk : uint8
 {
     GUILD_PERK_XP = 0,          // % experience
-    GUILD_PERK_DURABILITY,      // % less durability lost: no core hook, unused
+    GUILD_PERK_DURABILITY,      // damaged equipped items mended by 1 point per period
     GUILD_PERK_HONOR,           // % honor
     GUILD_PERK_HEARTHSTONE,     // minutes off the Hearthstone cooldown
     GUILD_PERK_GATHERING,       // extra items on a lucky gathering
@@ -73,12 +73,14 @@ struct GuildPerkConfig
     // Per perk: (guild level, amount) steps, sorted by level.
     std::array<std::vector<std::pair<uint8, float>>, GUILD_PERK_COUNT> steps;
     float gatheringChance = 20.0f;      // % per gathering
+    uint32 durabilityInterval = 60;     // seconds between two mendings
 };
 
 // What the perks keep on a character, on Player::CustomData.
 struct GuildPerkPlayerData : public DataMap::Base
 {
     ObjectGuid lastGatherLoot;          // the node or corpse already rolled
+    uint32 mendTimer = 0;               // ms since the last mending
     // Auras already lengthened, by spell and application time: a refreshed
     // flask keeps its time, a stacked one is not lengthened twice.
     std::set<std::pair<uint32, int64>> extended;
@@ -114,6 +116,7 @@ public:
     void OnResurrect(Player* player, float restorePercent);
     void OnAuraApply(Player* player, Aura* aura);
     void OnHearthstone(Player* player);
+    void OnUpdate(Player* player, uint32 diff);
 
     // .guildlevel perks
     void Show(ChatHandler* handler, uint8 level) const;

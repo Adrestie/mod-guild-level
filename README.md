@@ -6,8 +6,7 @@ climbs **25 levels**, then **9 Paragon levels**.
 
 > **Status: step 2 of the roadmap.** Guild experience, levels, Paragon levels,
 > announcements, GM commands and the passive perks of levels 1 to 20 work
-> (the durability perk excepted, see [Perks](#perks-of-levels-1-to-20)). The
-> active perks of levels 21 to 25, the guild talents, the guild house and its
+> (see [Perks](#perks-of-levels-1-to-20)). The active perks of levels 21 to 25, the guild talents, the guild house and its
 > Customization mode are planned (see [Roadmap](#roadmap)) and not built yet.
 
 No client patch: core hooks, one characters table, texts in `module_string`,
@@ -74,7 +73,7 @@ levels 1 to 9. A Paragon guild has them all.
 | Levels | Perk | Total | How |
 |---|---|---|---|
 | 1, 11 | Experience, from every source | +5%, then +15% | hook on the experience given |
-| 2, 12 | Durability lost | -5%, then -20% | **not applied**: no core hook (below) |
+| 2, 12 | Durability mended: 1 point every minute on a damaged piece worn | 1 piece, then 2 | player tick |
 | 3, 13 | Honor, from every source | +5%, then +15% | hidden aura (honor gain) |
 | 4, 14 | Hearthstone cooldown | -5 min, then -15 min | spell script on the Hearthstone |
 | 5, 15 | Lucky gathering: 20% chance per node or skinned corpse | +1 item, then +3 | hook on the loot |
@@ -111,13 +110,12 @@ Details:
   food buffs (the "Well Fed" auras) last 30 more minutes, once per
   application.
 
-**The durability perk is not applied.** AzerothCore has no script hook where
-durability is lost (`Player::DurabilityLoss`, `DurabilityPointsLoss`,
-`DurabilityPointLossForEquipSlot`), and no aura reduces it by a percentage
-(`SPELL_AURA_PREVENT_DURABILITY_LOSS` prevents all of it). It needs a hook in
-the core, such as `OnPlayerBeforeDurabilityLoss(Player*, Item*, int32& points)`
-called by those functions; `GuildLevel.Perk.Durability` is read but unused
-until then.
+* **Durability**: the core has no hook where durability is lost, and the
+  module never changes the core. So the perk mends instead: every minute
+  (`GuildLevel.Perk.Durability.Interval`), a damaged piece worn, drawn at
+  random, gets 1 point of durability back; 2 different pieces from level 12.
+  A broken piece mended this way gets its stats back. Nothing happens while
+  the player is dead.
 
 ## GM commands
 
@@ -155,7 +153,8 @@ their step costs climb at once, without announcement.
 | `GuildLevel.SaveInterval` | 60 | Seconds between two saves. |
 | `GuildLevel.Perks.Enable` | 1 | 0 = no perk at all. |
 | `GuildLevel.Perk.Experience` | `1:5 11:10` | % experience. |
-| `GuildLevel.Perk.Durability` | `2:5 12:15` | Unused (no core hook). |
+| `GuildLevel.Perk.Durability` | `2:1 12:1` | Damaged pieces worn mended by 1 point per period. |
+| `GuildLevel.Perk.Durability.Interval` | 60 | Seconds between two mendings. |
 | `GuildLevel.Perk.Honor` | `3:5 13:10` | % honor. |
 | `GuildLevel.Perk.Hearthstone` | `4:5 14:10` | Minutes off the Hearthstone cooldown. |
 | `GuildLevel.Perk.Gathering` | `5:1 15:2` | Items more on a lucky gathering. |
@@ -261,7 +260,8 @@ the comparison. Numbers are for the default configuration.
 21. **List:** `.guildlevel perks` at level 0 shows every perk at 0 and "no";
     at level 20: experience +15%, honor +15%, reputation +10%, mounted speed
     +10%, vendors -10%, gold 10%, Hearthstone -15 min, gathering 20% for 3
-    more, resurrection "yes", consumables +30 min.
+    more, resurrection "yes", consumables +30 min, durability 2 items every
+    60 seconds.
 22. **Experience:** a solo kill worth N experience gives N at level 0,
     N x 1.05 at level 1, N x 1.15 at level 11 (rested experience aside). A
     quest turned in gives its experience x 1.15 at level 11.
@@ -291,7 +291,13 @@ the comparison. Numbers are for the default configuration.
 33. **Joining and leaving:** in a level 20 guild, `.guild uninvite` a member:
     his perks stop at once (mounted speed back to normal); invited again, they
     come back.
-34. **Switch:** `GuildLevel.Perks.Enable = 0` and `.reload config`: every perk
+34. **Durability:** at level 2, wear down the gear (die once, or
+    `.damage` yourself until the pieces lose points), note the durability of
+    each piece worn, wait 5 minutes: 5 points have come back in all, one per
+    minute, spread over random pieces. At level 12, 10 points in 5 minutes,
+    never twice the same piece in the same minute. At level 1, none. A
+    broken piece (0) mended to 1 gets its stats back.
+35. **Switch:** `GuildLevel.Perks.Enable = 0` and `.reload config`: every perk
     stops, and `.guildlevel perks` says so.
 
 ## Roadmap

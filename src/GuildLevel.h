@@ -76,7 +76,8 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_PERKS_MISC      = 113,  // {} gathering chance %, {} items, {} resurrection, {} consumable minutes
     GUILD_LEVEL_STR_PERKS_ON        = 114,
     GUILD_LEVEL_STR_PERKS_OFF       = 115,
-    GUILD_LEVEL_STR_PERKS_DISABLED  = 116   // GuildLevel.Perks.Enable = 0
+    GUILD_LEVEL_STR_PERKS_DISABLED  = 116,  // GuildLevel.Perks.Enable = 0
+    GUILD_LEVEL_STR_PERKS_DURABILITY = 117  // {} items, {} seconds
 };
 
 struct GuildLevelConfig

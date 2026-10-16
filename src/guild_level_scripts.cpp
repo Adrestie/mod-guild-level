@@ -83,7 +83,8 @@ public:
             PLAYERHOOK_ON_GET_REPUTATION_PRICE_DISCOUNT,
             PLAYERHOOK_ON_BEFORE_LOOT_MONEY,
             PLAYERHOOK_ON_LOOT_ITEM,
-            PLAYERHOOK_ON_PLAYER_RESURRECT
+            PLAYERHOOK_ON_PLAYER_RESURRECT,
+            PLAYERHOOK_ON_UPDATE
         }) { }
 
     // Only the creature overload is ours; the faction one stays the base class's.
@@ -127,6 +128,12 @@ public:
     void OnPlayerResurrect(Player* player, float restorePercent, bool& /*applySickness*/) override
     {
         sGuildPerkMgr->OnResurrect(player, restorePercent);
+    }
+
+    // Every player tick, on his map's thread: the durability perk's clock.
+    void OnPlayerUpdate(Player* player, uint32 diff) override
+    {
+        sGuildPerkMgr->OnUpdate(player, diff);
     }
 };
 
