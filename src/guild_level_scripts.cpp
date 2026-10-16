@@ -20,6 +20,7 @@
  */
 
 #include "Guild.h"
+#include "GuildActivePerks.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
 #include "ObjectAccessor.h"
@@ -45,6 +46,7 @@ public:
     {
         sGuildLevelMgr->LoadConfig();
         sGuildPerkMgr->LoadConfig();
+        sGuildActivePerkMgr->LoadConfig();
 
         // New amounts for the members online at once.
         if (reload)
@@ -84,7 +86,8 @@ public:
             PLAYERHOOK_ON_BEFORE_LOOT_MONEY,
             PLAYERHOOK_ON_LOOT_ITEM,
             PLAYERHOOK_ON_PLAYER_RESURRECT,
-            PLAYERHOOK_ON_UPDATE
+            PLAYERHOOK_ON_UPDATE,
+            PLAYERHOOK_ON_DELETE_FROM_DB
         }) { }
 
     // Only the creature overload is ours; the faction one stays the base class's.
@@ -103,6 +106,12 @@ public:
     void OnPlayerLogin(Player* player) override
     {
         sGuildPerkMgr->Apply(player);
+        sGuildActivePerkMgr->Load(player);
+    }
+
+    void OnPlayerDeleteFromDB(CharacterDatabaseTransaction trans, uint32 guid) override
+    {
+        sGuildActivePerkMgr->DeleteCharacter(trans, guid);
     }
 
     void OnPlayerGiveReputation(Player* player, int32 /*factionID*/, float& amount, ReputationSource /*repSource*/) override
@@ -202,6 +211,7 @@ public:
 };
 
 void AddSC_guild_level_commands();
+void AddSC_guild_perk_commands();
 
 void AddSC_guild_level_scripts()
 {
@@ -211,4 +221,5 @@ void AddSC_guild_level_scripts()
     new GuildLevelUnitScript();
     RegisterSpellScript(spell_guild_level_hearthstone);
     AddSC_guild_level_commands();
+    AddSC_guild_perk_commands();
 }

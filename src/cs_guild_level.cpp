@@ -24,6 +24,7 @@
 #include "Chat.h"
 #include "ChatCommand.h"
 #include "Guild.h"
+#include "GuildActivePerks.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
 #include "GuildMgr.h"
@@ -176,7 +177,15 @@ public:
             Say(handler, GUILD_LEVEL_STR_CMD_NO_GUILD);
             return true;
         }
-        sGuildPerkMgr->Show(handler, sGuildLevelMgr->Get(guild->GetId()).level);
+        uint8 const level = sGuildLevelMgr->Get(guild->GetId()).level;
+        sGuildPerkMgr->Show(handler, level);
+
+        // The cooldowns shown are those of the selected player, else your
+        // own, when that character belongs to the guild.
+        Player* player = handler->GetSession() ? handler->getSelectedPlayerOrSelf() : nullptr;
+        if (player && player->GetGuildId() != guild->GetId())
+            player = nullptr;
+        sGuildActivePerkMgr->List(handler, level, player);
         return true;
     }
 

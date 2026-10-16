@@ -139,3 +139,45 @@ GuildLevel.Perk.MountSpeed        = "8:5 18:5"
 GuildLevel.Perk.Reputation        = "9:5 19:5"
 GuildLevel.Perk.Resurrection      = "10:1"
 GuildLevel.Perk.Consumables       = "20:30"
+
+###############################################################################
+#
+#    ACTIVE PERKS OF LEVELS 21 TO 25
+#
+#    Player commands `.gperk raid|rez|bank|vendor|home` (and `.gperk list`),
+#    for the members of a guild of the level asked. Each perk has its own
+#    cooldown per character, kept in the characters database across restarts.
+#    A perk that does nothing (no one to summon, no one dead...) starts no
+#    cooldown. GuildLevel.Perks.Enable = 0 turns them off too.
+#
+#    GuildLevel.Active.<Perk>.Level      guild level the perk needs.
+#    GuildLevel.Active.<Perk>.Cooldown   seconds; 0 = no cooldown.
+#
+#    Raid    summons every member of the group, who accepts as with a summoning
+#            stone. Out of combat, not in a battleground or an arena.
+#    Rez     offers a resurrection to the dead of the group on the same map,
+#            out of combat, with GuildLevel.Active.Rez.Percent of their health
+#            and mana (the level 10 perk makes it full for guildmates).
+#    Bank    a guild vault in front of the player for .Duration seconds
+#            (.Entry: a gameobject of the guild bank type; 187294 is the game's).
+#    Vendor  a reagent vendor and repairer in front of the player for
+#            .Duration seconds (.Entry: creature 92001 of the module).
+#    Home    to the guild house: it comes with the guild house. For now the
+#            command says so and starts no cooldown.
+#
+
+GuildLevel.Active.Raid.Level        = 21
+GuildLevel.Active.Raid.Cooldown     = 3600
+GuildLevel.Active.Rez.Level         = 22
+GuildLevel.Active.Rez.Cooldown      = 600
+GuildLevel.Active.Rez.Percent       = 35
+GuildLevel.Active.Bank.Level        = 23
+GuildLevel.Active.Bank.Cooldown     = 3600
+GuildLevel.Active.Bank.Duration     = 300
+GuildLevel.Active.Bank.Entry        = 187294
+GuildLevel.Active.Vendor.Level      = 24
+GuildLevel.Active.Vendor.Cooldown   = 3600
+GuildLevel.Active.Vendor.Duration   = 300
+GuildLevel.Active.Vendor.Entry      = 92001
+GuildLevel.Active.Home.Level        = 25
+GuildLevel.Active.Home.Cooldown     = 3600

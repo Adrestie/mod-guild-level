@@ -10,7 +10,8 @@
   "signature": [
     "src/guild_level_loader.cpp",
     "src/GuildLevel.cpp",
-    "src/GuildPerks.cpp"
+    "src/GuildPerks.cpp",
+    "src/GuildActivePerks.cpp"
   ],
   "configuration": {
     "file": "mod-guild-level.conf",
@@ -19,10 +20,12 @@
   "database": {
     "characters": {
       "tables": [
-        "mod_guild_level"
+        "mod_guild_level",
+        "mod_guild_level_perk_cooldown"
       ],
       "kept_on_update": [
-        "mod_guild_level"
+        "mod_guild_level",
+        "mod_guild_level_perk_cooldown"
       ],
       "rows": [
         {
@@ -52,6 +55,26 @@
         {
           "table": "spell_script_names",
           "where": "ScriptName = 'spell_guild_level_hearthstone'"
+        },
+        {
+          "table": "creature_template",
+          "where": "entry = 92001"
+        },
+        {
+          "table": "creature_template_model",
+          "where": "CreatureID = 92001"
+        },
+        {
+          "table": "creature_template_locale",
+          "where": "entry = 92001"
+        },
+        {
+          "table": "npc_vendor",
+          "where": "entry = 92001"
+        },
+        {
+          "table": "command",
+          "where": "name = 'gperk' OR name LIKE 'gperk %'"
         },
         {
           "table": "updates",

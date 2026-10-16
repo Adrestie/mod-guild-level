@@ -4,16 +4,18 @@ An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm:
 members of a guild who play together earn guild experience, and the guild
 climbs **25 levels**, then **9 Paragon levels**.
 
-> **Status: step 2 of the roadmap.** Guild experience, levels, Paragon levels,
-> announcements, GM commands and the passive perks of levels 1 to 20 work
-> (see [Perks](#perks-of-levels-1-to-20)). The active perks of levels 21 to 25, the guild talents, the guild house and its
-> Customization mode are planned (see [Roadmap](#roadmap)) and not built yet.
+> **Status: step 3 of the roadmap.** Guild experience, levels, Paragon levels,
+> announcements, GM commands, the passive perks of levels 1 to 20 and the
+> active perks of levels 21 to 24 work (see [Perks](#perks-of-levels-1-to-20)
+> and [Active perks](#active-perks-of-levels-21-to-25)). The level 25 perk, the
+> guild talents, the guild house and its Customization mode are planned (see
+> [Roadmap](#roadmap)) and not built yet.
 
 No client patch: core hooks, one characters table, texts in `module_string`,
 and one hidden server-side spell. The module owns the tranches **92-93**
 (92000-93999) of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
-spell 92000 is the perks' aura, the rest is kept for the guild house, the
-active perks and the talents to come.
+spell 92000 is the perks' aura, creature 92001 the guild supplier, the rest
+is kept for the guild house and the talents to come.
 
 ## Guild experience
 
@@ -117,6 +119,30 @@ Details:
   A broken piece mended this way gets its stats back. Nothing happens while
   the player is dead.
 
+## Active perks of levels 21 to 25
+
+Members of a guild of the level asked use them with **player commands**, no
+client patch needed (buttons in an interface will come later and call the same
+thing). Each perk has its own **cooldown per character**, kept in
+`mod_guild_level_perk_cooldown` (characters database) across restarts, and
+deleted with the character. A perk that does nothing (no one to summon, no
+one dead, nothing could be placed) starts no cooldown.
+
+| Level | Command | Perk | Cooldown |
+|---|---|---|---|
+| 21 | `.gperk raid` | Every member of the group or raid gets a summon to accept, as from a summoning stone. Out of combat, not in a battleground or an arena; dead members and members in a battleground are left out. | 1 h |
+| 22 | `.gperk rez` | Every dead member of the group on the same map and instance gets a resurrection to accept, where the player stands, with 35% of their health and mana (full for guildmates, thanks to the level 10 perk). Out of combat. | 10 min |
+| 23 | `.gperk bank` | A guild vault (the game's own, gameobject 187294) stands in front of the player for 5 minutes. Not in a battleground or an arena. | 1 h |
+| 24 | `.gperk vendor` | The Guild Supplier (creature 92001), a reagent vendor who repairs, waits in front of the player for 5 minutes. Not in a battleground or an arena. | 1 h |
+| 25 | `.gperk home` | To the guild house: **it comes with the guild house**. For now the command says so and starts no cooldown. | 1 h |
+
+`.gperk list` shows the active perks of your guild: locked, ready, or the time
+left. The Guild Supplier sells the reagents of every class at their usual
+prices: Arcane Powder, Runes of Teleportation and of Portals, Light Feather,
+Symbols of Kings and of Divinity, Holy, Sacred and Devout Candles, Ankh,
+Infernal Stone, Demonic Figurine, Corpse Dust, Flash Powder, Maple and
+Ironwood Seeds, Wild Quillvine, Wild Spineleaf and Starleaf Seed.
+
 ## GM commands
 
 Every command ends with an optional guild: its **name** (spaces allowed, no
@@ -131,7 +157,7 @@ guild named.
 | `.guildlevel setparagon $paragon [$guild]` | Sets level 25 and the Paragon level (0 to 9), empty bar. Not announced. |
 | `.guildlevel setxp $xp [$guild]` | Sets the experience toward the next step, kept below what it costs. |
 | `.guildlevel addxp $xp [$guild]` | Gives experience as if earned: the levels climbed are announced. |
-| `.guildlevel perks [$guild]` | The perks the guild's members get at its current level. |
+| `.guildlevel perks [$guild]` | The perks the guild's members get at its current level, then its active perks: locked, ready, or the cooldown left of the selected player (else your own) when he belongs to the guild. |
 
 All need the game master level (2). The texts are in English, French, German,
 Spanish (both) and Russian, English for the others.
@@ -165,6 +191,12 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Perk.Reputation` | `9:5 19:5` | % reputation. |
 | `GuildLevel.Perk.Resurrection` | `10:1` | Above 0: full resurrection by a guildmate. |
 | `GuildLevel.Perk.Consumables` | `20:30` | Minutes added to flasks, elixirs and food buffs. |
+
+| `GuildLevel.Active.<Perk>.Level` | 21 to 25 | Guild level of each active perk (Raid, Rez, Bank, Vendor, Home). |
+| `GuildLevel.Active.<Perk>.Cooldown` | 3600 (Rez 600) | Seconds; 0 = none. |
+| `GuildLevel.Active.Rez.Percent` | 35 | Health and mana of the resurrection offered. |
+| `GuildLevel.Active.Bank.Duration` / `.Entry` | 300 / 187294 | Seconds the vault stays; its gameobject. |
+| `GuildLevel.Active.Vendor.Duration` / `.Entry` | 300 / 92001 | Seconds the supplier stays; its creature. |
 
 A perk is a list of `level:amount` steps that add up once reached: `1:5 11:10`
 is +5 from level 1, +15 from level 11. `""` turns a perk off. After
@@ -299,6 +331,36 @@ the comparison. Numbers are for the default configuration.
     broken piece (0) mended to 1 gets its stats back.
 35. **Switch:** `GuildLevel.Perks.Enable = 0` and `.reload config`: every perk
     stops, and `.guildlevel perks` says so.
+
+### Active perks
+
+A guild at level 20, then 25 (`.guildlevel setlevel`); two or three members
+in a group, characters with a client to accept summons and resurrections.
+
+36. **Locked:** at level 20, `.gperk raid` answers that the guild must be level
+    21; `.gperk list` shows the five perks "locked". `.guildlevel perks` shows
+    the same list under the passive perks.
+37. **Summon:** at level 21, members far away (another zone, another continent)
+    get the summon window when `.gperk raid` is typed; accepting brings them
+    next to the player. The answer counts the summons sent. Typed again: "not
+    ready, 59 min … s left". In combat, or in a battleground: refused, no
+    cooldown. Alone, out of a group: refused.
+38. **Resurrection:** at level 22, a member of the group dies; out of combat,
+    `.gperk rez` offers him a resurrection; accepted, he comes back next to the
+    player, with full health and mana if he is a guildmate (35% otherwise).
+    Cooldown 10 min. With no one dead: refused, no cooldown.
+39. **Vault:** at level 23, `.gperk bank`: a Guild Vault stands two yards in
+    front of the player; right-click opens the guild bank. After 5 minutes it
+    disappears. Cooldown 1 h.
+40. **Supplier:** at level 24, `.gperk vendor`: the Guild Supplier stands in
+    front of the player, sells the 19 reagents and repairs. After 5 minutes he
+    disappears. Cooldown 1 h.
+41. **House:** at level 25, `.gperk home` answers that the perk comes with the
+    guild house; no cooldown starts.
+42. **Cooldowns kept:** use `.gperk bank`, restart the worldserver, `.gperk
+    list`: the time left has gone on counting. The row is in
+    `mod_guild_level_perk_cooldown`.
+43. **Others:** a player out of a guild gets "You are not in a guild".
 
 ## Roadmap
 
