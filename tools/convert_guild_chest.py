@@ -135,26 +135,56 @@ def convert_skin(src):
     return bytes(skin)
 
 
-def write_blp(image, path):
-    """BLP2, 256-colour palette (encoding 1), no alpha, with every mip level.
+def _rgb565(r, g, b):
+    return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
 
-    The palette encoding is the one every 3.3.5a client reads; uncompressed
-    BGRA came later. An opaque banner loses nothing to it."""
+
+def _dxt1(image):
+    """DXT1 blocks of an opaque RGB image whose sides are multiples of 4.
+
+    Each 4x4 block takes its darkest and brightest pixels as the two end
+    colours and puts every pixel on the nearest of the four points between
+    them. A tinted grey cloth lies on one line of colour, which is exactly
+    what DXT1 stores: it loses next to nothing."""
+    width, height = image.size
+    pixels = image.load()
+    out = bytearray()
+    for by in range(0, height, 4):
+        for bx in range(0, width, 4):
+            block = [pixels[bx + x, by + y] for y in range(4) for x in range(4)]
+            lum = [r * 3 + g * 6 + b for r, g, b in block]
+            hi, lo = block[lum.index(max(lum))], block[lum.index(min(lum))]
+            c0, c1 = _rgb565(*hi), _rgb565(*lo)
+            if c0 < c1:
+                c0, c1, hi, lo = c1, c0, lo, hi
+            if c0 == c1:
+                out += struct.pack("<HHI", c0, c1, 0)
+                continue
+            # c0 > c1: four colours, 0 = hi, 1 = lo, 2 = 2/3 hi, 3 = 1/3 hi.
+            span = [hi[i] - lo[i] for i in range(3)]
+            length = sum(v * v for v in span) or 1
+            indices = 0
+            for n, px in enumerate(block):
+                t = sum((px[i] - lo[i]) * span[i] for i in range(3)) / length
+                code = 0 if t > 5 / 6 else 2 if t > 1 / 2 else 3 if t > 1 / 6 else 1
+                indices |= code << (2 * n)
+            out += struct.pack("<HHI", c0, c1, indices)
+    return bytes(out)
+
+
+def write_blp(image, path):
+    """BLP2, DXT1 without alpha (encoding 2, alpha type 0), every mip level.
+
+    The format of the game's own opaque textures, which every 3.3.5a client
+    reads. Mip levels stop at 4 x 4, the smallest DXT block."""
     image = image.convert("RGB")
-    paletted = image.quantize(colors=256, method=Image.Quantize.MEDIANCUT)
-    palette = paletted.getpalette()[:768]
-    palette += [0] * (768 - len(palette))
     width, height = image.size
     levels = []
-    level = paletted
     while True:
-        levels.append(level.tobytes())
-        if level.size == (1, 1) or len(levels) == 16:
+        levels.append(_dxt1(image))
+        if min(image.size) <= 4 or len(levels) == 16:
             break
-        # Each mip is reduced in colour, then mapped back to the SAME palette.
-        smaller = image.resize((max(1, level.size[0] // 2), max(1, level.size[1] // 2)), Image.LANCZOS)
-        image = smaller
-        level = smaller.quantize(palette=paletted, dither=Image.Dither.NONE)
+        image = image.resize((image.size[0] // 2, image.size[1] // 2), Image.LANCZOS)
     header_size = 148 + 1024
     offsets, sizes, pos = [], [], header_size
     for data in levels:
@@ -163,15 +193,11 @@ def write_blp(image, path):
         pos += len(data)
     offsets += [0] * (16 - len(offsets))
     sizes += [0] * (16 - len(sizes))
-    bgra = bytearray()
-    for i in range(256):
-        r, g, b = palette[3 * i:3 * i + 3]
-        bgra += bytes((b, g, r, 255))
     with open(path, "wb") as f:
-        # magic, type 1, encoding 1 (palette), alpha depth 0, alpha type 0, mips
-        f.write(b"BLP2" + struct.pack("<I4BII", 1, 1, 0, 0, 1, width, height))
+        # magic, type 1, encoding 2 (DXT), alpha depth 0, alpha type 0 (DXT1), mips
+        f.write(b"BLP2" + struct.pack("<I4BII", 1, 2, 0, 0, 1, width, height))
         f.write(struct.pack("<16I", *offsets) + struct.pack("<16I", *sizes))
-        f.write(bytes(bgra))
+        f.write(b"\x00" * 1024)
         for data in levels:
             f.write(data)
 
