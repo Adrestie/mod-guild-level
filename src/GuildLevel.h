@@ -57,6 +57,7 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_PARAGON_UP      = 2,    // {} Paragon level
     GUILD_LEVEL_STR_LEVEL_MAX       = 3,    // level 25 reached
     GUILD_LEVEL_STR_PARAGON_MAX     = 4,    // Paragon 9 reached
+    GUILD_LEVEL_STR_GATHER_BONUS    = 5,    // {} count, {} item: a perk to the member alone
 
     // GM commands.
     GUILD_LEVEL_STR_CMD_NO_GUILD    = 101,  // no guild found
@@ -66,7 +67,17 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_CMD_INFO_TOTAL  = 105,  // {} lifetime experience
     GUILD_LEVEL_STR_CMD_BAD_LEVEL   = 106,  // {} maximum
     GUILD_LEVEL_STR_CMD_DONE        = 107,  // the change is applied
-    GUILD_LEVEL_STR_CMD_DISABLED    = 108   // the module is off: gains stopped
+    GUILD_LEVEL_STR_CMD_DISABLED    = 108,  // the module is off: gains stopped
+
+    // .guildlevel perks
+    GUILD_LEVEL_STR_PERKS_TITLE     = 110,  // {} level
+    GUILD_LEVEL_STR_PERKS_GAINS     = 111,  // {} xp %, {} honor %, {} reputation %, {} mounted speed %
+    GUILD_LEVEL_STR_PERKS_GOLD      = 112,  // {} vendor %, {} gold to bank %, {} Hearthstone minutes
+    GUILD_LEVEL_STR_PERKS_MISC      = 113,  // {} gathering chance %, {} items, {} resurrection, {} consumable minutes
+    GUILD_LEVEL_STR_PERKS_ON        = 114,
+    GUILD_LEVEL_STR_PERKS_OFF       = 115,
+    GUILD_LEVEL_STR_PERKS_DISABLED  = 116,  // GuildLevel.Perks.Enable = 0
+    GUILD_LEVEL_STR_PERKS_DURABILITY = 117  // {} items, {} seconds
 };
 
 struct GuildLevelConfig
@@ -152,6 +163,7 @@ private:
     std::unordered_map<uint32, GuildLevelState> _guilds;
     std::unordered_set<uint32> _dirty;
     std::vector<Announcement> _announcements;
+    std::unordered_set<uint32> _changed;    // guilds whose level moved: perks to refresh
 
     uint32 _saveTimer = 0;
 };

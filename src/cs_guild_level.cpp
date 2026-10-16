@@ -25,6 +25,7 @@
 #include "ChatCommand.h"
 #include "Guild.h"
 #include "GuildLevel.h"
+#include "GuildPerks.h"
 #include "GuildMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -91,6 +92,7 @@ public:
             { "setparagon", HandleSetParagonCommand, SEC_GAMEMASTER, Console::Yes },
             { "setxp",      HandleSetXPCommand,      SEC_GAMEMASTER, Console::Yes },
             { "addxp",      HandleAddXPCommand,      SEC_GAMEMASTER, Console::Yes },
+            { "perks",      HandlePerksCommand,      SEC_GAMEMASTER, Console::Yes },
         };
 
         static ChatCommandTable commandTable =
@@ -162,6 +164,19 @@ public:
         sGuildLevelMgr->SetXP(guild->GetId(), xp);
         Say(handler, GUILD_LEVEL_STR_CMD_DONE);
         ShowState(handler, guild);
+        return true;
+    }
+
+    // The perks the guild's members get at its current level.
+    static bool HandlePerksCommand(ChatHandler* handler, Optional<Tail> named)
+    {
+        Guild* guild = FindGuild(handler, named);
+        if (!guild)
+        {
+            Say(handler, GUILD_LEVEL_STR_CMD_NO_GUILD);
+            return true;
+        }
+        sGuildPerkMgr->Show(handler, sGuildLevelMgr->Get(guild->GetId()).level);
         return true;
     }
 

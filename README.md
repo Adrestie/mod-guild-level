@@ -4,15 +4,16 @@ An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm:
 members of a guild who play together earn guild experience, and the guild
 climbs **25 levels**, then **9 Paragon levels**.
 
-> **Status: step 1 of the roadmap.** Guild experience, levels, Paragon levels,
-> announcements and GM commands work. The perks of the levels, the guild
-> talents, the guild house and its Customization mode are planned (see
-> [Roadmap](#roadmap)) and not built yet.
+> **Status: step 2 of the roadmap.** Guild experience, levels, Paragon levels,
+> announcements, GM commands and the passive perks of levels 1 to 20 work
+> (see [Perks](#perks-of-levels-1-to-20)). The active perks of levels 21 to 25, the guild talents, the guild house and its
+> Customization mode are planned (see [Roadmap](#roadmap)) and not built yet.
 
-No client patch and no new identifiers yet: core hooks, one characters table,
-texts in `module_string`. The module owns the tranches **92-93**
-(92000-93999) of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md)
-for the guild house, the perks and the talents to come.
+No client patch: core hooks, one characters table, texts in `module_string`,
+and one hidden server-side spell. The module owns the tranches **92-93**
+(92000-93999) of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
+spell 92000 is the perks' aura, the rest is kept for the guild house, the
+active perks and the talents to come.
 
 ## Guild experience
 
@@ -62,6 +63,60 @@ The guild's experience is kept in memory and written to `mod_guild_level`
 level is reached or changed by a GM, and on shutdown. The row is deleted with
 its guild.
 
+## Perks of levels 1 to 20
+
+Every member of a guild gets the perks of its **current level**, alone or in a
+group, from the moment the level is reached or the member joins; leaving the
+guild takes them away. The "more" perks of levels 11 to 19 add up with those of
+levels 1 to 9. A Paragon guild has them all.
+
+| Levels | Perk | Total | How |
+|---|---|---|---|
+| 1, 11 | Experience, from every source | +5%, then +15% | hook on the experience given |
+| 2, 12 | Durability mended: 1 point every minute on a damaged piece worn | 1 piece, then 2 | player tick |
+| 3, 13 | Honor, from every source | +5%, then +15% | hidden aura (honor gain) |
+| 4, 14 | Hearthstone cooldown | -5 min, then -15 min | spell script on the Hearthstone |
+| 5, 15 | Lucky gathering: 20% chance per node or skinned corpse | +1 item, then +3 | hook on the loot |
+| 6, 16 | Vendor prices and repairs | -5%, then -10% | hook on the price discount |
+| 7, 17 | Gold looted, added to the guild bank | 5%, then 10% | hook on the loot money |
+| 8, 18 | Mounted speed, ground and flying | +5%, then +10% | hidden aura (mounted speed) |
+| 9, 19 | Reputation gained | +5%, then +10% | hook on the reputation given |
+| 10 | Resurrected by a guildmate | full health and mana | hook on the resurrection |
+| 20 | Flasks, elixirs and food buffs | +30 min | hook on the aura applied |
+
+Details:
+
+* **Experience** applies to kills, quests, exploration and battlegrounds. It
+  does not feed guild experience, which is read from the kill itself.
+* **Honor** and **mounted speed** ride on spell 92000, a passive, hidden aura
+  kept through death, whose amounts the module sets from the guild's level.
+  Mounted speed multiplies with everything else (riding skill, Crusader Aura,
+  Riding Crop...).
+* **Hearthstone**: the cooldown is shortened right after the cast (spell 8690,
+  `spell_guild_level_hearthstone`).
+* **Gathering**: mining, herbalism and skinning. One roll per node or corpse,
+  on the first item taken (the ore, the herb, the leather), which then comes
+  with 1 more (3 more from level 15). A green line tells the player.
+* **Vendors**: the price of everything bought from a vendor, and repairs.
+  Trainers and flight masters keep their prices.
+* **Gold to the bank**: the gold looted from creatures and chests is **added**
+  to the guild bank of the looter: the looters keep all of theirs. A group's
+  pile counts once, for the guild of the one who takes it.
+* **Reputation**: gains only, from kills and quests; a loss stays a loss.
+* **Resurrection**: when a player accepts a resurrection offered by a member of
+  his guild (a resurrection spell; a Soulstone is the player's own), he comes
+  back with full health and mana.
+* **Consumables**: flasks and elixirs (told by the item that cast them) and
+  food buffs (the "Well Fed" auras) last 30 more minutes, once per
+  application.
+
+* **Durability**: the core has no hook where durability is lost, and the
+  module never changes the core. So the perk mends instead: every minute
+  (`GuildLevel.Perk.Durability.Interval`), a damaged piece worn, drawn at
+  random, gets 1 point of durability back; 2 different pieces from level 12.
+  A broken piece mended this way gets its stats back. Nothing happens while
+  the player is dead.
+
 ## GM commands
 
 Every command ends with an optional guild: its **name** (spaces allowed, no
@@ -76,6 +131,7 @@ guild named.
 | `.guildlevel setparagon $paragon [$guild]` | Sets level 25 and the Paragon level (0 to 9), empty bar. Not announced. |
 | `.guildlevel setxp $xp [$guild]` | Sets the experience toward the next step, kept below what it costs. |
 | `.guildlevel addxp $xp [$guild]` | Gives experience as if earned: the levels climbed are announced. |
+| `.guildlevel perks [$guild]` | The perks the guild's members get at its current level. |
 
 All need the game master level (2). The texts are in English, French, German,
 Spanish (both) and Russian, English for the others.
@@ -95,6 +151,24 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Curve.Paragon` | 9 amounts | Cost of Paragon 1 to 9. |
 | `GuildLevel.Announce` | 1 | Announce each level to the guild. |
 | `GuildLevel.SaveInterval` | 60 | Seconds between two saves. |
+| `GuildLevel.Perks.Enable` | 1 | 0 = no perk at all. |
+| `GuildLevel.Perk.Experience` | `1:5 11:10` | % experience. |
+| `GuildLevel.Perk.Durability` | `2:1 12:1` | Damaged pieces worn mended by 1 point per period. |
+| `GuildLevel.Perk.Durability.Interval` | 60 | Seconds between two mendings. |
+| `GuildLevel.Perk.Honor` | `3:5 13:10` | % honor. |
+| `GuildLevel.Perk.Hearthstone` | `4:5 14:10` | Minutes off the Hearthstone cooldown. |
+| `GuildLevel.Perk.Gathering` | `5:1 15:2` | Items more on a lucky gathering. |
+| `GuildLevel.Perk.Gathering.Chance` | 20 | % chance of a lucky gathering. |
+| `GuildLevel.Perk.Vendor` | `6:5 16:5` | % off vendor prices and repairs. |
+| `GuildLevel.Perk.GoldToBank` | `7:5 17:5` | % of looted gold added to the guild bank. |
+| `GuildLevel.Perk.MountSpeed` | `8:5 18:5` | % mounted speed. |
+| `GuildLevel.Perk.Reputation` | `9:5 19:5` | % reputation. |
+| `GuildLevel.Perk.Resurrection` | `10:1` | Above 0: full resurrection by a guildmate. |
+| `GuildLevel.Perk.Consumables` | `20:30` | Minutes added to flasks, elixirs and food buffs. |
+
+A perk is a list of `level:amount` steps that add up once reached: `1:5 11:10`
+is +5 from level 1, +15 from level 11. `""` turns a perk off. After
+`.reload config`, the members online get the new amounts at once.
 
 ## For the other modules
 
@@ -176,6 +250,55 @@ configuration change.
 20. **Locales:** on a French client, the announcement reads
     `[Guilde] Votre guilde atteint le niveau … !`, and the commands answer in
     French.
+
+### Perks
+
+Same guild, level 20 characters. Before each test, set the guild's level with
+`.guildlevel setlevel N` and check `.guildlevel perks`; set it back to 0 for
+the comparison. Numbers are for the default configuration.
+
+21. **List:** `.guildlevel perks` at level 0 shows every perk at 0 and "no";
+    at level 20: experience +15%, honor +15%, reputation +10%, mounted speed
+    +10%, vendors -10%, gold 10%, Hearthstone -15 min, gathering 20% for 3
+    more, resurrection "yes", consumables +30 min, durability 2 items every
+    60 seconds.
+22. **Experience:** a solo kill worth N experience gives N at level 0,
+    N x 1.05 at level 1, N x 1.15 at level 11 (rested experience aside). A
+    quest turned in gives its experience x 1.15 at level 11.
+23. **Honor:** at level 3, an honorable kill or a battleground bonus gives 5%
+    more honor than at level 0; 15% more at level 13.
+24. **Hearthstone:** after use, the Hearthstone's cooldown is 30 minutes at
+    level 0, 25 at level 4, 15 at level 14.
+25. **Gathering:** at level 5, gather about 20 nodes: about 1 in 5 gives one
+    more ore or herb, with the green "Bountiful gathering" line. At level 15,
+    3 more. `GuildLevel.Perk.Gathering.Chance = 100` makes it every time.
+26. **Vendors:** at level 6, an item worth 1 gold at a neutral vendor costs
+    95 silver; at level 16, 90 silver. Repairs are 10% cheaper. A trainer's
+    prices do not change.
+27. **Gold to the bank:** at level 7, loot a creature dropping G copper: the
+    looter gets G, the guild bank grows by 5% of G (10% at level 17).
+28. **Mounted speed:** at level 8, a 60% ground mount runs at 168% instead of
+    160% (x 1.05); at level 18, 176%.
+29. **Reputation:** at level 9, a kill worth 10 reputation gives 10.5; at
+    level 19, 11. A reputation loss is unchanged.
+30. **Resurrection:** at level 10, a guildmate resurrects a dead member, who
+    comes back with full health and mana (the spell's own amount at level 9).
+31. **Consumables:** at level 20, a flask lasts 1 hour 30 instead of 1 hour;
+    an elixir and a food buff ("Well Fed") last 30 minutes more. Relogging does
+    not add another 30 minutes.
+32. **Level change:** with a member online, `.guildlevel setlevel 8` then
+    `setlevel 0`: the mounted speed changes at once, without relogging.
+33. **Joining and leaving:** in a level 20 guild, `.guild uninvite` a member:
+    his perks stop at once (mounted speed back to normal); invited again, they
+    come back.
+34. **Durability:** at level 2, wear down the gear (die once, or
+    `.damage` yourself until the pieces lose points), note the durability of
+    each piece worn, wait 5 minutes: 5 points have come back in all, one per
+    minute, spread over random pieces. At level 12, 10 points in 5 minutes,
+    never twice the same piece in the same minute. At level 1, none. A
+    broken piece (0) mended to 1 gets its stats back.
+35. **Switch:** `GuildLevel.Perks.Enable = 0` and `.reload config`: every perk
+    stops, and `.guildlevel perks` says so.
 
 ## Roadmap
 

@@ -84,3 +84,58 @@ GuildLevel.Curve.Paragon        = "1500000 1750000 2000000 2250000 2500000 27500
 
 GuildLevel.Announce             = 1
 GuildLevel.SaveInterval         = 60
+
+###############################################################################
+#
+#    PERKS OF LEVELS 1 TO 20
+#
+#    Every member of a guild gets the perks of its current level, alone or in
+#    a group, from the moment the level is reached or the member joins.
+#
+#    GuildLevel.Perks.Enable
+#        0 = no perk at all (the levels still climb).
+#
+#    Each perk below is a list of steps "level:amount", separated by spaces or
+#    commas. The steps the guild has reached add up: "1:5 11:10" is +5 from
+#    level 1 and +15 from level 11. "" turns the perk off.
+#
+#    GuildLevel.Perk.Experience      % more experience, from every source.
+#    GuildLevel.Perk.Durability      damaged pieces worn mended by 1 point of
+#                                    durability every period, each a different
+#                                    piece drawn at random.
+#    GuildLevel.Perk.Durability.Interval
+#                                    seconds between two mendings.
+#    GuildLevel.Perk.Honor           % more honor, from every source.
+#    GuildLevel.Perk.Hearthstone     minutes off the Hearthstone cooldown.
+#    GuildLevel.Perk.Gathering       items more on a lucky mining, herbalism or
+#                                    skinning, of the first item taken.
+#    GuildLevel.Perk.Gathering.Chance
+#                                    % chance of a lucky gathering.
+#    GuildLevel.Perk.Vendor          % off the prices of vendors and repairs
+#                                    (not trainers, not flight masters).
+#    GuildLevel.Perk.GoldToBank      % of the gold looted from creatures and
+#                                    chests ADDED to the guild bank; the
+#                                    looters keep all of theirs.
+#    GuildLevel.Perk.MountSpeed      % more mounted speed, ground and flying.
+#    GuildLevel.Perk.Reputation      % more reputation (gains only).
+#    GuildLevel.Perk.Resurrection    above 0: resurrected by a member of the
+#                                    guild, a player comes back with full
+#                                    health and mana.
+#    GuildLevel.Perk.Consumables     minutes added to flasks, elixirs and food
+#                                    buffs ("Well Fed").
+#
+
+GuildLevel.Perks.Enable           = 1
+GuildLevel.Perk.Experience        = "1:5 11:10"
+GuildLevel.Perk.Durability        = "2:1 12:1"
+GuildLevel.Perk.Durability.Interval = 60
+GuildLevel.Perk.Honor             = "3:5 13:10"
+GuildLevel.Perk.Hearthstone       = "4:5 14:10"
+GuildLevel.Perk.Gathering         = "5:1 15:2"
+GuildLevel.Perk.Gathering.Chance  = 20
+GuildLevel.Perk.Vendor            = "6:5 16:5"
+GuildLevel.Perk.GoldToBank        = "7:5 17:5"
+GuildLevel.Perk.MountSpeed        = "8:5 18:5"
+GuildLevel.Perk.Reputation        = "9:5 19:5"
+GuildLevel.Perk.Resurrection      = "10:1"
+GuildLevel.Perk.Consumables       = "20:30"
