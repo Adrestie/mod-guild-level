@@ -30,6 +30,7 @@
 #include "DataMap.h"
 #include "DatabaseEnvFwd.h"
 #include "Define.h"
+#include "ObjectGuid.h"
 #include <array>
 
 class ChatHandler;
@@ -89,6 +90,9 @@ public:
     // The active perks at a guild level: locked, ready, or the time left for
     // `player` (none given: no cooldown shown).
     void List(ChatHandler* handler, uint8 guildLevel, Player* player) const;
+
+    // Every cooldown of a character back to ready, online or not.
+    void ResetCooldowns(ObjectGuid guid);
 
     // Seconds before the perk is ready again for this character.
     [[nodiscard]] uint32 Remaining(Player* player, GuildActivePerk perk) const;

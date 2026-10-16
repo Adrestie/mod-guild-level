@@ -25,6 +25,7 @@
 #include "DatabaseEnv.h"
 #include "GameObject.h"
 #include "GameTime.h"
+#include "ObjectAccessor.h"
 #include "Group.h"
 #include "Player.h"
 #include "QueryResult.h"
@@ -109,6 +110,14 @@ void GuildActivePerkMgr::Load(Player* player)
 void GuildActivePerkMgr::DeleteCharacter(CharacterDatabaseTransaction trans, uint32 guid)
 {
     trans->Append("DELETE FROM `mod_guild_level_perk_cooldown` WHERE `guid` = {}", guid);
+}
+
+void GuildActivePerkMgr::ResetCooldowns(ObjectGuid guid)
+{
+    CharacterDatabase.Execute("DELETE FROM `mod_guild_level_perk_cooldown` WHERE `guid` = {}", guid.GetCounter());
+    if (Player* player = ObjectAccessor::FindConnectedPlayer(guid))
+        if (auto* data = player->CustomData.Get<GuildActivePerkPlayerData>(DATA_KEY))
+            data->readyAt.fill(0);
 }
 
 uint32 GuildActivePerkMgr::Remaining(Player* player, GuildActivePerk perk) const

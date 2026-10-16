@@ -147,7 +147,9 @@ one dead, nothing could be placed) starts no cooldown.
 | 25 | `.gperk home` | To the guild house: **it comes with the guild house**. For now the command says so and starts no cooldown. | 1 h |
 
 `.gperk list` shows the active perks of your guild: locked, ready, or the time
-left. The Guild Supplier sells the reagents of every class at their usual
+left. A game master resets every cooldown of a character with
+`.gperk reset [$character]` (named, else the selected player, else himself;
+offline characters too). The Guild Supplier sells the reagents of every class at their usual
 prices: Arcane Powder, Runes of Teleportation and of Portals, Light Feather,
 Symbols of Kings and of Divinity, Holy, Sacred and Devout Candles, Ankh,
 Infernal Stone, Demonic Figurine, Corpse Dust, Flash Powder, Maple and
@@ -374,6 +376,10 @@ in a group, characters with a client to accept summons and resurrections.
     list`: the time left has gone on counting. The row is in
     `mod_guild_level_perk_cooldown`.
 43. **Others:** a player out of a guild gets "You are not in a guild".
+44. **Reset:** after using `.gperk bank`, a GM types `.gperk reset <name>`:
+    the answer names the character, `.gperk list` shows the perk ready again,
+    and his rows are gone from `mod_guild_level_perk_cooldown`. A player
+    without GM rights cannot use it.
 
 ## Roadmap
 

@@ -99,7 +99,8 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_ACTIVE_LOCKED   = 136,
     GUILD_LEVEL_STR_ACTIVE_LEFT     = 137,  // {} minutes, {} seconds
     GUILD_LEVEL_STR_ACTIVE_NAME     = 138,  // 138 to 142: the names, in GuildActivePerk order
-    GUILD_LEVEL_STR_ACTIVE_FAILED   = 143
+    GUILD_LEVEL_STR_ACTIVE_FAILED   = 143,
+    GUILD_LEVEL_STR_ACTIVE_RESET    = 144   // {} character
 };
 
 struct GuildLevelConfig

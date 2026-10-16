@@ -18,7 +18,7 @@
 /*
  * mod-guild-level — `.gperk`, the player commands of the active perks of
  * levels 21 to 25. Every player may type them; GuildActivePerkMgr::Use checks
- * the guild, its level and the cooldown.
+ * the guild, its level and the cooldown. `.gperk reset` is a GM's.
  */
 
 #include "Chat.h"
@@ -45,6 +45,7 @@ public:
             { "bank",   HandleBankCommand,   SEC_PLAYER, Console::No },
             { "vendor", HandleVendorCommand, SEC_PLAYER, Console::No },
             { "home",   HandleHomeCommand,   SEC_PLAYER, Console::No },
+            { "reset",  HandleResetCommand,  SEC_GAMEMASTER, Console::Yes },
         };
 
         static ChatCommandTable commandTable =
@@ -89,6 +90,20 @@ public:
     static bool HandleVendorCommand(ChatHandler* handler)
     {
         sGuildActivePerkMgr->Use(handler, GUILD_ACTIVE_VENDOR);
+        return true;
+    }
+
+    // GM: every cooldown of a character (named, else the selected player,
+    // else yourself) back to ready, online or not.
+    static bool HandleResetCommand(ChatHandler* handler, Optional<PlayerIdentifier> target)
+    {
+        if (!target)
+            target = PlayerIdentifier::FromTargetOrSelf(handler);
+        if (!target)
+            return false;
+
+        sGuildActivePerkMgr->ResetCooldowns(target->GetGUID());
+        handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_ACTIVE_RESET, target->GetName()));
         return true;
     }
 
