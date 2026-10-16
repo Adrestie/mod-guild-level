@@ -83,7 +83,7 @@ GuildLevel.Curve.Paragon        = "1500000 1750000 2000000 2250000 2500000 27500
 #
 
 GuildLevel.Announce             = 1
-GuildLevel.SaveInterval         = 60
+GuildLevel.SaveInterval         = 10
 
 ###############################################################################
 #
@@ -132,7 +132,7 @@ GuildLevel.Perk.Durability.Interval = 60
 GuildLevel.Perk.Honor             = "3:5 13:10"
 GuildLevel.Perk.Hearthstone       = "4:5 14:10"
 GuildLevel.Perk.Gathering         = "5:1 15:2"
-GuildLevel.Perk.Gathering.Chance  = 20
+GuildLevel.Perk.Gathering.Chance  = 10
 GuildLevel.Perk.Vendor            = "6:5 16:5"
 GuildLevel.Perk.GoldToBank        = "7:5 17:5"
 GuildLevel.Perk.MountSpeed        = "8:5 18:5"

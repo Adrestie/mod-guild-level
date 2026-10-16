@@ -73,7 +73,7 @@ struct GuildPerkConfig
     bool enable = true;
     // Per perk: (guild level, amount) steps, sorted by level.
     std::array<std::vector<std::pair<uint8, float>>, GUILD_PERK_COUNT> steps;
-    float gatheringChance = 20.0f;      // % per gathering
+    float gatheringChance = 10.0f;      // % per gathering
     uint32 durabilityInterval = 60;     // seconds between two mendings
 };
 

@@ -102,7 +102,7 @@ void GuildLevelMgr::LoadConfig()
     c.announce = sConfigMgr->GetOption<bool>("GuildLevel.Announce", true);
     ReadCurve(c.levelXp, "GuildLevel.Curve.Levels", DEFAULT_LEVEL_CURVE);
     ReadCurve(c.paragonXp, "GuildLevel.Curve.Paragon", DEFAULT_PARAGON_CURVE);
-    c.saveInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.SaveInterval", 60), 1);
+    c.saveInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.SaveInterval", 10), 1);
 
     std::lock_guard<std::mutex> guard(_lock);
     _config = c;

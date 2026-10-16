@@ -117,7 +117,7 @@ struct GuildLevelConfig
     std::array<uint64, GUILD_LEVEL_MAX> levelXp{};
     std::array<uint64, GUILD_PARAGON_MAX> paragonXp{};
 
-    uint32 saveInterval = 60;               // seconds
+    uint32 saveInterval = 10;               // seconds
 };
 
 struct GuildLevelState

@@ -78,7 +78,7 @@ levels 1 to 9. A Paragon guild has them all.
 | 2, 12 | Durability mended: 1 point every minute on a damaged piece worn | 1 piece, then 2 | player tick |
 | 3, 13 | Honor, from every source | +5%, then +15% | hidden aura (honor gain) |
 | 4, 14 | Hearthstone cooldown | -5 min, then -15 min | spell script on the Hearthstone |
-| 5, 15 | Lucky gathering: 20% chance per node or skinned corpse | +1 item, then +3 | hook on the loot |
+| 5, 15 | Lucky gathering: 10% chance per node or skinned corpse | +1 item, then +3 | hook on the loot |
 | 6, 16 | Vendor prices and repairs | -5%, then -10% | hook on the price discount |
 | 7, 17 | Gold looted, added to the guild bank | 5%, then 10% | hook on the loot money |
 | 8, 18 | Mounted speed, ground and flying | +5%, then +10% | hidden aura (mounted speed) |
@@ -176,7 +176,7 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Curve.Levels` | 25 amounts | Cost of levels 1 to 25. |
 | `GuildLevel.Curve.Paragon` | 9 amounts | Cost of Paragon 1 to 9. |
 | `GuildLevel.Announce` | 1 | Announce each level to the guild. |
-| `GuildLevel.SaveInterval` | 60 | Seconds between two saves. |
+| `GuildLevel.SaveInterval` | 10 | Seconds between two saves. |
 | `GuildLevel.Perks.Enable` | 1 | 0 = no perk at all. |
 | `GuildLevel.Perk.Experience` | `1:5 11:10` | % experience. |
 | `GuildLevel.Perk.Durability` | `2:1 12:1` | Damaged pieces worn mended by 1 point per period. |
@@ -184,7 +184,7 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Perk.Honor` | `3:5 13:10` | % honor. |
 | `GuildLevel.Perk.Hearthstone` | `4:5 14:10` | Minutes off the Hearthstone cooldown. |
 | `GuildLevel.Perk.Gathering` | `5:1 15:2` | Items more on a lucky gathering. |
-| `GuildLevel.Perk.Gathering.Chance` | 20 | % chance of a lucky gathering. |
+| `GuildLevel.Perk.Gathering.Chance` | 10 | % chance of a lucky gathering. |
 | `GuildLevel.Perk.Vendor` | `6:5 16:5` | % off vendor prices and repairs. |
 | `GuildLevel.Perk.GoldToBank` | `7:5 17:5` | % of looted gold added to the guild bank. |
 | `GuildLevel.Perk.MountSpeed` | `8:5 18:5` | % mounted speed. |
@@ -265,7 +265,7 @@ configuration change.
     without a name: the guild of the selected player. Without a selection, your
     own guild. From the console, `.guildlevel info Test Guild` and
     `.guildlevel info <guild id>` both answer.
-16. **Persistence:** earn some experience, wait one minute
+16. **Persistence:** earn some experience, wait ten seconds
     (`GuildLevel.SaveInterval`), and look at the guild's row in
     `mod_guild_level`. Restart the worldserver: `.guildlevel info` shows the
     same values.
@@ -291,7 +291,7 @@ the comparison. Numbers are for the default configuration.
 
 21. **List:** `.guildlevel perks` at level 0 shows every perk at 0 and "no";
     at level 20: experience +15%, honor +15%, reputation +10%, mounted speed
-    +10%, vendors -10%, gold 10%, Hearthstone -15 min, gathering 20% for 3
+    +10%, vendors -10%, gold 10%, Hearthstone -15 min, gathering 10% for 3
     more, resurrection "yes", consumables +30 min, durability 2 items every
     60 seconds.
 22. **Experience:** a solo kill worth N experience gives N at level 0,
@@ -301,7 +301,7 @@ the comparison. Numbers are for the default configuration.
     more honor than at level 0; 15% more at level 13.
 24. **Hearthstone:** after use, the Hearthstone's cooldown is 30 minutes at
     level 0, 25 at level 4, 15 at level 14.
-25. **Gathering:** at level 5, gather about 20 nodes: about 1 in 5 gives one
+25. **Gathering:** at level 5, gather about 30 nodes: about 1 in 10 gives one
     more ore or herb, with the green "Bountiful gathering" line. At level 15,
     3 more. `GuildLevel.Perk.Gathering.Chance = 100` makes it every time.
 26. **Vendors:** at level 6, an item worth 1 gold at a neutral vendor costs

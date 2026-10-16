@@ -157,7 +157,7 @@ void GuildPerkMgr::LoadConfig()
     for (uint8 i = 0; i < GUILD_PERK_COUNT; ++i)
         c.steps[i] = ReadSteps(PERK_OPTIONS[i].option,
             sConfigMgr->GetOption<std::string>(PERK_OPTIONS[i].option, PERK_OPTIONS[i].steps));
-    c.gatheringChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.Perk.Gathering.Chance", 20.0f), 0.0f, 100.0f);
+    c.gatheringChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.Perk.Gathering.Chance", 10.0f), 0.0f, 100.0f);
     c.durabilityInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Perk.Durability.Interval", 60), 1);
     _config = c;
 }
