@@ -124,44 +124,63 @@ def convert_skin(src):
     count, offset = struct.unpack_from("<II", skin, 36)
     for i in range(count):
         base = offset + 24 * i
+        # M2Batch: flags 0, priority 1, shader 2, skin section 4, geoset 6,
+        # colour 8, material 10, material layer 12, TEXTURE COUNT 14, texture
+        # combo 16, coord combo 18, weight combo 20, transform combo 22.
+        # Writing the count one field too far set every combo to 1: each
+        # batch then drew the next texture of the lookup, not its own.
         struct.pack_into("<H", skin, base + 2, 0)        # shader: plain, one texture
-        struct.pack_into("<H", skin, base + 16, 1)       # texture count
+        struct.pack_into("<H", skin, base + 14, 1)       # texture count
     struct.pack_into("<I", skin, 44, 21)                 # bone count max, as 3.3.5a models
     return bytes(skin)
 
 
 def write_blp(image, path):
-    """BLP2, uncompressed BGRA (encoding 3), with every mip level."""
-    image = image.convert("RGBA")
+    """BLP2, 256-colour palette (encoding 1), no alpha, with every mip level.
+
+    The palette encoding is the one every 3.3.5a client reads; uncompressed
+    BGRA came later. An opaque banner loses nothing to it."""
+    image = image.convert("RGB")
+    paletted = image.quantize(colors=256, method=Image.Quantize.MEDIANCUT)
+    palette = paletted.getpalette()[:768]
+    palette += [0] * (768 - len(palette))
     width, height = image.size
     levels = []
+    level = paletted
     while True:
-        r, g, b, a = image.split()
-        levels.append(Image.merge("RGBA", (b, g, r, a)).tobytes())
-        if image.size == (1, 1) or len(levels) == 16:
+        levels.append(level.tobytes())
+        if level.size == (1, 1) or len(levels) == 16:
             break
-        image = image.resize((max(1, image.size[0] // 2), max(1, image.size[1] // 2)), Image.LANCZOS)
+        # Each mip is reduced in colour, then mapped back to the SAME palette.
+        smaller = image.resize((max(1, level.size[0] // 2), max(1, level.size[1] // 2)), Image.LANCZOS)
+        image = smaller
+        level = smaller.quantize(palette=paletted, dither=Image.Dither.NONE)
     header_size = 148 + 1024
     offsets, sizes, pos = [], [], header_size
-    for level in levels:
+    for data in levels:
         offsets.append(pos)
-        sizes.append(len(level))
-        pos += len(level)
+        sizes.append(len(data))
+        pos += len(data)
     offsets += [0] * (16 - len(offsets))
     sizes += [0] * (16 - len(sizes))
+    bgra = bytearray()
+    for i in range(256):
+        r, g, b = palette[3 * i:3 * i + 3]
+        bgra += bytes((b, g, r, 255))
     with open(path, "wb") as f:
-        f.write(b"BLP2" + struct.pack("<I4BII", 1, 3, 8, 8, 1, width, height))
+        # magic, type 1, encoding 1 (palette), alpha depth 0, alpha type 0, mips
+        f.write(b"BLP2" + struct.pack("<I4BII", 1, 1, 0, 0, 1, width, height))
         f.write(struct.pack("<16I", *offsets) + struct.pack("<16I", *sizes))
-        f.write(b"\x00" * 1024)
-        for level in levels:
-            f.write(level)
+        f.write(bytes(bgra))
+        for data in levels:
+            f.write(data)
 
 
 def bake_banner(png, colour, path):
     """The grey cloth, multiplied by the faction's colour, opaque."""
     cloth = Image.open(png).convert("L")
     channels = [cloth.point(lambda v, c=c: v * c // 255) for c in colour]
-    write_blp(Image.merge("RGBA", channels + [Image.new("L", cloth.size, 255)]), path)
+    write_blp(Image.merge("RGB", channels), path)
 
 
 def write_dbc(rows, path):
