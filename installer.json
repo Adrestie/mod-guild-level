@@ -1,0 +1,54 @@
+{
+  "format": "wow-mods-installer/1",
+  "module": "mod-guild-level",
+  "title": "Guild Level",
+  "fields": {
+    "worldserver": "required",
+    "sources": "required",
+    "mysql": "required"
+  },
+  "signature": [
+    "src/guild_level_loader.cpp",
+    "src/GuildLevel.cpp"
+  ],
+  "configuration": {
+    "file": "mod-guild-level.conf",
+    "template": "conf/mod-guild-level.conf.dist"
+  },
+  "database": {
+    "characters": {
+      "tables": [
+        "mod_guild_level"
+      ],
+      "kept_on_update": [
+        "mod_guild_level"
+      ],
+      "rows": [
+        {
+          "table": "updates",
+          "where": "name IN ({sql_files:characters})"
+        }
+      ]
+    },
+    "world": {
+      "rows": [
+        {
+          "table": "module_string",
+          "where": "module = 'mod-guild-level'"
+        },
+        {
+          "table": "module_string_locale",
+          "where": "module = 'mod-guild-level'"
+        },
+        {
+          "table": "command",
+          "where": "name = 'guildlevel' OR name LIKE 'guildlevel %'"
+        },
+        {
+          "table": "updates",
+          "where": "name IN ({sql_files:world})"
+        }
+      ]
+    }
+  }
+}
