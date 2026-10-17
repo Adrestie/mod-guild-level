@@ -15,12 +15,32 @@ import wmo
 FLAG_FACE = 0x20      # rendered and collidable
 
 
-def wall_axes(axis, out):
-    """(outward normal, along-wall unit vector) of a wall."""
-    n = np.zeros(3)
-    n[axis] = out
-    along = np.array([0.0, 1.0, 0.0]) if axis == 0 else np.array([1.0, 0.0, 0.0])
-    return n, along
+class Wall(object):
+    """A hall's wall: outward normal n and along-wall direction a (horizontal, unit), and the face's
+    offset along n. Wall coordinates (u, z, w): u along a, z up, w along n."""
+
+    def __init__(self, n, a, face):
+        self.n = np.array(n, np.float64)
+        self.a = np.array(a, np.float64)
+        self.face = float(face)
+
+    @staticmethod
+    def of(spec):
+        """(axis, face, out): a wall across x (axis 0) or y (axis 1) at that coordinate, its outside
+        toward out; ('angle', degrees, face): the outward normal at that angle, the face at that
+        distance from the origin along it."""
+        if spec[0] == 'angle':
+            t = math.radians(spec[1])
+            n = (math.cos(t), math.sin(t), 0.0)
+            return Wall(n, (-n[1], n[0], 0.0), spec[2])
+        axis, face, out = spec
+        n = np.zeros(3)
+        n[axis] = out
+        a = np.array([0.0, 1.0, 0.0]) if axis == 0 else np.array([1.0, 0.0, 0.0])
+        return Wall(n, a, face * out)
+
+    def P(self, u, z, w):
+        return self.a * u + self.n * w + np.array([0.0, 0.0, z])
 
 
 def mean_color(mesh):
@@ -93,17 +113,20 @@ def attach(b, hall, att):
             if p == door:
                 side = sd
     src_out = -side * n                     # from the room through its door
-    axis, face, out = att['wall']
-    hall_out, along = wall_axes(axis, out)
+    W = Wall.of(att['wall'])
+    hall_out, along = W.n, W.a
     # rotate so that the room's door looks into the hall (-hall_out)
     ang = math.degrees(math.atan2(-hall_out[1], -hall_out[0]) - math.atan2(src_out[1], src_out[0]))
     R = merge.rot_z(round(ang / 90.0) * 90.0 if abs(ang / 90.0 - round(ang / 90.0)) < 1e-3 else ang)
     dc = np.mean(dverts, 0)
+    if att.get('auto_floor') and 'src_floor' not in att:
+        # the floor just inside the door, when the portal starts above it
+        f = floor_below(wmo.Group(datas[att.get('door_group', att['groups'][0])]),
+                        dc[:2] - src_out[:2] * 1.0, min(v[2] for v in dverts) + 0.6)
+        if f is not None and min(v[2] for v in dverts) - f < 1.5:
+            att = dict(att, src_floor=f)
     dz = att.get('src_floor', min(v[2] for v in dverts))
-    target = np.zeros(3)
-    target[axis] = face + out * att['gap']
-    target[1 - axis] = att['at']
-    target[2] = att['floor']
+    target = W.P(att['at'], att['floor'], W.face + att['gap'])
     t = target - R @ np.array([dc[0], dc[1], dz])
     ids = b.add_room(src_root, datas, att['groups'], R, t, doodad_sets=att.get('sets', ('Set_$DefaultGlobal',)),
                      unique_id=b.groups[hall].unique_id)
@@ -122,15 +145,15 @@ def attach(b, hall, att):
     if att.get('max_h') and z1 - z0 > att['max_h']:
         z1 = z0 + att['max_h']
     rm = b.meshes[room]
-    plane_w = float(np.mean([v[axis] for v in door_verts]))
+    plane_w = float(np.mean([v @ W.n for v in door_verts]))
     outer = (min(us) - 0.6, max(us) + 0.6, z0, max(zs) + 0.6)
     # an arched door: the corridor fits inside what the room's walls leave open
-    ou0, ou1, oz1 = open_rect(rm, axis, plane_w, along, u0, u1, z0, z1)
+    ou0, ou1, oz1 = open_rect(rm, W, plane_w, u0, u1, z0, z1)
     if (ou1 - ou0) < (u1 - u0) - 0.15 or oz1 < z1 - 0.15:
         print('   %s: doorway %.1f x %.1f, open %.1f x %.1f' % (att['key'], u1 - u0, z1 - z0, ou1 - ou0, oz1 - z0))
     u0, u1, z1 = max(u0, ou0), min(u1, ou1), min(z1, oz1)
     # around the corridor's end, a two-sided panel closes whatever the room's doorway leaves open
-    panel(rm, axis, plane_w - out * 0.04, along, outer, (u0, u1, z0, z1), main_material(rm))
+    panel(rm, W, plane_w - 0.04, outer, (u0, u1, z0, z1), main_material(rm))
     # drop the door from the open portals (it is now the corridor's end)
     b.open_portals = [op for op in b.open_portals
                       if not (op[0] == room and np.allclose(np.mean(op[1], 0), np.mean(door_verts, 0), atol=1e-3))]
@@ -147,18 +170,43 @@ def attach(b, hall, att):
         b.open_portals.remove(op)
         frame(hm, op[1], along, u0, u1, z0, z1, -hall_out, att.get('frame_material', main_material(hm)))
         # whatever blocked the way out (an invisible wall at an instance's entrance) goes too
-        removed = cut_wall(hm, axis, face, out, along, hall_out, u0, u1, z0, z1, att.get('cut_in', 1.0))
+        removed = cut_wall(hm, W, u0, u1, z0, z1, att.get('cut_in', 1.0))
     else:
-        removed = cut_wall(hm, axis, face, out, along, hall_out, u0, u1, z0, z1, att.get('cut_in', 0.35))
-    corridor(b, att, room, axis, face, out, along, u0, u1, z0, z1)
+        removed = cut_wall(hm, W, u0, u1, z0, z1, att.get('cut_in', 0.35))
+    corridor(b, att, room, W, u0, u1, z0, z1)
     trim = att.get('trim_material', 5)
-    plank_frame(hm, axis, face, -out, along, u0, u1, z0, z1, trim)
-    plank_frame(b.meshes[room], axis, face + out * att['gap'], out, along, u0, u1, z0, z1, trim)
-    clear_doodads(b, hall, axis, face, out, along, u0 - 0.7, u1 + 0.7, z0 - 0.5, z1, att.get('clearance', 3.0))
+    plank_frame(hm, W, W.face, -1, u0, u1, z0, z1, trim)
+    plank_frame(b.meshes[room], W, W.face + att['gap'], 1, u0, u1, z0, z1, trim)
+    clear_doodads(b, hall, W, u0 - 0.7, u1 + 0.7, z0 - 0.5, z1, att.get('clearance', 3.0))
     # the portal between hall and room, on the hall's wall face
-    pv = [_P(axis, u0, z0, face), _P(axis, u1, z0, face), _P(axis, u1, z1, face), _P(axis, u0, z1, face)]
+    pv = [W.P(u0, z0, W.face), W.P(u1, z0, W.face), W.P(u1, z1, W.face), W.P(u0, z1, W.face)]
     b.add_portal(pv, hall, room)
     return ids, removed
+
+
+def floor_below(grp, xy, zmax):
+    """The highest upward face of a group under the point xy, at most zmax; None if none."""
+    V = np.array(grp.verts)
+    T = np.array(grp.indices).reshape(-1, 3)
+    best = None
+    x, y = float(xy[0]), float(xy[1])
+    for a, b, c in T:
+        p, q, r = V[a], V[b], V[c]
+        d = (q[1] - r[1]) * (p[0] - r[0]) + (r[0] - q[0]) * (p[1] - r[1])
+        if abs(d) < 1e-9:
+            continue
+        l1 = ((q[1] - r[1]) * (x - r[0]) + (r[0] - q[0]) * (y - r[1])) / d
+        l2 = ((r[1] - p[1]) * (x - r[0]) + (p[0] - r[0]) * (y - r[1])) / d
+        l3 = 1 - l1 - l2
+        if min(l1, l2, l3) < -1e-6:
+            continue
+        n = np.cross(q - p, r - p)
+        if abs(n[2]) / (np.linalg.norm(n) or 1) < 0.7:
+            continue
+        z = l1 * p[2] + l2 * q[2] + l3 * r[2]
+        if z <= zmax and (best is None or z > best):
+            best = float(z)
+    return best
 
 
 _m2_boxes = {}
@@ -186,7 +234,7 @@ def quat_rotate(q, v):
     return 2 * (u @ v) * u + (w * w - u @ u) * v + 2 * w * np.cross(u, v)
 
 
-def clear_doodads(b, g, axis, face, out, along, u0, u1, z0, z1, depth):
+def clear_doodads(b, g, W, u0, u1, z0, z1, depth):
     """Takes out of group g the decorations standing in front of a doorway."""
     root = b.root
     grp = b.groups[g]
@@ -202,8 +250,8 @@ def clear_doodads(b, g, axis, face, out, along, u0, u1, z0, z1, depth):
             corners = [pos + dd[8] * quat_rotate(dd[4:8], np.array([box[0 + 3 * i], box[1 + 3 * j], box[2 + 3 * k]]))
                        for i in (0, 1) for j in (0, 1) for k in (0, 1)]
         C = np.array(corners)
-        us = C @ along
-        ws = (face - C[:, axis]) * out          # distance into the hall from the wall face
+        us = C @ W.a
+        ws = W.face - C @ W.n                   # distance into the hall from the wall face
         zs = C[:, 2]
         hit = us.max() > u0 and us.min() < u1 and ws.max() > -0.5 and ws.min() < depth and \
             zs.max() > z0 and zs.min() < z1
@@ -214,11 +262,12 @@ def clear_doodads(b, g, axis, face, out, along, u0, u1, z0, z1, depth):
     grp.doodad_refs = keep
 
 
-def add_box(mesh, axis, along, lo, hi, material, color):
+def add_box(mesh, W, lo, hi, material, color):
     """A box given in (u, z, w) wall coordinates: lo and hi corners. Six faces, outward."""
     (u0, z0, w0), (u1, z1, w1) = lo, hi
-    P = lambda u, z, w: _P(axis, u, z, w)
-    wn = np.zeros(3); wn[axis] = 1.0
+    P = W.P
+    wn = W.n
+    along = W.a
     faces = [
         ([P(u0, z0, w0), P(u0, z1, w0), P(u0, z1, w1), P(u0, z0, w1)], -along),
         ([P(u1, z0, w0), P(u1, z1, w0), P(u1, z1, w1), P(u1, z0, w1)], along),
@@ -233,26 +282,28 @@ def add_box(mesh, axis, along, lo, hi, material, color):
                        color=color)
 
 
-def plank_frame(mesh, axis, face, toward, along, u0, u1, z0, z1, material, width=0.4, thick=0.15, back=0.6):
-    """Planks around a doorway on a wall face: two jambs and a lintel, standing out by `thick`
-    toward `toward` (+1/-1 on the axis) and reaching `back` into the opening to hide the joint."""
+def plank_frame(mesh, W, face, toward, u0, u1, z0, z1, material, width=0.4, thick=0.15, back=0.6):
+    """Planks around a doorway on a wall face (w = face): two jambs and a lintel, standing out by
+    `thick` toward `toward` (+1 outward, -1 into the hall) and reaching `back` into the opening to
+    hide the joint."""
     col = mean_color(mesh)
     wa, wb = sorted((face - toward * back, face + toward * thick))
     e = 0.06     # a little into the opening, so no face lies on the corridor's own
-    add_box(mesh, axis, along, (u0 - width, z0, wa), (u0 + e, z1 + width, wb), material, col)
-    add_box(mesh, axis, along, (u1 - e, z0, wa), (u1 + width, z1 + width, wb), material, col)
-    add_box(mesh, axis, along, (u0 + e, z1 - e, wa), (u1 - e, z1 + width, wb), material, col)
+    add_box(mesh, W, (u0 - width, z0, wa), (u0 + e, z1 + width, wb), material, col)
+    add_box(mesh, W, (u1 - e, z0, wa), (u1 + width, z1 + width, wb), material, col)
+    add_box(mesh, W, (u0 + e, z1 - e, wa), (u1 - e, z1 + width, wb), material, col)
 
 
-def open_rect(mesh, axis, plane_w, along, u0, u1, z0, z1, depth=0.8, step=0.1):
+def open_rect(mesh, W, plane_w, u0, u1, z0, z1, depth=0.8, step=0.1):
     """The largest rectangle, standing on z0 and around the middle, through which a doorway at
     plane_w (between u0..u1, z0..z1) is not blocked by the mesh within `depth` of its plane:
     an arched or pointed door gives a narrower or lower rectangle than its portal."""
     P = np.array(mesh.p)
     T = np.array([t[:3] for t in mesh.tris])
     A, B, C = P[T[:, 0]], P[T[:, 1]], P[T[:, 2]]
-    wa = np.minimum(np.minimum(A[:, axis], B[:, axis]), C[:, axis])
-    wb = np.maximum(np.maximum(A[:, axis], B[:, axis]), C[:, axis])
+    along = W.a
+    wa = np.minimum(np.minimum(A @ W.n, B @ W.n), C @ W.n)
+    wb = np.maximum(np.maximum(A @ W.n, B @ W.n), C @ W.n)
     ua = np.minimum(np.minimum(A @ along, B @ along), C @ along)
     ub = np.maximum(np.maximum(A @ along, B @ along), C @ along)
     za = np.minimum(np.minimum(A[:, 2], B[:, 2]), C[:, 2])
@@ -260,7 +311,7 @@ def open_rect(mesh, axis, plane_w, along, u0, u1, z0, z1, depth=0.8, step=0.1):
     near = (wb > plane_w - depth) & (wa < plane_w + depth) & (ub > u0 - 0.5) & (ua < u1 + 0.5) & \
         (zb > z0) & (za < z1 + 0.5)
     A, B, C = A[near], B[near], C[near]
-    d = np.zeros(3); d[axis] = 1.0
+    d = W.n
     us = np.arange(u0 + step / 2, u1, step)
     zs = np.arange(z0 + 0.15, z1, step)
     blocked = np.zeros((len(zs), len(us)), bool)
@@ -271,7 +322,7 @@ def open_rect(mesh, axis, plane_w, along, u0, u1, z0, z1, depth=0.8, step=0.1):
     A, e1, e2, pv, det = A[ok], e1[ok], e2[ok], pv[ok], det[ok]
     for i, z in enumerate(zs):
         for j, u in enumerate(us):
-            o = _P(axis, u, z, plane_w - depth)
+            o = W.P(u, z, plane_w - depth)
             tv = o - A
             uu = np.einsum('ij,ij->i', tv, pv) / det
             qv = np.cross(tv, e1)
@@ -301,21 +352,13 @@ def open_rect(mesh, axis, plane_w, along, u0, u1, z0, z1, depth=0.8, step=0.1):
     return best[1], best[2], best[3]
 
 
-def panel(mesh, axis, plane_w, along, outer, inner, material):
-    """A two-sided wall on the plane: the rectangle outer minus the rectangle inner (u0, u1, z0, z1)."""
+def panel(mesh, W, plane_w, outer, inner, material):
+    """A two-sided wall on the plane w = plane_w: the rectangle outer minus the rectangle inner
+    (u0, u1, z0, z1)."""
     u0, u1, z0, z1 = outer
-    poly = [_P(axis, u0, z0, plane_w), _P(axis, u1, z0, plane_w), _P(axis, u1, z1, plane_w), _P(axis, u0, z1, plane_w)]
-    n = np.zeros(3); n[axis] = 1.0
-    for nrm in (n, -n):
-        frame(mesh, poly, along, *inner, nrm, material)
-
-
-def _P(axis, u, z, w):
-    p = np.zeros(3)
-    p[axis] = w
-    p[1 - axis] = u
-    p[2] = z
-    return p
+    poly = [W.P(u0, z0, plane_w), W.P(u1, z0, plane_w), W.P(u1, z1, plane_w), W.P(u0, z1, plane_w)]
+    for nrm in (W.n, -W.n):
+        frame(mesh, poly, W.a, *inner, nrm, material)
 
 
 def frame(mesh, poly, along, u0, u1, z0, z1, normal, material):
@@ -336,32 +379,36 @@ def frame(mesh, poly, along, u0, u1, z0, z1, normal, material):
         seal(mesh, pc, normal, material)
 
 
-def cut_wall(hm, axis, face, out, along, hall_out, u0, u1, z0, z1, cut_in):
-    inner = face - out * cut_in
-    nd = np.zeros(3); nd[axis] = -out
+def cut_wall(hm, W, u0, u1, z0, z1, cut_in):
+    inner = W.face - cut_in
+    along = W.a
     planes = [
         (-along, float(u0)),            # outside when u < u0:  f = -u + u0 > 0
         (along, -float(u1)),            # outside when u > u1
         (np.array([0, 0, -1.0]), float(z0) + 0.02),   # outside when z < z0 + 0.02
         (np.array([0, 0, 1.0]), -float(z1)),          # outside when z > z1
-        (nd, float(inner * out)),       # outside when further into the hall than inner
+        (-W.n, float(inner)),           # outside when further into the hall than inner
     ]
     return merge.cut_box(hm, planes)
 
 
-def corridor(b, att, room, axis, face, out, along, u0, u1, z0, z1):
+def corridor(b, att, room, W, u0, u1, z0, z1):
     rm = b.meshes[room]
-    a_face = face
-    b_face = face + out * att['gap']
-    P = lambda u, z, w: _P(axis, u, z, w)
+    a_face = W.face
+    b_face = W.face + att['gap']
+    P = W.P
+    along = W.a
     wall_mat = att.get('corridor_wall', main_material(rm))
     floor_mat = att.get('corridor_floor', main_material(rm, vertical=False))
     col = mean_color(rm)
+    # the floor may run on under the hall's and the room's (a hair lower), over the gaps their thresholds leave
+    fa, fb = a_face - att.get('floor_back', 0.0), b_face + att.get('floor_fwd', 0.0)
+    fz = z0 - (0.03 if fa < a_face or fb > b_face else 0.0)
     for (pts, nrm, mat) in (
             ([P(u0, z0, a_face), P(u0, z0, b_face), P(u0, z1, b_face), P(u0, z1, a_face)], along, wall_mat),
             ([P(u1, z0, a_face), P(u1, z0, b_face), P(u1, z1, b_face), P(u1, z1, a_face)], -along, wall_mat),
             ([P(u0, z1, a_face), P(u0, z1, b_face), P(u1, z1, b_face), P(u1, z1, a_face)], np.array([0, 0, -1.0]), wall_mat),
-            ([P(u0, z0, a_face), P(u0, z0, b_face), P(u1, z0, b_face), P(u1, z0, a_face)], np.array([0, 0, 1.0]), floor_mat)):
+            ([P(u0, fz, fa), P(u0, fz, fb), P(u1, fz, fb), P(u1, fz, fa)], np.array([0, 0, 1.0]), floor_mat)):
         pts = facing(pts, nrm)
         uvs = [plane_uv(p, nrm, 2.5) for p in pts]
         merge.add_quad(rm, pts, nrm, uvs, FLAG_FACE, mat, merge.BT_INT, color=col)
