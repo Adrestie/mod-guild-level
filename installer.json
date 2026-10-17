@@ -84,11 +84,11 @@
         },
         {
           "table": "gameobject_template",
-          "where": "entry IN (920000, 920001)"
+          "where": "entry IN (920000, 920001, 920002)"
         },
         {
           "table": "gameobject_template_locale",
-          "where": "entry IN (920000, 920001)"
+          "where": "entry IN (920000, 920001, 920002)"
         },
         {
           "table": "updates",

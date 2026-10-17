@@ -111,6 +111,13 @@ public:
     void OnMemberLeft(ObjectGuid player);       // left or was removed from his guild
     void DeleteGuild(uint32 guildId);
 
+    // GM: the spawns of a hall, and their edition. Saved in the world table,
+    // and every open house of the hall is furnished again at once.
+    void ListSpawns(ChatHandler* handler, uint32 mapId);
+    bool MoveSpawn(uint32 id, uint32 mapId, float x, float y, float z, float o);
+    uint32 AddSpawn(uint32 mapId, uint8 paragon, uint8 kind, uint32 entry, float x, float y, float z, float o);
+    bool DeleteSpawn(uint32 id);
+
 private:
     GuildHouseMgr() = default;
 
@@ -137,6 +144,7 @@ private:
     [[nodiscard]] uint8 ParagonOf(uint32 guildId) const;
     void Furnish(Map* map, Slot& slot, uint8 index);
     void Empty(Map* map, Slot& slot);
+    void RebuildHall(uint32 mapId);             // under _lock
 
     GuildHouseConfig _config;
     std::vector<GuildHouseSpawn> _spawns;

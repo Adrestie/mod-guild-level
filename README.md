@@ -175,8 +175,35 @@ in all; a 32nd guild is asked to try again a few minutes later.
 **What stands in it** is in the world table `mod_guild_level_house_spawn`, one
 row per creature or object, each unlocked at a Paragon level: placed when the
 house opens, and at once in an open house when the guild reaches that level.
-Paragon 1 places a mailbox. Rows under id 1000 are the module's; a server adds
-its own above.
+Rows under id 1000 are the module's; a server adds its own above.
+
+| Paragon | What appears |
+|---|---|
+| 1 | a mailbox by the entrance |
+| 2 | the Guild Supplier (reagents of every class, repairs) |
+| 3 | a banker of the faction's capital (Olivia Burnside / Karus) |
+| 4 | a repairer of the faction's capital |
+| 5 | the ten class trainers of the faction's capital (the Death Knight one from Acherus) and a stable master |
+| 6 | the fourteen Grand Master profession trainers of Dalaran, who teach every recipe of Vanilla, Burning Crusade and Wrath, with a forge, an anvil and a cooking fire |
+| 7 | two auctioneers of the faction: its own auction house |
+| 8 | portals to the four capitals of the faction, Shattrath, Dalaran and the Caverns of Time (gameobject 920002 of the module: the game has no such portal) |
+
+**The layout** was proposed from the walkable floor of each hall (the
+server's mmaps). Champions' Hall, a long room: services by the entrance, class
+trainers along the north wall, profession trainers along the south wall,
+auctioneers and portals on the dais at the far end. Hall of Legends, a round
+room: services by the entrance, class trainers around the west of the ring,
+profession trainers around the east, auctioneers facing the entrance, portals
+in a circle at the centre. A GM adjusts it from inside a hall:
+
+| Command | Effect |
+|---|---|
+| `.guildlevel house list` | Every spawn of the hall: id, Paragon level, kind, entry, position. |
+| `.guildlevel house move $id` | Moves the spawn where the GM stands, facing his way. |
+| `.guildlevel house add $paragon creature\|object $entry` | Adds a spawn there (ids from 1000). |
+| `.guildlevel house del $id` | Removes the spawn. |
+
+Every open house of the hall follows at once.
 
 Someone who is not a member (or whose guild has no house) and ends up in a
 hall -- a GM teleport, a login after leaving the guild -- is sent back. Game
@@ -428,6 +455,15 @@ in a group, characters with a client to accept summons and resurrections.
 49. **Empty house:** everyone leaves; a minute later the phase is free again
     (a GM with `.modify phase` sees nothing there). Going back in brings the
     mailbox back.
+51. **Paragon 2 to 8:** a guild at Paragon 8: going home shows the supplier,
+    banker and repairer by the entrance, the class trainers and stable master,
+    the profession trainers with forge, anvil and fire, two auctioneers and
+    seven portals. At Paragon 4, only what Paragon 1 to 4 unlock. Each NPC
+    works: training, bank, auction house of the faction, repairs; each portal
+    goes where it says (the Caverns of Time one to Tanaris).
+52. **Layout:** a GM in the hall: `.guildlevel house list`, then
+    `.guildlevel house move <id>` somewhere else: the NPC moves in every open
+    house of the hall. `add` and `del` likewise.
 50. **Logout inside:** a member logs out in the house and back in: he is in
     his house again, in its phase.
 

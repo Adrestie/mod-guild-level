@@ -30,6 +30,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "QueryResult.h"
+#include "StringFormat.h"
 #include "TemporarySummon.h"
 
 #include <algorithm>
@@ -328,6 +329,68 @@ void GuildHouseMgr::OnMapUpdate(Map* map, uint32 diff)
             slot.furnish = false;
         }
     }
+}
+
+void GuildHouseMgr::RebuildHall(uint32 mapId)
+{
+    for (Slot& slot : HallOf(mapId).slots)
+        if (slot.guildId)
+            slot.rebuild = true;
+}
+
+void GuildHouseMgr::ListSpawns(ChatHandler* handler, uint32 mapId)
+{
+    std::lock_guard<std::mutex> guard(_lock);
+    for (GuildHouseSpawn const& s : _spawns)
+        if (s.map == mapId)
+            handler->SendSysMessage(Acore::StringFormat("{}: Paragon {} {} {} at {:.2f} {:.2f} {:.2f} o {:.2f}",
+                s.id, uint32(s.paragon), s.kind ? "object" : "creature", s.entry, s.x, s.y, s.z, s.o));
+}
+
+bool GuildHouseMgr::MoveSpawn(uint32 id, uint32 mapId, float x, float y, float z, float o)
+{
+    std::lock_guard<std::mutex> guard(_lock);
+    for (GuildHouseSpawn& s : _spawns)
+        if (s.id == id)
+        {
+            if (s.map != mapId)
+                return false;
+            s.x = x; s.y = y; s.z = z; s.o = o;
+            WorldDatabase.Execute("UPDATE `mod_guild_level_house_spawn` SET `x` = {}, `y` = {}, `z` = {}, `o` = {} WHERE `id` = {}",
+                x, y, z, o, id);
+            RebuildHall(mapId);
+            return true;
+        }
+    return false;
+}
+
+uint32 GuildHouseMgr::AddSpawn(uint32 mapId, uint8 paragon, uint8 kind, uint32 entry, float x, float y, float z, float o)
+{
+    std::lock_guard<std::mutex> guard(_lock);
+    // A server's own rows start at 1000: the module's are rewritten on update.
+    uint32 id = 1000;
+    for (GuildHouseSpawn const& s : _spawns)
+        id = std::max(id, s.id + 1);
+    _spawns.push_back({ id, mapId, paragon, kind, entry, x, y, z, o });
+    WorldDatabase.Execute("INSERT INTO `mod_guild_level_house_spawn` (`id`, `map`, `paragon`, `kind`, `entry`, `x`, `y`, `z`, `o`, `comment`) "
+        "VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, 'added in game')", id, mapId, uint32(paragon), uint32(kind), entry, x, y, z, o);
+    RebuildHall(mapId);
+    return id;
+}
+
+bool GuildHouseMgr::DeleteSpawn(uint32 id)
+{
+    std::lock_guard<std::mutex> guard(_lock);
+    for (auto itr = _spawns.begin(); itr != _spawns.end(); ++itr)
+        if (itr->id == id)
+        {
+            uint32 const mapId = itr->map;
+            _spawns.erase(itr);
+            WorldDatabase.Execute("DELETE FROM `mod_guild_level_house_spawn` WHERE `id` = {}", id);
+            RebuildHall(mapId);
+            return true;
+        }
+    return false;
 }
 
 void GuildHouseMgr::OnGuildChanged(uint32 guildId)
