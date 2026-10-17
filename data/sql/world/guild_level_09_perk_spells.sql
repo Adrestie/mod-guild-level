@@ -29,3 +29,9 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (92023, 'spell_guild_level_perk'),
 (92024, 'spell_guild_level_perk'),
 (92025, 'spell_guild_level_perk');
+
+-- THE WAY OUT OF THE HALLS: back where the player came from (at_guild_level_house_exit).
+DELETE FROM `areatrigger_scripts` WHERE `ScriptName` = 'at_guild_level_house_exit';
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(2530, 'at_guild_level_house_exit'),
+(2534, 'at_guild_level_house_exit');

@@ -116,6 +116,7 @@ public:
     void OnPlayerDeleteFromDB(CharacterDatabaseTransaction trans, uint32 guid) override
     {
         sGuildActivePerkMgr->DeleteCharacter(trans, guid);
+        sGuildHouseMgr->DeleteCharacter(trans, guid);
     }
 
     void OnPlayerGiveReputation(Player* player, int32 /*factionID*/, float& amount, ReputationSource /*repSource*/) override
@@ -213,6 +214,23 @@ class spell_guild_level_perk : public SpellScript
     }
 };
 
+// The way out of the halls (areatrigger_scripts, data/sql/world): 2534 in
+// Champions' Hall, 2530 in the Hall of Legends lead to their city; from a
+// guild house, back where the player came from instead.
+class at_guild_level_house_exit : public AreaTriggerScript
+{
+public:
+    at_guild_level_house_exit() : AreaTriggerScript("at_guild_level_house_exit") { }
+
+    bool OnTrigger(Player* player, AreaTrigger const* /*trigger*/) override
+    {
+        if (!GuildHouseMgr::IsHouseMap(player->GetMapId()) || player->IsGameMaster())
+            return false;
+        sGuildHouseMgr->SendBack(player);
+        return true;
+    }
+};
+
 class GuildLevelGuildScript : public GuildScript
 {
 public:
@@ -287,6 +305,7 @@ void AddSC_guild_level_scripts()
     new GuildLevelAllMapScript();
     RegisterSpellScript(spell_guild_level_hearthstone);
     RegisterSpellScript(spell_guild_level_perk);
+    new at_guild_level_house_exit();
     AddSC_guild_level_commands();
     AddSC_guild_perk_commands();
 }

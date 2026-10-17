@@ -48,7 +48,9 @@
 #define MOD_GUILD_HOUSE_H_
 
 #include "Define.h"
+#include "DatabaseEnvFwd.h"
 #include "ObjectGuid.h"
+#include "Position.h"
 #include <array>
 #include <map>
 #include <mutex>
@@ -102,6 +104,11 @@ public:
     bool Enter(ChatHandler* handler, Player* player);
     // Back where the player came from.
     bool Leave(ChatHandler* handler, Player* player);
+    // Back where the player came from before the house: the spot he left, the
+    // front of the entrance when it was a dungeon or a raid, his home if the
+    // way back is unknown.
+    void SendBack(Player* player);
+    void DeleteCharacter(CharacterDatabaseTransaction trans, uint32 guid);
 
     // The hooks, in the hall's map thread.
     void OnPlayerEnterMap(Map* map, Player* player);
@@ -149,6 +156,9 @@ private:
     void Furnish(Map* map, Slot& slot, uint8 index);
     void Empty(Map* map, Slot& slot);
     void RebuildHall(uint32 mapId);             // under _lock
+
+    // Where each character came from (characters table mod_guild_level_house_origin).
+    std::map<ObjectGuid, WorldLocation> _origins;
 
     GuildHouseConfig _config;
     std::vector<GuildHouseSpawn> _spawns;

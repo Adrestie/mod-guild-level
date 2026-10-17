@@ -23,11 +23,13 @@
     "characters": {
       "tables": [
         "mod_guild_level",
-        "mod_guild_level_perk_cooldown"
+        "mod_guild_level_perk_cooldown",
+        "mod_guild_level_house_origin"
       ],
       "kept_on_update": [
         "mod_guild_level",
-        "mod_guild_level_perk_cooldown"
+        "mod_guild_level_perk_cooldown",
+        "mod_guild_level_house_origin"
       ],
       "rows": [
         {
@@ -97,6 +99,10 @@
         {
           "table": "spell_script_names",
           "where": "ScriptName = 'spell_guild_level_perk'"
+        },
+        {
+          "table": "areatrigger_scripts",
+          "where": "ScriptName = 'at_guild_level_house_exit'"
         },
         {
           "table": "updates",

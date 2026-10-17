@@ -25,6 +25,7 @@
 #include "Creature.h"
 #include "DatabaseEnv.h"
 #include "GameObject.h"
+#include "ObjectMgr.h"
 #include "Log.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
@@ -44,14 +45,6 @@ namespace
         handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, id, std::forward<Args>(args)...));
     }
 
-    // Back where the player came from before the house; his home if he has
-    // no way back (a character created or moved by a GM inside).
-    void SendBack(Player* player)
-    {
-        if (!player->TeleportToEntryPoint())
-            player->TeleportTo(player->m_homebindMapId, player->m_homebindX, player->m_homebindY,
-                player->m_homebindZ, player->GetOrientation());
-    }
 }
 
 GuildHouseMgr* GuildHouseMgr::instance()
@@ -158,7 +151,27 @@ bool GuildHouseMgr::Enter(ChatHandler* handler, Player* player)
     // The phase is set on arrival (OnPlayerEnterMap): set now, the player
     // would vanish where he still stands.
     if (!IsHouseMap(player->GetMapId()))
+    {
         player->SetEntryPoint();
+        // The way back: where he stands, or in front of the entrance of the
+        // dungeon or raid he is in (the trigger that leads out of it).
+        WorldLocation origin(player->GetMapId(), player->GetPositionX(), player->GetPositionY(),
+            player->GetPositionZ(), player->GetOrientation());
+        if (player->GetMap()->IsDungeon())
+        {
+            if (AreaTriggerTeleport const* out = sObjectMgr->GetGoBackTrigger(player->GetMapId()))
+                origin.WorldRelocate(out->target_mapId, out->target_X, out->target_Y, out->target_Z, out->target_Orientation);
+            else
+                origin = player->GetEntryPoint();
+        }
+        {
+            std::lock_guard<std::mutex> guard(_lock);
+            _origins[player->GetGUID()] = origin;
+        }
+        CharacterDatabase.Execute("REPLACE INTO `mod_guild_level_house_origin` (`guid`, `map`, `x`, `y`, `z`, `o`) "
+            "VALUES ({}, {}, {}, {}, {}, {})", player->GetGUID().GetCounter(), origin.GetMapId(),
+            origin.GetPositionX(), origin.GetPositionY(), origin.GetPositionZ(), origin.GetOrientation());
+    }
     auto const& p = horde ? _config.horde : _config.alliance;
     return player->TeleportTo(mapId, p[0], p[1], p[2], p[3]);
 }
@@ -432,6 +445,43 @@ void GuildHouseMgr::OnGuildChanged(uint32 guildId)
         for (Slot& slot : hall->slots)
             if (slot.guildId == guildId)
                 slot.rebuild = true;
+}
+
+void GuildHouseMgr::SendBack(Player* player)
+{
+    WorldLocation origin;
+    bool known = false;
+    {
+        std::lock_guard<std::mutex> guard(_lock);
+        auto itr = _origins.find(player->GetGUID());
+        if (itr != _origins.end())
+        {
+            origin = itr->second;
+            known = true;
+        }
+    }
+    if (!known)
+    {
+        // Logged in inside the house: the way back is in the database.
+        if (QueryResult result = CharacterDatabase.Query(
+                "SELECT `map`, `x`, `y`, `z`, `o` FROM `mod_guild_level_house_origin` WHERE `guid` = {}",
+                player->GetGUID().GetCounter()))
+        {
+            Field* f = result->Fetch();
+            origin.WorldRelocate(f[0].Get<uint16>(), f[1].Get<float>(), f[2].Get<float>(), f[3].Get<float>(), f[4].Get<float>());
+            known = true;
+        }
+    }
+    if (known && !IsHouseMap(origin.GetMapId()) && player->TeleportTo(origin))
+        return;
+    if (!player->TeleportToEntryPoint())
+        player->TeleportTo(player->m_homebindMapId, player->m_homebindX, player->m_homebindY,
+            player->m_homebindZ, player->GetOrientation());
+}
+
+void GuildHouseMgr::DeleteCharacter(CharacterDatabaseTransaction trans, uint32 guid)
+{
+    trans->Append("DELETE FROM `mod_guild_level_house_origin` WHERE `guid` = {}", guid);
 }
 
 void GuildHouseMgr::OnMemberLeft(ObjectGuid guid)
