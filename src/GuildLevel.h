@@ -77,7 +77,36 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_PERKS_ON        = 114,
     GUILD_LEVEL_STR_PERKS_OFF       = 115,
     GUILD_LEVEL_STR_PERKS_DISABLED  = 116,  // GuildLevel.Perks.Enable = 0
-    GUILD_LEVEL_STR_PERKS_DURABILITY = 117  // {} items, {} seconds
+    GUILD_LEVEL_STR_PERKS_DURABILITY = 117, // {} items, {} seconds
+
+    // .gperk, the active perks of levels 21 to 25
+    GUILD_LEVEL_STR_ACTIVE_LEVEL    = 120,  // {} level needed
+    GUILD_LEVEL_STR_ACTIVE_COOLDOWN = 121,  // {} minutes, {} seconds left
+    GUILD_LEVEL_STR_ACTIVE_COMBAT   = 122,
+    GUILD_LEVEL_STR_ACTIVE_BG       = 123,
+    GUILD_LEVEL_STR_ACTIVE_SUMMONED = 124,  // {} members
+    GUILD_LEVEL_STR_ACTIVE_REZZED   = 125,  // {} members
+    GUILD_LEVEL_STR_ACTIVE_NO_ONE   = 126,
+    GUILD_LEVEL_STR_ACTIVE_NO_DEAD  = 127,
+    GUILD_LEVEL_STR_ACTIVE_VAULT    = 128,  // {} minutes
+    GUILD_LEVEL_STR_ACTIVE_SUPPLIER = 129,  // {} minutes
+    GUILD_LEVEL_STR_ACTIVE_NO_HOME  = 130,
+    GUILD_LEVEL_STR_ACTIVE_NO_GUILD = 131,
+    GUILD_LEVEL_STR_ACTIVE_NO_GROUP = 132,
+    GUILD_LEVEL_STR_ACTIVE_TITLE    = 133,
+    GUILD_LEVEL_STR_ACTIVE_LINE     = 134,  // {} name, {} subcommand, {} level, {} state
+    GUILD_LEVEL_STR_ACTIVE_READY    = 135,
+    GUILD_LEVEL_STR_ACTIVE_LOCKED   = 136,
+    GUILD_LEVEL_STR_ACTIVE_LEFT     = 137,  // {} minutes, {} seconds
+    GUILD_LEVEL_STR_ACTIVE_NAME     = 138,  // 138 to 142: the names, in GuildActivePerk order
+    GUILD_LEVEL_STR_ACTIVE_FAILED   = 143,
+    GUILD_LEVEL_STR_ACTIVE_RESET    = 144,  // {} character
+
+    // the guild house
+    GUILD_LEVEL_STR_HOUSE_LOCKED    = 145,  // {} Paragon level
+    GUILD_LEVEL_STR_HOUSE_FULL      = 146,
+    GUILD_LEVEL_STR_HOUSE_NOT_IN    = 147,
+    GUILD_LEVEL_STR_HOUSE_NOT_YOURS = 148
 };
 
 struct GuildLevelConfig
@@ -95,7 +124,7 @@ struct GuildLevelConfig
     std::array<uint64, GUILD_LEVEL_MAX> levelXp{};
     std::array<uint64, GUILD_PARAGON_MAX> paragonXp{};
 
-    uint32 saveInterval = 60;               // seconds
+    uint32 saveInterval = 10;               // seconds
 };
 
 struct GuildLevelState

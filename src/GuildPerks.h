@@ -73,7 +73,7 @@ struct GuildPerkConfig
     bool enable = true;
     // Per perk: (guild level, amount) steps, sorted by level.
     std::array<std::vector<std::pair<uint8, float>>, GUILD_PERK_COUNT> steps;
-    float gatheringChance = 20.0f;      // % per gathering
+    float gatheringChance = 10.0f;      // % per gathering
     uint32 durabilityInterval = 60;     // seconds between two mendings
 };
 
@@ -102,6 +102,7 @@ public:
 
     // The hidden aura of a member online, set to his guild's level. World thread.
     void Apply(Player* player);
+    void ApplyAura(Player* player);           // the hidden aura of the passive perks
     void RefreshGuild(uint32 guildId);
     // A member joined or left: refreshed on the next world tick, when his
     // guild id is settled.

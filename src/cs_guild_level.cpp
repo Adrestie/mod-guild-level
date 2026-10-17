@@ -24,6 +24,8 @@
 #include "Chat.h"
 #include "ChatCommand.h"
 #include "Guild.h"
+#include "GuildActivePerks.h"
+#include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
 #include "GuildMgr.h"
@@ -85,8 +87,18 @@ public:
 
     ChatCommandTable GetCommands() const override
     {
+        // The layout of the guild houses, from inside a hall.
+        static ChatCommandTable houseTable =
+        {
+            { "list", HandleHouseListCommand, SEC_GAMEMASTER, Console::No },
+            { "move", HandleHouseMoveCommand, SEC_GAMEMASTER, Console::No },
+            { "add",  HandleHouseAddCommand,  SEC_GAMEMASTER, Console::No },
+            { "del",  HandleHouseDelCommand,  SEC_GAMEMASTER, Console::No },
+        };
+
         static ChatCommandTable guildLevelTable =
         {
+            { "house",      houseTable },
             { "info",       HandleInfoCommand,       SEC_GAMEMASTER, Console::Yes },
             { "setlevel",   HandleSetLevelCommand,   SEC_GAMEMASTER, Console::Yes },
             { "setparagon", HandleSetParagonCommand, SEC_GAMEMASTER, Console::Yes },
@@ -94,6 +106,7 @@ public:
             { "addxp",      HandleAddXPCommand,      SEC_GAMEMASTER, Console::Yes },
             { "perks",      HandlePerksCommand,      SEC_GAMEMASTER, Console::Yes },
         };
+
 
         static ChatCommandTable commandTable =
         {
@@ -167,6 +180,80 @@ public:
         return true;
     }
 
+    // The hall the GM stands in; refused elsewhere.
+    static Player* InHall(ChatHandler* handler)
+    {
+        Player* player = handler->GetPlayer();
+        if (!GuildHouseMgr::IsHouseMap(player->GetMapId()))
+        {
+            handler->SendSysMessage("Stand in Champions' Hall (map 449) or the Hall of Legends (map 450).");
+            return nullptr;
+        }
+        return player;
+    }
+
+    static bool HandleHouseListCommand(ChatHandler* handler)
+    {
+        if (Player* player = InHall(handler))
+            sGuildHouseMgr->ListSpawns(handler, player->GetMapId());
+        return true;
+    }
+
+    // `.guildlevel house move <id>`: the spot moves where the GM stands, facing his way.
+    // Without an id: the targeted creature of the house.
+    static bool HandleHouseMoveCommand(ChatHandler* handler, Optional<uint32> spawnId)
+    {
+        Player* player = InHall(handler);
+        if (!player)
+            return true;
+        uint32 id = spawnId.value_or(0);
+        if (!id)
+        {
+            Unit* target = handler->getSelectedUnit();
+            if (target && target != player)
+                id = sGuildHouseMgr->SpawnOf(target->GetGUID());
+            if (!id)
+            {
+                handler->SendSysMessage("Target a creature of the house, or give a spawn id (.guildlevel house list).");
+                return true;
+            }
+        }
+        if (sGuildHouseMgr->MoveSpawn(id, player->GetMapId(), player->GetPositionX(), player->GetPositionY(),
+                player->GetPositionZ(), player->GetOrientation()))
+            Say(handler, GUILD_LEVEL_STR_CMD_DONE);
+        else
+            handler->SendSysMessage("No spawn with that id in this hall.");
+        return true;
+    }
+
+    // `.guildlevel house add <paragon> <creature|object> <entry>`, where the GM stands.
+    static bool HandleHouseAddCommand(ChatHandler* handler, uint32 paragon, std::string kind, uint32 entry)
+    {
+        Player* player = InHall(handler);
+        if (!player)
+            return true;
+        if (paragon > GUILD_PARAGON_MAX || (kind != "creature" && kind != "object"))
+        {
+            handler->SendSysMessage("Syntax: .guildlevel house add <paragon 0-9> <creature|object> <entry>");
+            return true;
+        }
+        uint32 const id = sGuildHouseMgr->AddSpawn(player->GetMapId(), uint8(paragon), kind == "object" ? 1 : 0, entry,
+            player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+        handler->SendSysMessage(Acore::StringFormat("Spawn {} added.", id));
+        return true;
+    }
+
+    static bool HandleHouseDelCommand(ChatHandler* handler, uint32 id)
+    {
+        if (!InHall(handler))
+            return true;
+        if (sGuildHouseMgr->DeleteSpawn(id))
+            Say(handler, GUILD_LEVEL_STR_CMD_DONE);
+        else
+            handler->SendSysMessage("No spawn with that id.");
+        return true;
+    }
+
     // The perks the guild's members get at its current level.
     static bool HandlePerksCommand(ChatHandler* handler, Optional<Tail> named)
     {
@@ -176,7 +263,15 @@ public:
             Say(handler, GUILD_LEVEL_STR_CMD_NO_GUILD);
             return true;
         }
-        sGuildPerkMgr->Show(handler, sGuildLevelMgr->Get(guild->GetId()).level);
+        uint8 const level = sGuildLevelMgr->Get(guild->GetId()).level;
+        sGuildPerkMgr->Show(handler, level);
+
+        // The cooldowns shown are those of the selected player, else your
+        // own, when that character belongs to the guild.
+        Player* player = handler->GetSession() ? handler->getSelectedPlayerOrSelf() : nullptr;
+        if (player && player->GetGuildId() != guild->GetId())
+            player = nullptr;
+        sGuildActivePerkMgr->List(handler, level, player);
         return true;
     }
 

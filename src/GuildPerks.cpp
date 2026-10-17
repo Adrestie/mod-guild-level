@@ -16,6 +16,7 @@
  */
 
 #include "GuildPerks.h"
+#include "GuildActivePerks.h"
 #include "GuildLevel.h"
 
 #include "Chat.h"
@@ -157,7 +158,7 @@ void GuildPerkMgr::LoadConfig()
     for (uint8 i = 0; i < GUILD_PERK_COUNT; ++i)
         c.steps[i] = ReadSteps(PERK_OPTIONS[i].option,
             sConfigMgr->GetOption<std::string>(PERK_OPTIONS[i].option, PERK_OPTIONS[i].steps));
-    c.gatheringChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.Perk.Gathering.Chance", 20.0f), 0.0f, 100.0f);
+    c.gatheringChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.Perk.Gathering.Chance", 10.0f), 0.0f, 100.0f);
     c.durabilityInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Perk.Durability.Interval", 60), 1);
     _config = c;
 }
@@ -190,6 +191,13 @@ void GuildPerkMgr::Apply(Player* player)
     if (!player || !player->IsInWorld())
         return;
 
+    // The spells of the active perks follow the same changes.
+    sGuildActivePerkMgr->SyncSpells(player);
+    ApplyAura(player);
+}
+
+void GuildPerkMgr::ApplyAura(Player* player)
+{
     int32 const honor = int32(Amount(GUILD_PERK_HONOR, player));
     int32 const mount = int32(Amount(GUILD_PERK_MOUNT_SPEED, player));
     if (honor <= 0 && mount <= 0)

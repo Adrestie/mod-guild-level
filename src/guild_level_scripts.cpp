@@ -19,7 +19,10 @@
  * mod-guild-level — the hooks. Each one hands over to GuildLevelMgr.
  */
 
+#include "Chat.h"
 #include "Guild.h"
+#include "GuildActivePerks.h"
+#include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
 #include "ObjectAccessor.h"
@@ -45,6 +48,8 @@ public:
     {
         sGuildLevelMgr->LoadConfig();
         sGuildPerkMgr->LoadConfig();
+        sGuildActivePerkMgr->LoadConfig();
+        sGuildHouseMgr->LoadConfig();
 
         // New amounts for the members online at once.
         if (reload)
@@ -56,6 +61,7 @@ public:
     void OnStartup() override
     {
         sGuildLevelMgr->LoadFromDB();
+        sGuildHouseMgr->LoadFromDB();
     }
 
     void OnUpdate(uint32 diff) override
@@ -84,7 +90,8 @@ public:
             PLAYERHOOK_ON_BEFORE_LOOT_MONEY,
             PLAYERHOOK_ON_LOOT_ITEM,
             PLAYERHOOK_ON_PLAYER_RESURRECT,
-            PLAYERHOOK_ON_UPDATE
+            PLAYERHOOK_ON_UPDATE,
+            PLAYERHOOK_ON_DELETE_FROM_DB
         }) { }
 
     // Only the creature overload is ours; the faction one stays the base class's.
@@ -103,6 +110,13 @@ public:
     void OnPlayerLogin(Player* player) override
     {
         sGuildPerkMgr->Apply(player);
+        sGuildActivePerkMgr->Load(player);
+    }
+
+    void OnPlayerDeleteFromDB(CharacterDatabaseTransaction trans, uint32 guid) override
+    {
+        sGuildActivePerkMgr->DeleteCharacter(trans, guid);
+        sGuildHouseMgr->DeleteCharacter(trans, guid);
     }
 
     void OnPlayerGiveReputation(Player* player, int32 /*factionID*/, float& amount, ReputationSource /*repSource*/) override
@@ -171,6 +185,52 @@ class spell_guild_level_hearthstone : public SpellScript
     }
 };
 
+// The spells of the active perks (spell_script_names, data/sql/world): each
+// does what its `.gperk` command does; inside the guild house, the house's
+// spell takes the player back out.
+class spell_guild_level_perk : public SpellScript
+{
+    PrepareSpellScript(spell_guild_level_perk);
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        Player* player = GetCaster()->ToPlayer();
+        int const perk = GuildActivePerkMgr::PerkOfSpell(GetSpellInfo()->Id);
+        if (!player || perk < 0)
+            return;
+
+        ChatHandler handler(player->GetSession());
+        if (perk == GUILD_ACTIVE_HOME && GuildHouseMgr::IsHouseMap(player->GetMapId()))
+        {
+            sGuildHouseMgr->Leave(&handler, player);
+            return;
+        }
+        sGuildActivePerkMgr->Use(&handler, GuildActivePerk(perk));
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_guild_level_perk::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+// The way out of the halls (areatrigger_scripts, data/sql/world): 2534 in
+// Champions' Hall, 2530 in the Hall of Legends lead to their city; from a
+// guild house, back where the player came from instead.
+class at_guild_level_house_exit : public AreaTriggerScript
+{
+public:
+    at_guild_level_house_exit() : AreaTriggerScript("at_guild_level_house_exit") { }
+
+    bool OnTrigger(Player* player, AreaTrigger const* /*trigger*/) override
+    {
+        if (!GuildHouseMgr::IsHouseMap(player->GetMapId()) || player->IsGameMaster())
+            return false;
+        sGuildHouseMgr->SendBack(player);
+        return true;
+    }
+};
+
 class GuildLevelGuildScript : public GuildScript
 {
 public:
@@ -192,16 +252,49 @@ public:
     void OnRemoveMember(Guild* /*guild*/, Player* player, bool /*isDisbanding*/, bool /*isKicked*/) override
     {
         if (player)
+        {
             sGuildPerkMgr->QueueRefresh(player->GetGUID());
+            // Out of the house he no longer belongs to.
+            sGuildHouseMgr->OnMemberLeft(player->GetGUID());
+        }
     }
 
     void OnDisband(Guild* guild) override
     {
         sGuildLevelMgr->DeleteGuild(guild->GetId());
+        sGuildHouseMgr->DeleteGuild(guild->GetId());
+    }
+};
+
+// The guild house: halls 449 and 450, one phase per open house.
+class GuildLevelAllMapScript : public AllMapScript
+{
+public:
+    GuildLevelAllMapScript() : AllMapScript("GuildLevelAllMapScript",
+        {
+            ALLMAPHOOK_ON_PLAYER_ENTER_ALL,
+            ALLMAPHOOK_ON_PLAYER_LEAVE_ALL,
+            ALLMAPHOOK_ON_MAP_UPDATE
+        }) { }
+
+    void OnPlayerEnterAll(Map* map, Player* player) override
+    {
+        sGuildHouseMgr->OnPlayerEnterMap(map, player);
+    }
+
+    void OnPlayerLeaveAll(Map* map, Player* player) override
+    {
+        sGuildHouseMgr->OnPlayerLeaveMap(map, player);
+    }
+
+    void OnMapUpdate(Map* map, uint32 diff) override
+    {
+        sGuildHouseMgr->OnMapUpdate(map, diff);
     }
 };
 
 void AddSC_guild_level_commands();
+void AddSC_guild_perk_commands();
 
 void AddSC_guild_level_scripts()
 {
@@ -209,6 +302,10 @@ void AddSC_guild_level_scripts()
     new GuildLevelPlayerScript();
     new GuildLevelGuildScript();
     new GuildLevelUnitScript();
+    new GuildLevelAllMapScript();
     RegisterSpellScript(spell_guild_level_hearthstone);
+    RegisterSpellScript(spell_guild_level_perk);
+    new at_guild_level_house_exit();
     AddSC_guild_level_commands();
+    AddSC_guild_perk_commands();
 }

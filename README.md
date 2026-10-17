@@ -4,16 +4,28 @@ An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm:
 members of a guild who play together earn guild experience, and the guild
 climbs **25 levels**, then **9 Paragon levels**.
 
-> **Status: step 2 of the roadmap.** Guild experience, levels, Paragon levels,
-> announcements, GM commands and the passive perks of levels 1 to 20 work
-> (see [Perks](#perks-of-levels-1-to-20)). The active perks of levels 21 to 25, the guild talents, the guild house and its
-> Customization mode are planned (see [Roadmap](#roadmap)) and not built yet.
+> **Status: step 3 of the roadmap.** Guild experience, levels, Paragon levels,
+> announcements, GM commands, the passive perks of levels 1 to 20 and the
+> active perks of levels 21 to 24 work (see [Perks](#perks-of-levels-1-to-20)
+> and [Active perks](#active-perks-of-levels-21-to-25)). The level 25 perk, the
+> guild talents, the guild house and its Customization mode are planned (see
+> [Roadmap](#roadmap)) and not built yet.
 
 No client patch: core hooks, one characters table, texts in `module_string`,
 and one hidden server-side spell. The module owns the tranches **92-93**
 (92000-93999) of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
-spell 92000 is the perks' aura, the rest is kept for the guild house, the
-active perks and the talents to come.
+spell 92000 is the perks' aura, creature 92001 the guild supplier, displays
+92010-92011 and gameobjects 920000-920001 the Guild Chest; the rest is kept for
+the guild house and the talents to come.
+
+**A client patch for one thing**: the Guild Chest of `.gperk bank` is
+Cataclysm's Mobile Banking chest, converted for 3.3.5a by
+`tools/convert_guild_chest.py` from what wow.export exports of a modern
+client. Its files (`data/art/World/GuildLevel/GuildChest`) and its display rows
+(`data/dbc/guild_level_GameObjectDisplayInfo.dbc`) go into the game client with
+the WoW-mods installer. The model loses what 3.3.5a cannot draw: the guild's
+own colours and emblem on the banner (baked blue for the Alliance, red for the
+Horde) and the reflections of the metal.
 
 ## Guild experience
 
@@ -76,7 +88,7 @@ levels 1 to 9. A Paragon guild has them all.
 | 2, 12 | Durability mended: 1 point every minute on a damaged piece worn | 1 piece, then 2 | player tick |
 | 3, 13 | Honor, from every source | +5%, then +15% | hidden aura (honor gain) |
 | 4, 14 | Hearthstone cooldown | -5 min, then -15 min | spell script on the Hearthstone |
-| 5, 15 | Lucky gathering: 20% chance per node or skinned corpse | +1 item, then +3 | hook on the loot |
+| 5, 15 | Lucky gathering: 10% chance per node or skinned corpse | +1 item, then +3 | hook on the loot |
 | 6, 16 | Vendor prices and repairs | -5%, then -10% | hook on the price discount |
 | 7, 17 | Gold looted, added to the guild bank | 5%, then 10% | hook on the loot money |
 | 8, 18 | Mounted speed, ground and flying | +5%, then +10% | hidden aura (mounted speed) |
@@ -117,6 +129,86 @@ Details:
   A broken piece mended this way gets its stats back. Nothing happens while
   the player is dead.
 
+## Active perks of levels 21 to 25
+
+Members of a guild of the level asked use them with **player commands**, no
+client patch needed (buttons in an interface will come later and call the same
+thing). Each perk has its own **cooldown per character**, kept in
+`mod_guild_level_perk_cooldown` (characters database) across restarts, and
+deleted with the character. A perk that does nothing (no one to summon, no
+one dead, nothing could be placed) starts no cooldown.
+
+| Level | Command | Perk | Cooldown |
+|---|---|---|---|
+| 21 | `.gperk raid` | Every member of the group or raid gets a summon to accept, as from a summoning stone. Out of combat, not in a battleground or an arena; dead members and members in a battleground are left out. | 1 h |
+| 22 | `.gperk rez` | Every dead member of the group on the same map and instance gets a resurrection to accept, where the player stands, with 35% of their health and mana (full for guildmates, thanks to the level 10 perk). Out of combat. | 10 min |
+| 23 | `.gperk bank` | The Guild Chest of Cataclysm's Mobile Banking stands in front of the player for 5 minutes: blue banner for the Alliance (gameobject 920000), red for the Horde (920001). Not in a battleground or an arena. | 1 h |
+| 24 | `.gperk vendor` | The Guild Supplier (creature 92001), a reagent vendor who repairs, waits in front of the player for 5 minutes. Not in a battleground or an arena. | 1 h |
+| 25 | `.gperk home` | Into the guild house, once the guild has one (Paragon 1, see [The guild house](#the-guild-house)). `.gperk leave` goes back. | 1 h |
+
+`.gperk list` shows the active perks of your guild: locked, ready, or the time
+left. A game master resets every cooldown of a character with
+`.gperk reset [$character]` (named, else the selected player, else himself;
+offline characters too). The Guild Supplier sells the reagents of every class at their usual
+prices: Arcane Powder, Runes of Teleportation and of Portals, Light Feather,
+Symbols of Kings and of Divinity, Holy, Sacred and Devout Candles, Ankh,
+Infernal Stone, Demonic Figurine, Corpse Dust, Flash Powder, Maple and
+Ironwood Seeds, Wild Quillvine, Wild Spineleaf and Starleaf Seed.
+
+## The guild house
+
+From **Paragon 1**, a guild has a house: **Champions' Hall** (map 449) for an
+Alliance guild, the **Hall of Legends** (map 450) for a Horde one -- the two PvP
+halls the game left empty in 2.0. Members go in with `.gperk home` (the level
+25 perk, 1 h cooldown) and out with `.gperk leave`, back where they came from.
+
+**Every guild has its own house, by phases.** An instance per guild is not
+possible without changing the core: it refuses a second player into an
+instance someone of another group is in. So the halls stay open maps, and a
+guild whose house is open owns one of the hall's 31 phases: its members, its
+creatures and its objects live in that phase only, and no guild sees another.
+The phase goes back to the pool once the house has been empty for
+`GuildLevel.House.EmptyDelay` seconds; what stands in it is in the database and
+comes back. Up to 31 houses can be open at once per hall, any number of guilds
+in all; a 32nd guild is asked to try again a few minutes later.
+
+**What stands in it** is in the world table `mod_guild_level_house_spawn`, one
+row per creature or object, each unlocked at a Paragon level: placed when the
+house opens, and at once in an open house when the guild reaches that level.
+Rows under id 1000 are the module's; a server adds its own above.
+
+| Paragon | What appears |
+|---|---|
+| 1 | a mailbox by the entrance |
+| 2 | the Guild Supplier (reagents of every class, repairs) |
+| 3 | a banker of the faction's capital (Olivia Burnside / Karus) |
+| 4 | nobody (the Guild Supplier repairs) |
+| 5 | the ten class trainers of the faction's capital (the Death Knight one from Acherus) and a stable master |
+| 6 | the fourteen Grand Master profession trainers of Dalaran, who teach every recipe of Vanilla, Burning Crusade and Wrath, with a forge, an anvil and a cooking fire |
+| 7 | two auctioneers of the faction: its own auction house |
+| 8 | portals to the four capitals of the faction, Shattrath, Dalaran and the Caverns of Time (gameobject 920002 of the module: the game has no such portal) |
+
+**The layout** was proposed from the walkable floor of each hall (the
+server's mmaps). Champions' Hall, a long room: services by the entrance, class
+trainers along the north wall, profession trainers along the south wall,
+auctioneers and portals on the dais at the far end. Hall of Legends, a round
+room: services by the entrance, class trainers around the west of the ring,
+profession trainers around the east, auctioneers facing the entrance, portals
+in a circle at the centre. A GM adjusts it from inside a hall:
+
+| Command | Effect |
+|---|---|
+| `.guildlevel house list` | Every spawn of the hall: id, Paragon level, kind, entry, position. |
+| `.guildlevel house move $id` | Moves the spawn where the GM stands, facing his way. |
+| `.guildlevel house add $paragon creature\|object $entry` | Adds a spawn there (ids from 1000). |
+| `.guildlevel house del $id` | Removes the spawn. |
+
+Every open house of the hall follows at once.
+
+Someone who is not a member (or whose guild has no house) and ends up in a
+hall -- a GM teleport, a login after leaving the guild -- is sent back. Game
+masters keep their own phase there (`.modify phase` shows a house).
+
 ## GM commands
 
 Every command ends with an optional guild: its **name** (spaces allowed, no
@@ -131,7 +223,7 @@ guild named.
 | `.guildlevel setparagon $paragon [$guild]` | Sets level 25 and the Paragon level (0 to 9), empty bar. Not announced. |
 | `.guildlevel setxp $xp [$guild]` | Sets the experience toward the next step, kept below what it costs. |
 | `.guildlevel addxp $xp [$guild]` | Gives experience as if earned: the levels climbed are announced. |
-| `.guildlevel perks [$guild]` | The perks the guild's members get at its current level. |
+| `.guildlevel perks [$guild]` | The perks the guild's members get at its current level, then its active perks: locked, ready, or the cooldown left of the selected player (else your own) when he belongs to the guild. |
 
 All need the game master level (2). The texts are in English, French, German,
 Spanish (both) and Russian, English for the others.
@@ -150,7 +242,7 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Curve.Levels` | 25 amounts | Cost of levels 1 to 25. |
 | `GuildLevel.Curve.Paragon` | 9 amounts | Cost of Paragon 1 to 9. |
 | `GuildLevel.Announce` | 1 | Announce each level to the guild. |
-| `GuildLevel.SaveInterval` | 60 | Seconds between two saves. |
+| `GuildLevel.SaveInterval` | 10 | Seconds between two saves. |
 | `GuildLevel.Perks.Enable` | 1 | 0 = no perk at all. |
 | `GuildLevel.Perk.Experience` | `1:5 11:10` | % experience. |
 | `GuildLevel.Perk.Durability` | `2:1 12:1` | Damaged pieces worn mended by 1 point per period. |
@@ -158,13 +250,23 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Perk.Honor` | `3:5 13:10` | % honor. |
 | `GuildLevel.Perk.Hearthstone` | `4:5 14:10` | Minutes off the Hearthstone cooldown. |
 | `GuildLevel.Perk.Gathering` | `5:1 15:2` | Items more on a lucky gathering. |
-| `GuildLevel.Perk.Gathering.Chance` | 20 | % chance of a lucky gathering. |
+| `GuildLevel.Perk.Gathering.Chance` | 10 | % chance of a lucky gathering. |
 | `GuildLevel.Perk.Vendor` | `6:5 16:5` | % off vendor prices and repairs. |
 | `GuildLevel.Perk.GoldToBank` | `7:5 17:5` | % of looted gold added to the guild bank. |
 | `GuildLevel.Perk.MountSpeed` | `8:5 18:5` | % mounted speed. |
 | `GuildLevel.Perk.Reputation` | `9:5 19:5` | % reputation. |
 | `GuildLevel.Perk.Resurrection` | `10:1` | Above 0: full resurrection by a guildmate. |
 | `GuildLevel.Perk.Consumables` | `20:30` | Minutes added to flasks, elixirs and food buffs. |
+
+| `GuildLevel.House.Enable` | 1 | 0 = no guild house. |
+| `GuildLevel.House.Paragon` | 1 | The Paragon level that opens the house. |
+| `GuildLevel.House.EmptyDelay` | 60 | Seconds an empty house keeps its phase. |
+| `GuildLevel.Active.<Perk>.Level` | 21 to 25 | Guild level of each active perk (Raid, Rez, Bank, Vendor, Home). |
+| `GuildLevel.Active.<Perk>.Cooldown` | 3600 (Rez 600, Home 0) | Seconds; 0 = none. |
+| `GuildLevel.Active.Rez.Percent` | 35 | Health and mana of the resurrection offered. |
+| `GuildLevel.Active.Bank.Duration` | 300 | Seconds the chest stays. |
+| `GuildLevel.Active.Bank.Entry.Alliance` / `.Horde` | 920000 / 920001 | The chest of each faction (any gameobject of the guild bank type; 187294 is the game's Guild Vault). |
+| `GuildLevel.Active.Vendor.Duration` / `.Entry` | 300 / 92001 | Seconds the supplier stays; its creature. |
 
 A perk is a list of `level:amount` steps that add up once reached: `1:5 11:10`
 is +5 from level 1, +15 from level 11. `""` turns a perk off. After
@@ -233,7 +335,7 @@ configuration change.
     without a name: the guild of the selected player. Without a selection, your
     own guild. From the console, `.guildlevel info Test Guild` and
     `.guildlevel info <guild id>` both answer.
-16. **Persistence:** earn some experience, wait one minute
+16. **Persistence:** earn some experience, wait ten seconds
     (`GuildLevel.SaveInterval`), and look at the guild's row in
     `mod_guild_level`. Restart the worldserver: `.guildlevel info` shows the
     same values.
@@ -259,7 +361,7 @@ the comparison. Numbers are for the default configuration.
 
 21. **List:** `.guildlevel perks` at level 0 shows every perk at 0 and "no";
     at level 20: experience +15%, honor +15%, reputation +10%, mounted speed
-    +10%, vendors -10%, gold 10%, Hearthstone -15 min, gathering 20% for 3
+    +10%, vendors -10%, gold 10%, Hearthstone -15 min, gathering 10% for 3
     more, resurrection "yes", consumables +30 min, durability 2 items every
     60 seconds.
 22. **Experience:** a solo kill worth N experience gives N at level 0,
@@ -269,7 +371,7 @@ the comparison. Numbers are for the default configuration.
     more honor than at level 0; 15% more at level 13.
 24. **Hearthstone:** after use, the Hearthstone's cooldown is 30 minutes at
     level 0, 25 at level 4, 15 at level 14.
-25. **Gathering:** at level 5, gather about 20 nodes: about 1 in 5 gives one
+25. **Gathering:** at level 5, gather about 30 nodes: about 1 in 10 gives one
     more ore or herb, with the green "Bountiful gathering" line. At level 15,
     3 more. `GuildLevel.Perk.Gathering.Chance = 100` makes it every time.
 26. **Vendors:** at level 6, an item worth 1 gold at a neutral vendor costs
@@ -299,6 +401,71 @@ the comparison. Numbers are for the default configuration.
     broken piece (0) mended to 1 gets its stats back.
 35. **Switch:** `GuildLevel.Perks.Enable = 0` and `.reload config`: every perk
     stops, and `.guildlevel perks` says so.
+
+### Active perks
+
+A guild at level 20, then 25 (`.guildlevel setlevel`); two or three members
+in a group, characters with a client to accept summons and resurrections.
+
+36. **Locked:** at level 20, `.gperk raid` answers that the guild must be level
+    21; `.gperk list` shows the five perks "locked". `.guildlevel perks` shows
+    the same list under the passive perks.
+37. **Summon:** at level 21, members far away (another zone, another continent)
+    get the summon window when `.gperk raid` is typed; accepting brings them
+    next to the player. The answer counts the summons sent. Typed again: "not
+    ready, 59 min … s left". In combat, or in a battleground: refused, no
+    cooldown. Alone, out of a group: refused.
+38. **Resurrection:** at level 22, a member of the group dies; out of combat,
+    `.gperk rez` offers him a resurrection; accepted, he comes back next to the
+    player, with full health and mana if he is a guildmate (35% otherwise).
+    Cooldown 10 min. With no one dead: refused, no cooldown.
+39. **Chest:** at level 23, `.gperk bank`: the Guild Chest of Cataclysm stands
+    two yards in front of the player, with a blue banner for an Alliance
+    player, red for a Horde one; right-click opens the guild bank. After 5
+    minutes it disappears. Cooldown 1 h. Without the client files of the
+    module, the client draws nothing where the chest stands.
+40. **Supplier:** at level 24, `.gperk vendor`: the Guild Supplier stands in
+    front of the player, sells the 19 reagents and repairs. After 5 minutes he
+    disappears. Cooldown 1 h.
+41. **House:** a guild at level 25, Paragon 0: `.gperk home` answers that the
+    house opens at Paragon 1, no cooldown. At Paragon 1, `.gperk home` takes an
+    Alliance member to Champions' Hall, a Horde member to the Hall of Legends,
+    with a mailbox near the entrance; `.gperk leave` takes him back where he
+    was.
+42. **Cooldowns kept:** use `.gperk bank`, restart the worldserver, `.gperk
+    list`: the time left has gone on counting. The row is in
+    `mod_guild_level_perk_cooldown`.
+43. **Others:** a player out of a guild gets "You are not in a guild".
+44. **Reset:** after using `.gperk bank`, a GM types `.gperk reset <name>`:
+    the answer names the character, `.gperk list` shows the perk ready again,
+    and his rows are gone from `mod_guild_level_perk_cooldown`. A player
+    without GM rights cannot use it.
+
+### Guild house
+
+45. **Own house:** two guilds at Paragon 1, one member of each goes home: each
+    sees his mailbox, neither sees the other. Two members of the same guild,
+    not grouped, both go home: they see each other.
+46. **Strangers:** a player of another guild, or none, teleported into the hall
+    by a GM, is sent back with "This is not your guild's house".
+47. **Leaving the guild:** a member inside is removed from the guild: he is
+    sent out at once.
+48. **Paragon change:** with a member inside, `.guildlevel setparagon 0` then
+    `setparagon 1`: the mailbox goes, then comes back.
+49. **Empty house:** everyone leaves; a minute later the phase is free again
+    (a GM with `.modify phase` sees nothing there). Going back in brings the
+    mailbox back.
+50. **Paragon 2 to 8:** a guild at Paragon 8: going home shows the supplier,
+    banker by the entrance, the class trainers and stable master,
+    the profession trainers with forge, anvil and fire, two auctioneers and
+    seven portals. At Paragon 3, only what Paragon 1 to 3 unlock. Each NPC
+    works: training, bank, auction house of the faction, repairs; each portal
+    goes where it says (the Caverns of Time one to Tanaris).
+51. **Layout:** a GM in the hall: `.guildlevel house list`, then
+    `.guildlevel house move <id>` somewhere else: the NPC moves in every open
+    house of the hall. `add` and `del` likewise.
+52. **Logout inside:** a member logs out in the house and back in: he is in
+    his house again, in its phase.
 
 ## Roadmap
 
@@ -345,7 +512,7 @@ together:
 1. The guild house, a mailbox, and the spell to teleport to the house.
 2. A reagent vendor.
 3. A banker.
-4. A repairer.
+4. (Nothing: the Guild Supplier repairs.)
 5. Class trainers and a stable master.
 6. Profession trainers with every recipe of the Vanilla, Burning Crusade and
    Wrath trainers, a forge, an anvil and the other objects crafting needs.

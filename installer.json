@@ -3,6 +3,7 @@
   "module": "mod-guild-level",
   "title": "Guild Level",
   "fields": {
+    "game": "required",
     "worldserver": "required",
     "sources": "required",
     "mysql": "required"
@@ -10,7 +11,9 @@
   "signature": [
     "src/guild_level_loader.cpp",
     "src/GuildLevel.cpp",
-    "src/GuildPerks.cpp"
+    "src/GuildPerks.cpp",
+    "src/GuildActivePerks.cpp",
+    "src/GuildHouse.cpp"
   ],
   "configuration": {
     "file": "mod-guild-level.conf",
@@ -19,10 +22,14 @@
   "database": {
     "characters": {
       "tables": [
-        "mod_guild_level"
+        "mod_guild_level",
+        "mod_guild_level_perk_cooldown",
+        "mod_guild_level_house_origin"
       ],
       "kept_on_update": [
-        "mod_guild_level"
+        "mod_guild_level",
+        "mod_guild_level_perk_cooldown",
+        "mod_guild_level_house_origin"
       ],
       "rows": [
         {
@@ -54,10 +61,285 @@
           "where": "ScriptName = 'spell_guild_level_hearthstone'"
         },
         {
+          "table": "creature_template",
+          "where": "entry = 92001"
+        },
+        {
+          "table": "creature_template_model",
+          "where": "CreatureID = 92001"
+        },
+        {
+          "table": "creature_template_locale",
+          "where": "entry = 92001"
+        },
+        {
+          "table": "npc_vendor",
+          "where": "entry = 92001"
+        },
+        {
+          "table": "command",
+          "where": "name = 'gperk' OR name LIKE 'gperk %'"
+        },
+        {
+          "table": "gameobjectdisplayinfo_dbc",
+          "where": "ID IN (92010, 92011)"
+        },
+        {
+          "table": "gameobject_template",
+          "where": "entry IN (920000, 920001, 920002)"
+        },
+        {
+          "table": "gameobject_template_locale",
+          "where": "entry IN (920000, 920001, 920002)"
+        },
+        {
+          "table": "spell_dbc",
+          "where": "ID BETWEEN 92021 AND 92025"
+        },
+        {
+          "table": "spell_script_names",
+          "where": "ScriptName = 'spell_guild_level_perk'"
+        },
+        {
+          "table": "areatrigger_scripts",
+          "where": "ScriptName = 'at_guild_level_house_exit'"
+        },
+        {
           "table": "updates",
           "where": "name IN ({sql_files:world})"
         }
+      ],
+      "tables": [
+        "mod_guild_level_house_spawn"
       ]
     }
-  }
+  },
+  "dbc": [
+    {
+      "file": "GameObjectDisplayInfo.dbc",
+      "fields": 19,
+      "text_fields": [
+        1
+      ],
+      "client": "data/dbc/guild_level_GameObjectDisplayInfo.dbc"
+    },
+    {
+      "file": "Spell.dbc",
+      "fields": 234,
+      "text_fields": [
+        [
+          136,
+          151
+        ],
+        [
+          153,
+          168
+        ],
+        [
+          170,
+          185
+        ],
+        [
+          187,
+          202
+        ]
+      ],
+      "client": true,
+      "server": false,
+      "rows": [
+        {
+          "0": 92021,
+          "28": 1,
+          "31": 0,
+          "46": 1,
+          "68": -1,
+          "71": 3,
+          "74": 1,
+          "86": 1,
+          "131": 0,
+          "133": 164,
+          "136": "Guild Rally",
+          "138": "Ralliement de guilde",
+          "139": "Gildensammlung",
+          "142": "Reunión de hermandad",
+          "143": "Reunión de hermandad",
+          "144": "Сбор гильдии",
+          "152": 16712190,
+          "169": 16712190,
+          "170": "Asks every member of your group to come to you.",
+          "172": "Propose à chaque membre de votre groupe de vous rejoindre.",
+          "173": "Bittet jedes Mitglied Eurer Gruppe, zu Euch zu kommen.",
+          "176": "Pide a cada miembro de tu grupo que venga hasta ti.",
+          "177": "Pide a cada miembro de tu grupo que venga hasta ti.",
+          "178": "Предлагает каждому участнику группы переместиться к вам.",
+          "186": 16712190,
+          "203": 16712190,
+          "205": 133,
+          "206": 1500,
+          "216": 1065353216,
+          "217": 1065353216,
+          "218": 1065353216,
+          "225": 1
+        },
+        {
+          "0": 92022,
+          "28": 1,
+          "31": 0,
+          "46": 1,
+          "68": -1,
+          "71": 3,
+          "74": 1,
+          "86": 1,
+          "131": 0,
+          "133": 121,
+          "136": "Mass Resurrection",
+          "138": "Résurrection de masse",
+          "139": "Massenwiederbelebung",
+          "142": "Resurrección en masa",
+          "143": "Resurrección en masa",
+          "144": "Массовое воскрешение",
+          "152": 16712190,
+          "169": 16712190,
+          "170": "Offers a resurrection to the dead of your group nearby.",
+          "172": "Propose une résurrection aux morts de votre groupe qui sont près de vous.",
+          "173": "Bietet den Toten Eurer Gruppe in der Nähe eine Wiederbelebung an.",
+          "176": "Ofrece una resurrección a los muertos de tu grupo cercanos.",
+          "177": "Ofrece una resurrección a los muertos de tu grupo cercanos.",
+          "178": "Предлагает воскрешение погибшим участникам группы поблизости.",
+          "186": 16712190,
+          "203": 16712190,
+          "205": 133,
+          "206": 1500,
+          "216": 1065353216,
+          "217": 1065353216,
+          "218": 1065353216,
+          "225": 1
+        },
+        {
+          "0": 92023,
+          "28": 1,
+          "31": 0,
+          "46": 1,
+          "68": -1,
+          "71": 3,
+          "74": 1,
+          "86": 1,
+          "131": 0,
+          "133": 3708,
+          "136": "Mobile Banking",
+          "138": "Banque mobile",
+          "139": "Mobile Bank",
+          "142": "Banca móvil",
+          "143": "Banca móvil",
+          "144": "Мобильный банк",
+          "152": 16712190,
+          "169": 16712190,
+          "170": "Calls a guild chest to you for a few minutes.",
+          "172": "Fait venir un coffre de guilde près de vous pendant quelques minutes.",
+          "173": "Ruft für einige Minuten eine Gildentruhe zu Euch.",
+          "176": "Hace aparecer un cofre de hermandad a tu lado durante unos minutos.",
+          "177": "Hace aparecer un cofre de hermandad a tu lado durante unos minutos.",
+          "178": "Призывает к вам сундук гильдии на несколько минут.",
+          "186": 16712190,
+          "203": 16712190,
+          "205": 133,
+          "206": 1500,
+          "216": 1065353216,
+          "217": 1065353216,
+          "218": 1065353216,
+          "225": 1
+        },
+        {
+          "0": 92024,
+          "28": 1,
+          "31": 0,
+          "46": 1,
+          "68": -1,
+          "71": 3,
+          "74": 1,
+          "86": 1,
+          "131": 0,
+          "133": 2801,
+          "136": "Guild Supplier",
+          "138": "Fournisseur de guilde",
+          "139": "Gildenversorger",
+          "142": "Proveedor de hermandad",
+          "143": "Proveedor de hermandad",
+          "144": "Поставщик гильдии",
+          "152": 16712190,
+          "169": 16712190,
+          "170": "Calls the Guild Supplier, reagents and repairs, for a few minutes.",
+          "172": "Fait venir le Fournisseur de guilde, composants et réparations, pendant quelques minutes.",
+          "173": "Ruft den Gildenversorger, Reagenzien und Reparaturen, für einige Minuten herbei.",
+          "176": "Hace venir al Proveedor de hermandad, componentes y reparaciones, durante unos minutos.",
+          "177": "Hace venir al Proveedor de hermandad, componentes y reparaciones, durante unos minutos.",
+          "178": "Призывает поставщика гильдии (реагенты и ремонт) на несколько минут.",
+          "186": 16712190,
+          "203": 16712190,
+          "205": 133,
+          "206": 1500,
+          "216": 1065353216,
+          "217": 1065353216,
+          "218": 1065353216,
+          "225": 1
+        },
+        {
+          "0": 92025,
+          "4": 134283264,
+          "5": 1024,
+          "7": 536870912,
+          "28": 7,
+          "31": 31,
+          "46": 1,
+          "68": -1,
+          "71": 3,
+          "74": 1,
+          "86": 1,
+          "131": 220,
+          "133": 2637,
+          "136": "Guild House",
+          "138": "Maison de guilde",
+          "139": "Gildenhaus",
+          "142": "Casa de hermandad",
+          "143": "Casa de hermandad",
+          "144": "Дом гильдии",
+          "152": 16712190,
+          "169": 16712190,
+          "170": "Takes you to your guild's house; inside, takes you back where you came from.",
+          "172": "Vous emmène dans la maison de votre guilde ; à l'intérieur, vous ramène d'où vous veniez.",
+          "173": "Bringt Euch ins Haus Eurer Gilde; darin bringt er Euch dorthin zurück, woher Ihr kamt.",
+          "176": "Te lleva a la casa de tu hermandad; dentro, te devuelve a donde estabas.",
+          "177": "Te lleva a la casa de tu hermandad; dentro, te devuelve a donde estabas.",
+          "178": "Переносит вас в дом гильдии; внутри дома — обратно туда, откуда вы пришли.",
+          "186": 16712190,
+          "203": 16712190,
+          "205": 133,
+          "206": 1500,
+          "216": 1065353216,
+          "217": 1065353216,
+          "218": 1065353216,
+          "225": 1
+        }
+      ]
+    }
+  ],
+  "game_files": {
+    "sources": [
+      "data/art"
+    ],
+    "owned_folders": [
+      "World/GuildLevel"
+    ]
+  },
+  "server_data": {
+    "sources": [
+      "data/server"
+    ]
+  },
+  "exclude_from_sources": [
+    "data/art",
+    "data/dbc",
+    "tools",
+    "data/server"
+  ]
 }
