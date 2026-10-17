@@ -122,7 +122,15 @@ def attach(b, hall, att):
     if att.get('max_h') and z1 - z0 > att['max_h']:
         z1 = z0 + att['max_h']
     rm = b.meshes[room]
-    frame(rm, door_verts, along, u0, u1, z0, z1, hall_out, main_material(rm))
+    plane_w = float(np.mean([v[axis] for v in door_verts]))
+    outer = (min(us) - 0.6, max(us) + 0.6, z0, max(zs) + 0.6)
+    # an arched door: the corridor fits inside what the room's walls leave open
+    ou0, ou1, oz1 = open_rect(rm, axis, plane_w, along, u0, u1, z0, z1)
+    if (ou1 - ou0) < (u1 - u0) - 0.15 or oz1 < z1 - 0.15:
+        print('   %s: doorway %.1f x %.1f, open %.1f x %.1f' % (att['key'], u1 - u0, z1 - z0, ou1 - ou0, oz1 - z0))
+    u0, u1, z1 = max(u0, ou0), min(u1, ou1), min(z1, oz1)
+    # around the corridor's end, a two-sided panel closes whatever the room's doorway leaves open
+    panel(rm, axis, plane_w - out * 0.04, along, outer, (u0, u1, z0, z1), main_material(rm))
     # drop the door from the open portals (it is now the corridor's end)
     b.open_portals = [op for op in b.open_portals
                       if not (op[0] == room and np.allclose(np.mean(op[1], 0), np.mean(door_verts, 0), atol=1e-3))]
@@ -234,6 +242,72 @@ def plank_frame(mesh, axis, face, toward, along, u0, u1, z0, z1, material, width
     add_box(mesh, axis, along, (u0 - width, z0, wa), (u0 + e, z1 + width, wb), material, col)
     add_box(mesh, axis, along, (u1 - e, z0, wa), (u1 + width, z1 + width, wb), material, col)
     add_box(mesh, axis, along, (u0 + e, z1 - e, wa), (u1 - e, z1 + width, wb), material, col)
+
+
+def open_rect(mesh, axis, plane_w, along, u0, u1, z0, z1, depth=0.8, step=0.1):
+    """The largest rectangle, standing on z0 and around the middle, through which a doorway at
+    plane_w (between u0..u1, z0..z1) is not blocked by the mesh within `depth` of its plane:
+    an arched or pointed door gives a narrower or lower rectangle than its portal."""
+    P = np.array(mesh.p)
+    T = np.array([t[:3] for t in mesh.tris])
+    A, B, C = P[T[:, 0]], P[T[:, 1]], P[T[:, 2]]
+    wa = np.minimum(np.minimum(A[:, axis], B[:, axis]), C[:, axis])
+    wb = np.maximum(np.maximum(A[:, axis], B[:, axis]), C[:, axis])
+    ua = np.minimum(np.minimum(A @ along, B @ along), C @ along)
+    ub = np.maximum(np.maximum(A @ along, B @ along), C @ along)
+    za = np.minimum(np.minimum(A[:, 2], B[:, 2]), C[:, 2])
+    zb = np.maximum(np.maximum(A[:, 2], B[:, 2]), C[:, 2])
+    near = (wb > plane_w - depth) & (wa < plane_w + depth) & (ub > u0 - 0.5) & (ua < u1 + 0.5) & \
+        (zb > z0) & (za < z1 + 0.5)
+    A, B, C = A[near], B[near], C[near]
+    d = np.zeros(3); d[axis] = 1.0
+    us = np.arange(u0 + step / 2, u1, step)
+    zs = np.arange(z0 + 0.15, z1, step)
+    blocked = np.zeros((len(zs), len(us)), bool)
+    e1, e2 = B - A, C - A
+    pv = np.cross(np.broadcast_to(d, e2.shape), e2)
+    det = np.einsum('ij,ij->i', e1, pv)
+    ok = np.abs(det) > 1e-9
+    A, e1, e2, pv, det = A[ok], e1[ok], e2[ok], pv[ok], det[ok]
+    for i, z in enumerate(zs):
+        for j, u in enumerate(us):
+            o = _P(axis, u, z, plane_w - depth)
+            tv = o - A
+            uu = np.einsum('ij,ij->i', tv, pv) / det
+            qv = np.cross(tv, e1)
+            vv = (qv @ d) / det
+            tt = np.einsum('ij,ij->i', e2, qv) / det
+            hit = (uu >= 0) & (vv >= 0) & (uu + vv <= 1) & (tt >= 0) & (tt <= 2 * depth)
+            blocked[i, j] = hit.any()
+    mid = len(us) // 2
+    best = None
+    lo, hi = 0, len(us) - 1
+    for i in range(len(zs)):
+        if blocked[i, mid]:
+            break
+        a = mid
+        while a > lo and not blocked[i, a - 1]:
+            a -= 1
+        b = mid
+        while b < hi and not blocked[i, b + 1]:
+            b += 1
+        lo, hi = a, b
+        w = us[hi] - us[lo] + step
+        h = zs[i] + step - z0
+        if w >= 1.5 and (best is None or w * h > best[0]):
+            best = (w * h, us[lo] - step / 2, us[hi] + step / 2, zs[i] + step / 2)
+    if best is None:
+        return u0, u1, z1
+    return best[1], best[2], best[3]
+
+
+def panel(mesh, axis, plane_w, along, outer, inner, material):
+    """A two-sided wall on the plane: the rectangle outer minus the rectangle inner (u0, u1, z0, z1)."""
+    u0, u1, z0, z1 = outer
+    poly = [_P(axis, u0, z0, plane_w), _P(axis, u1, z0, plane_w), _P(axis, u1, z1, plane_w), _P(axis, u0, z1, plane_w)]
+    n = np.zeros(3); n[axis] = 1.0
+    for nrm in (n, -n):
+        frame(mesh, poly, along, *inner, nrm, material)
 
 
 def _P(axis, u, z, w):

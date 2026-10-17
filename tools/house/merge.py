@@ -182,10 +182,19 @@ def build_bsp(P, tris, ids, max_faces=30, depth=0):
 
 def write_mesh(mesh, grp):
     """Puts the mesh back into grp: vertices compacted, triangles sorted into batches, BSP."""
-    used = sorted({i for t in mesh.tris for i in t[:3]})
+    # Vertices in the order of the batches that first use them: the client lights the vertices
+    # below the last transition batch's maxIndex as transition vertices (exterior light blended
+    # in), so those must come first, then the interior ones, then the exterior ones.
+    tris = sorted(mesh.tris, key=lambda t: (t[5], t[4]))
+    used = []
+    seen = set()
+    for t in tris:
+        for i in t[:3]:
+            if i not in seen:
+                seen.add(i)
+                used.append(i)
     remap = {o: k for k, o in enumerate(used)}
     assert len(used) < 65536, len(used)
-    tris = sorted(mesh.tris, key=lambda t: (t[5], t[4]))
     grp.verts = [list(map(float, mesh.p[i])) for i in used]
     grp.normals = [list(map(float, mesh.n[i])) for i in used]
     grp.uvs = [[list(map(float, s[i])) for i in used] for s in mesh.uv]
