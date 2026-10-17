@@ -216,16 +216,23 @@ void GuildHouseMgr::Furnish(Map* map, Slot& slot, uint8 index)
         if (s.map != map->GetId() || s.paragon > paragon || slot.placed.count(s.id))
             continue;
 
+        // On the floor: the row's height comes from the navigation mesh or a
+        // GM's feet, the collision of the hall says where the floor really is.
+        float z = s.z;
+        float const ground = map->GetHeight(PHASEMASK_NORMAL, s.x, s.y, s.z + 2.0f, true, 6.0f);
+        if (ground > INVALID_HEIGHT)
+            z = ground;
+
         if (s.kind == 0)
         {
-            if (TempSummon* creature = map->SummonCreature(s.entry, Position(s.x, s.y, s.z, s.o)))
+            if (TempSummon* creature = map->SummonCreature(s.entry, Position(s.x, s.y, z, s.o)))
             {
                 creature->SetPhaseMask(mask, true);
                 slot.objects.push_back(creature->GetGUID());
                 slot.placed.insert(s.id);
             }
         }
-        else if (GameObject* go = map->SummonGameObject(s.entry, s.x, s.y, s.z, s.o, 0.0f, 0.0f, 0.0f, 0.0f, 0))
+        else if (GameObject* go = map->SummonGameObject(s.entry, s.x, s.y, z, s.o, 0.0f, 0.0f, 0.0f, 0.0f, 0))
         {
             go->SetPhaseMask(mask, true);
             slot.objects.push_back(go->GetGUID());
