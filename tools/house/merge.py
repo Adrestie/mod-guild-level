@@ -435,9 +435,13 @@ class Building(object):
             self.group_refs.append(mine)
         return new_ids
 
-    def finish(self):
-        """Group headers, portal ref ranges, root counts and bbox."""
+    def finish(self, portals=True):
+        """Group headers, portal ref ranges, root counts and bbox. portals=False: none at all,
+        the client then draws every group (no occlusion between rooms)."""
         root = self.root
+        if not portals:
+            root.portals, root.portal_verts = [], []
+            self.group_refs = [[] for _ in self.groups]
         refs = []
         for g, grp in enumerate(self.groups):
             write_mesh(self.meshes[g], grp)

@@ -52,7 +52,7 @@ def solve(rooms, fixed=None, weights=None):
         lo, hi = slot[4]
         ats = [lo + 1.0 * k for k in range(int((hi - lo) / 1.0) + 1)] or [lo]
         for at in ats:
-            for gap in (1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0):
+            for gap in (1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 14.0):
                 r = rect(slot, fp, at, gap)
                 if any(overlap(r, h, 0.3) for h in HALL_RECTS):
                     continue
@@ -96,14 +96,14 @@ if __name__ == '__main__':
     fps = {
         'inn': footprint.footprint(B + 'GoldshireInn/GoldshireInn.wmo', [5, 0, 1, 2, 3, 6, 7, 8, 9, 10], 0),
         'townhall': footprint.footprint(B + 'TownHall/TownHall.wmo', [0], 3),
-        'barracks': footprint.footprint(B + 'Human_Barracks/Human_Barracks.wmo', [1], 28),
+        'barracks': footprint.footprint(B + 'Human_Barracks/Human_Barracks.wmo', [23, 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27], 0),
         'guildhouseA': footprint.footprint(B + 'GuildHouses/GuildHouseA.wmo', [0, 2, 3, 4], 1),
         'guildhouseB0': footprint.footprint(B + 'GuildHouses/GuildHouseB.wmo', [2, 1], 0),
         'guildhouseB1': footprint.footprint(B + 'GuildHouses/GuildHouseB.wmo', [2, 1], 1),
     }
-    for gb in ('guildhouseB0', 'guildhouseB1'):
+    for gb in ('guildhouseB1',):
         rooms = [(k, fps[k]) for k in ('guildhouseA', 'inn', gb, 'townhall', 'barracks')]
-        sol, cost = solve(rooms, fixed={'guildhouseA': 'mezz', 'inn': 'end'})
+        sol, cost = solve(rooms, fixed={'guildhouseA': 'mezz'})
         print('==', gb, 'cost', cost)
         if sol:
             for label, slot, at, gap, r in sol:

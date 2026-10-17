@@ -99,7 +99,7 @@ def attach(b, hall, att):
     ang = math.degrees(math.atan2(-hall_out[1], -hall_out[0]) - math.atan2(src_out[1], src_out[0]))
     R = merge.rot_z(round(ang / 90.0) * 90.0 if abs(ang / 90.0 - round(ang / 90.0)) < 1e-3 else ang)
     dc = np.mean(dverts, 0)
-    dz = min(v[2] for v in dverts)
+    dz = att.get('src_floor', min(v[2] for v in dverts))
     target = np.zeros(3)
     target[axis] = face + out * att['gap']
     target[1 - axis] = att['at']
@@ -113,6 +113,8 @@ def attach(b, hall, att):
     us = [float(v @ along) for v in door_verts]
     zs = [float(v[2]) for v in door_verts]
     u0, u1, z0, z1 = min(us), max(us), min(zs), max(zs)
+    if 'src_floor' in att:
+        z0 = att['floor']
     # the corridor may be smaller than the room's door: a frame closes the rest
     if att.get('max_w') and u1 - u0 > att['max_w']:
         c = (u0 + u1) / 2
@@ -141,6 +143,9 @@ def attach(b, hall, att):
     else:
         removed = cut_wall(hm, axis, face, out, along, hall_out, u0, u1, z0, z1, att.get('cut_in', 0.35))
     corridor(b, att, room, axis, face, out, along, u0, u1, z0, z1)
+    trim = att.get('trim_material', 5)
+    plank_frame(hm, axis, face, -out, along, u0, u1, z0, z1, trim)
+    plank_frame(b.meshes[room], axis, face + out * att['gap'], out, along, u0, u1, z0, z1, trim)
     clear_doodads(b, hall, axis, face, out, along, u0 - 0.7, u1 + 0.7, z0 - 0.5, z1, att.get('clearance', 3.0))
     # the portal between hall and room, on the hall's wall face
     pv = [_P(axis, u0, z0, face), _P(axis, u1, z0, face), _P(axis, u1, z1, face), _P(axis, u0, z1, face)]
@@ -201,6 +206,36 @@ def clear_doodads(b, g, axis, face, out, along, u0, u1, z0, z1, depth):
     grp.doodad_refs = keep
 
 
+def add_box(mesh, axis, along, lo, hi, material, color):
+    """A box given in (u, z, w) wall coordinates: lo and hi corners. Six faces, outward."""
+    (u0, z0, w0), (u1, z1, w1) = lo, hi
+    P = lambda u, z, w: _P(axis, u, z, w)
+    wn = np.zeros(3); wn[axis] = 1.0
+    faces = [
+        ([P(u0, z0, w0), P(u0, z1, w0), P(u0, z1, w1), P(u0, z0, w1)], -along),
+        ([P(u1, z0, w0), P(u1, z1, w0), P(u1, z1, w1), P(u1, z0, w1)], along),
+        ([P(u0, z0, w0), P(u1, z0, w0), P(u1, z0, w1), P(u0, z0, w1)], np.array([0, 0, -1.0])),
+        ([P(u0, z1, w0), P(u1, z1, w0), P(u1, z1, w1), P(u0, z1, w1)], np.array([0, 0, 1.0])),
+        ([P(u0, z0, w0), P(u1, z0, w0), P(u1, z1, w0), P(u0, z1, w0)], -wn),
+        ([P(u0, z0, w1), P(u1, z0, w1), P(u1, z1, w1), P(u0, z1, w1)], wn),
+    ]
+    for pts, nrm in faces:
+        pts = facing(pts, nrm)
+        merge.add_quad(mesh, pts, nrm, [plane_uv(p, nrm, 1.5) for p in pts], FLAG_FACE, material, merge.BT_INT,
+                       color=color)
+
+
+def plank_frame(mesh, axis, face, toward, along, u0, u1, z0, z1, material, width=0.4, thick=0.15, back=0.6):
+    """Planks around a doorway on a wall face: two jambs and a lintel, standing out by `thick`
+    toward `toward` (+1/-1 on the axis) and reaching `back` into the opening to hide the joint."""
+    col = mean_color(mesh)
+    wa, wb = sorted((face - toward * back, face + toward * thick))
+    e = 0.06     # a little into the opening, so no face lies on the corridor's own
+    add_box(mesh, axis, along, (u0 - width, z0, wa), (u0 + e, z1 + width, wb), material, col)
+    add_box(mesh, axis, along, (u1 - e, z0, wa), (u1 + width, z1 + width, wb), material, col)
+    add_box(mesh, axis, along, (u0 + e, z1 - e, wa), (u1 - e, z1 + width, wb), material, col)
+
+
 def _P(axis, u, z, w):
     p = np.zeros(3)
     p[axis] = w
@@ -258,7 +293,7 @@ def corridor(b, att, room, axis, face, out, along, u0, u1, z0, z1):
         merge.add_quad(rm, pts, nrm, uvs, FLAG_FACE, mat, merge.BT_INT, color=col)
 
 
-def build(hall_wmo, keep, attachments, seal_material=None):
+def build(hall_wmo, keep, attachments, seal_material=None, portals=False):
     root_data = game.read(hall_wmo)
     r0 = wmo.Root(root_data)
     gdatas = {g: game.read('%s_%03d.wmo' % (hall_wmo[:-4], g)) for g in range(len(r0.group_infos))}
@@ -267,11 +302,13 @@ def build(hall_wmo, keep, attachments, seal_material=None):
     for att in attachments:
         results.append(attach(b, 0, att))
     # seal what leads nowhere
+    b.seals = []
     for g, verts, plane, side in b.open_portals:
         n = np.array(plane[:3])
         mesh = b.meshes[g]
         mat = seal_material if (g == 0 and seal_material is not None) else main_material(mesh)
         seal(mesh, verts, side * n / np.linalg.norm(n), mat)
+        b.seals.append((g, [np.array(v) for v in verts], side * n / np.linalg.norm(n)))
     b.open_portals = []
-    b.finish()
+    b.finish(portals=portals)
     return b, results
