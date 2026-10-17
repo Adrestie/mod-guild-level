@@ -24,8 +24,10 @@
 #include "Common.h"
 #include "Config.h"
 #include "Creature.h"
+#include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "GameObject.h"
+#include "MapMgr.h"
 #include "ObjectMgr.h"
 #include "Log.h"
 #include "Map.h"
@@ -46,6 +48,25 @@ namespace
         handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, id, std::forward<Args>(args)...));
     }
 
+}
+
+// In front of a dungeon or raid without a way out of its own: where the client
+// brings a ghost back to it (Map.dbc), on the ground.
+static bool EntranceOf(uint32 mapId, WorldLocation& out)
+{
+    MapEntry const* entry = sMapStore.LookupEntry(mapId);
+    int32 entranceMap;
+    float x, y;
+    if (!entry || !entry->GetEntrancePos(entranceMap, x, y))
+        return false;
+    Map* map = sMapMgr->CreateBaseMap(uint32(entranceMap));
+    if (!map)
+        return false;
+    float const z = map->GetHeight(PHASEMASK_NORMAL, x, y, MAX_HEIGHT, true, MAX_HEIGHT);
+    if (z <= INVALID_HEIGHT)
+        return false;
+    out.WorldRelocate(uint32(entranceMap), x, y, z + 0.5f, 0.0f);
+    return true;
 }
 
 GuildHouseMgr* GuildHouseMgr::instance()
@@ -162,7 +183,7 @@ bool GuildHouseMgr::Enter(ChatHandler* handler, Player* player)
         {
             if (AreaTriggerTeleport const* out = sObjectMgr->GetGoBackTrigger(player->GetMapId()))
                 origin.WorldRelocate(out->target_mapId, out->target_X, out->target_Y, out->target_Z, out->target_Orientation);
-            else
+            else if (!EntranceOf(player->GetMapId(), origin))
                 origin = player->GetEntryPoint();
         }
         {
