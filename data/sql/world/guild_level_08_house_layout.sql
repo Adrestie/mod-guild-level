@@ -11,7 +11,7 @@
 --
 --   Paragon 2  the Guild Supplier (reagents, repairs)
 --   Paragon 3  a banker of the faction's capital
---   Paragon 4  a repairer of the faction's capital
+--   Paragon 4  (no one: the Guild Supplier repairs)
 --   Paragon 5  the class trainers (the capital's; Death Knight from Acherus)
 --              and a stable master
 --   Paragon 6  the Grand Master trainers of Dalaran, every profession, with
@@ -46,7 +46,6 @@ DELETE FROM `mod_guild_level_house_spawn` WHERE `id` BETWEEN 3 AND 999;
 INSERT INTO `mod_guild_level_house_spawn` (`id`, `map`, `paragon`, `kind`, `entry`, `x`, `y`, `z`, `o`, `comment`) VALUES
 (3, 449, 2, 0, 92001, 3.50, 3.50, 0.55, 2.521, 'Paragon 2: Guild Supplier'),
 (4, 449, 3, 0, 2455, -6.50, 5.50, -0.05, 0.077, 'Paragon 3: Banker'),
-(5, 449, 4, 0, 1287, 4.50, 6.50, 0.55, 3.252, 'Paragon 4: Repairer'),
 (6, 449, 5, 0, 914, 0.50, 46.50, 1.35, 0.093, 'Paragon 5: Warrior trainer'),
 (7, 449, 5, 0, 928, -4.50, 41.50, 1.55, 0.389, 'Paragon 5: Paladin trainer'),
 (8, 449, 5, 0, 5515, 10.50, 41.50, 1.35, 1.687, 'Paragon 5: Hunter trainer'),
@@ -86,7 +85,6 @@ INSERT INTO `mod_guild_level_house_spawn` (`id`, `map`, `paragon`, `kind`, `entr
 (42, 449, 8, 1, 920002, -12.50, -34.50, 5.65, 5.703, 'Paragon 8: Portal to Caverns of Time'),
 (43, 450, 2, 0, 92001, 236.50, 75.50, 25.45, 0.983, 'Paragon 2: Guild Supplier'),
 (44, 450, 3, 0, 3309, 231.50, 86.50, 25.65, 6.242, 'Paragon 3: Banker'),
-(45, 450, 4, 0, 3314, 239.50, 74.50, 25.45, 1.236, 'Paragon 4: Repairer'),
 (46, 450, 5, 0, 3353, 230.50, 94.50, 26.05, 5.704, 'Paragon 5: Warrior trainer'),
 (47, 450, 5, 0, 23128, 232.50, 96.50, 25.75, 5.521, 'Paragon 5: Paladin trainer'),
 (48, 450, 5, 0, 3406, 233.50, 98.50, 25.75, 5.387, 'Paragon 5: Hunter trainer'),

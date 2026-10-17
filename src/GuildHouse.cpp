@@ -30,6 +30,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "QueryResult.h"
+#include "SmartAI.h"
 #include "StringFormat.h"
 #include "TemporarySummon.h"
 
@@ -227,6 +228,14 @@ void GuildHouseMgr::Furnish(Map* map, Slot& slot, uint8 index)
         {
             if (TempSummon* creature = map->SummonCreature(s.entry, Position(s.x, s.y, z, s.o)))
             {
+                // Standing at its place: no patrol of its own (Katherine Lee
+                // walks the streets of Dalaran from her script).
+                if (SmartAI* ai = dynamic_cast<SmartAI*>(creature->AI()))
+                    ai->StopPath();
+                creature->GetMotionMaster()->Clear();
+                creature->GetMotionMaster()->MoveIdle();
+                creature->SetHomePosition(s.x, s.y, z, s.o);
+                creature->SetFacingTo(s.o);
                 creature->SetPhaseMask(mask, true);
                 slot.objects.push_back(creature->GetGUID());
                 slot.spawnOf[creature->GetGUID()] = s.id;

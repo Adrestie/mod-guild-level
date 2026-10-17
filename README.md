@@ -182,7 +182,7 @@ Rows under id 1000 are the module's; a server adds its own above.
 | 1 | a mailbox by the entrance |
 | 2 | the Guild Supplier (reagents of every class, repairs) |
 | 3 | a banker of the faction's capital (Olivia Burnside / Karus) |
-| 4 | a repairer of the faction's capital |
+| 4 | nobody (the Guild Supplier repairs) |
 | 5 | the ten class trainers of the faction's capital (the Death Knight one from Acherus) and a stable master |
 | 6 | the fourteen Grand Master profession trainers of Dalaran, who teach every recipe of Vanilla, Burning Crusade and Wrath, with a forge, an anvil and a cooking fire |
 | 7 | two auctioneers of the faction: its own auction house |
@@ -456,9 +456,9 @@ in a group, characters with a client to accept summons and resurrections.
     (a GM with `.modify phase` sees nothing there). Going back in brings the
     mailbox back.
 50. **Paragon 2 to 8:** a guild at Paragon 8: going home shows the supplier,
-    banker and repairer by the entrance, the class trainers and stable master,
+    banker by the entrance, the class trainers and stable master,
     the profession trainers with forge, anvil and fire, two auctioneers and
-    seven portals. At Paragon 4, only what Paragon 1 to 4 unlock. Each NPC
+    seven portals. At Paragon 3, only what Paragon 1 to 3 unlock. Each NPC
     works: training, bank, auction house of the faction, repairs; each portal
     goes where it says (the Caverns of Time one to Tanaris).
 51. **Layout:** a GM in the hall: `.guildlevel house list`, then
@@ -512,7 +512,7 @@ together:
 1. The guild house, a mailbox, and the spell to teleport to the house.
 2. A reagent vendor.
 3. A banker.
-4. A repairer.
+4. (Nothing: the Guild Supplier repairs.)
 5. Class trainers and a stable master.
 6. Profession trainers with every recipe of the Vanilla, Burning Crusade and
    Wrath trainers, a forge, an anvil and the other objects crafting needs.
