@@ -51,7 +51,8 @@ namespace
 }
 
 // In front of a dungeon or raid without a way out of its own: where the client
-// brings a ghost back to it (Map.dbc), on the ground.
+// brings a ghost back to it (Map.dbc), on the floor at the height of the
+// trigger that leads in (a citadel has floors above its gate).
 static bool EntranceOf(uint32 mapId, WorldLocation& out)
 {
     MapEntry const* entry = sMapStore.LookupEntry(mapId);
@@ -62,7 +63,12 @@ static bool EntranceOf(uint32 mapId, WorldLocation& out)
     Map* map = sMapMgr->CreateBaseMap(uint32(entranceMap));
     if (!map)
         return false;
-    float const z = map->GetHeight(PHASEMASK_NORMAL, x, y, MAX_HEIGHT, true, MAX_HEIGHT);
+    float z = INVALID_HEIGHT;
+    if (QueryResult result = WorldDatabase.Query("SELECT a.`z` FROM `areatrigger_teleport` t JOIN `areatrigger` a ON a.`entry` = t.`ID` "
+            "WHERE t.`target_map` = {} AND a.`map` = {} LIMIT 1", mapId, entranceMap))
+        z = map->GetHeight(PHASEMASK_NORMAL, x, y, result->Fetch()[0].Get<float>() + 5.0f, true, 30.0f);
+    else
+        z = map->GetHeight(PHASEMASK_NORMAL, x, y, MAX_HEIGHT, true, MAX_HEIGHT);
     if (z <= INVALID_HEIGHT)
         return false;
     out.WorldRelocate(uint32(entranceMap), x, y, z + 0.5f, 0.0f);
