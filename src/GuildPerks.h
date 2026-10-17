@@ -102,6 +102,7 @@ public:
 
     // The hidden aura of a member online, set to his guild's level. World thread.
     void Apply(Player* player);
+    void ApplyAura(Player* player);           // the hidden aura of the passive perks
     void RefreshGuild(uint32 guildId);
     // A member joined or left: refreshed on the next world tick, when his
     // guild id is settled.

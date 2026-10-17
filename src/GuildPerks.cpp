@@ -16,6 +16,7 @@
  */
 
 #include "GuildPerks.h"
+#include "GuildActivePerks.h"
 #include "GuildLevel.h"
 
 #include "Chat.h"
@@ -190,6 +191,13 @@ void GuildPerkMgr::Apply(Player* player)
     if (!player || !player->IsInWorld())
         return;
 
+    // The spells of the active perks follow the same changes.
+    sGuildActivePerkMgr->SyncSpells(player);
+    ApplyAura(player);
+}
+
+void GuildPerkMgr::ApplyAura(Player* player)
+{
     int32 const honor = int32(Amount(GUILD_PERK_HONOR, player));
     int32 const mount = int32(Amount(GUILD_PERK_MOUNT_SPEED, player));
     if (honor <= 0 && mount <= 0)

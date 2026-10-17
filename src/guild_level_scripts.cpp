@@ -19,6 +19,7 @@
  * mod-guild-level — the hooks. Each one hands over to GuildLevelMgr.
  */
 
+#include "Chat.h"
 #include "Guild.h"
 #include "GuildActivePerks.h"
 #include "GuildHouse.h"
@@ -183,6 +184,35 @@ class spell_guild_level_hearthstone : public SpellScript
     }
 };
 
+// The spells of the active perks (spell_script_names, data/sql/world): each
+// does what its `.gperk` command does; inside the guild house, the house's
+// spell takes the player back out.
+class spell_guild_level_perk : public SpellScript
+{
+    PrepareSpellScript(spell_guild_level_perk);
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        Player* player = GetCaster()->ToPlayer();
+        int const perk = GuildActivePerkMgr::PerkOfSpell(GetSpellInfo()->Id);
+        if (!player || perk < 0)
+            return;
+
+        ChatHandler handler(player->GetSession());
+        if (perk == GUILD_ACTIVE_HOME && GuildHouseMgr::IsHouseMap(player->GetMapId()))
+        {
+            sGuildHouseMgr->Leave(&handler, player);
+            return;
+        }
+        sGuildActivePerkMgr->Use(&handler, GuildActivePerk(perk));
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_guild_level_perk::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 class GuildLevelGuildScript : public GuildScript
 {
 public:
@@ -256,6 +286,7 @@ void AddSC_guild_level_scripts()
     new GuildLevelUnitScript();
     new GuildLevelAllMapScript();
     RegisterSpellScript(spell_guild_level_hearthstone);
+    RegisterSpellScript(spell_guild_level_perk);
     AddSC_guild_level_commands();
     AddSC_guild_perk_commands();
 }

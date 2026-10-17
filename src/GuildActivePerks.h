@@ -18,10 +18,11 @@
 /*
  * mod-guild-level — the active perks of levels 21 to 25.
  *
- * A member of a guild of the level asked uses them with a player command,
- * `.gperk raid|rez|bank|vendor|home`: no client patch for now, buttons in an
- * interface will call the same thing later. Each perk has its own cooldown,
- * per character, kept in the characters database across restarts.
+ * Each is a spell of the General tab of the spellbook, which the members of
+ * a guild of the level asked know (and only they): casting it does what the
+ * player command `.gperk raid|rez|bank|vendor|home` does. Each perk has its own
+ * cooldown, per character, kept in the characters database across restarts
+ * and shown on the spell's button.
  */
 
 #ifndef MOD_GUILD_ACTIVE_PERKS_H_
@@ -42,6 +43,10 @@ constexpr uint32 GUILD_SUPPLIER_ENTRY = 92001;
 // Mobile Banking chest, converted for 3.3.5a, Alliance and Horde.
 constexpr uint32 GUILD_CHEST_ALLIANCE_ENTRY = 920000;
 constexpr uint32 GUILD_CHEST_HORDE_ENTRY = 920001;
+
+// The spell of each perk, in GuildActivePerk order: server rows in spell_dbc
+// (data/sql/world), client rows of Spell.dbc in installer.json. Tranche 92.
+constexpr std::array<uint32, 5> GUILD_ACTIVE_SPELLS = { 92021, 92022, 92023, 92024, 92025 };
 
 enum GuildActivePerk : uint8
 {
@@ -97,6 +102,12 @@ public:
     // Seconds before the perk is ready again for this character.
     [[nodiscard]] uint32 Remaining(Player* player, GuildActivePerk perk) const;
 
+    // The spells of the perks the character's guild has, and those only.
+    void SyncSpells(Player* player);
+
+    // The perk a spell casts, -1 for none.
+    [[nodiscard]] static int PerkOfSpell(uint32 spellId);
+
 private:
     GuildActivePerkMgr() = default;
 
@@ -106,6 +117,9 @@ private:
     bool SummonVault(ChatHandler* handler, Player* player);
     bool SummonSupplier(ChatHandler* handler, Player* player);
     bool GoHome(ChatHandler* handler, Player* player);
+
+    // The cooldown on the perk's spell button, as the server holds it.
+    void SendCooldown(Player* player, GuildActivePerk perk, uint32 seconds) const;
 
     GuildActivePerkConfig _config;
 };

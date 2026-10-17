@@ -30,6 +30,7 @@
 #include "Group.h"
 #include "Player.h"
 #include "QueryResult.h"
+#include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -106,6 +107,62 @@ void GuildActivePerkMgr::Load(Player* player)
         } while (result->NextRow());
     }
     player->CustomData.Set(DATA_KEY, data);
+
+    // The cooldowns still running, on the buttons of the spells.
+    for (uint8 i = 0; i < GUILD_ACTIVE_COUNT; ++i)
+        if (uint32 const left = Remaining(player, GuildActivePerk(i)))
+            SendCooldown(player, GuildActivePerk(i), left);
+}
+
+int GuildActivePerkMgr::PerkOfSpell(uint32 spellId)
+{
+    for (uint8 i = 0; i < GUILD_ACTIVE_COUNT; ++i)
+        if (GUILD_ACTIVE_SPELLS[i] == spellId)
+            return i;
+    return -1;
+}
+
+void GuildActivePerkMgr::SyncSpells(Player* player)
+{
+    if (!player || !player->IsInWorld())
+        return;
+
+    uint32 const guildId = player->GetGuildId();
+    uint8 const level = guildId ? sGuildLevelMgr->Get(guildId).level : 0;
+    bool const enabled = sGuildPerkMgr->Config().enable;
+    for (uint8 i = 0; i < GUILD_ACTIVE_COUNT; ++i)
+    {
+        uint32 const spell = GUILD_ACTIVE_SPELLS[i];
+        bool const known = player->HasSpell(spell);
+        bool const wanted = enabled && guildId && level >= _config.level[i];
+        if (wanted && !known)
+        {
+            if (!sSpellMgr->GetSpellInfo(spell))
+            {
+                LOG_ERROR("module", "mod-guild-level: spell {} is missing (data/sql/world/guild_level_09_perk_spells.sql).", spell);
+                continue;
+            }
+            player->learnSpell(spell);
+            if (uint32 const left = Remaining(player, GuildActivePerk(i)))
+                SendCooldown(player, GuildActivePerk(i), left);
+        }
+        else if (!wanted && known)
+            player->removeSpell(spell, SPEC_MASK_ALL, false);
+    }
+}
+
+void GuildActivePerkMgr::SendCooldown(Player* player, GuildActivePerk perk, uint32 seconds) const
+{
+    uint32 const spell = GUILD_ACTIVE_SPELLS[perk];
+    if (!player->HasSpell(spell))
+        return;
+    player->AddSpellCooldown(spell, 0, seconds * IN_MILLISECONDS);
+    WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4 + 4);
+    data << player->GetGUID();
+    data << uint8(0);
+    data << uint32(spell);
+    data << uint32(seconds * IN_MILLISECONDS);
+    player->SendDirectMessage(&data);
 }
 
 void GuildActivePerkMgr::DeleteCharacter(CharacterDatabaseTransaction trans, uint32 guid)
@@ -117,8 +174,13 @@ void GuildActivePerkMgr::ResetCooldowns(ObjectGuid guid)
 {
     CharacterDatabase.Execute("DELETE FROM `mod_guild_level_perk_cooldown` WHERE `guid` = {}", guid.GetCounter());
     if (Player* player = ObjectAccessor::FindConnectedPlayer(guid))
+    {
         if (auto* data = player->CustomData.Get<GuildActivePerkPlayerData>(DATA_KEY))
             data->readyAt.fill(0);
+        for (uint32 spell : GUILD_ACTIVE_SPELLS)
+            if (player->HasSpellCooldown(spell))
+                player->RemoveSpellCooldown(spell, true);
+    }
 }
 
 uint32 GuildActivePerkMgr::Remaining(Player* player, GuildActivePerk perk) const
@@ -177,6 +239,7 @@ void GuildActivePerkMgr::Use(ChatHandler* handler, GuildActivePerk perk)
     CharacterDatabase.Execute(
         "REPLACE INTO `mod_guild_level_perk_cooldown` (`guid`, `perk`, `ready_at`) VALUES ({}, {}, {})",
         player->GetGUID().GetCounter(), uint32(perk), uint32(data->readyAt[perk]));
+    SendCooldown(player, perk, _config.cooldown[perk]);
 }
 
 bool GuildActivePerkMgr::SummonGroup(ChatHandler* handler, Player* player)
