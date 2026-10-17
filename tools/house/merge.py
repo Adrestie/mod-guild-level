@@ -134,45 +134,47 @@ def collidable(flags):
     return bool(flags & 0x08) or (bool(flags & 0x20) and not flags & 0x04)
 
 
-def build_bsp(P, tris, ids, max_faces=24, depth=0):
-    """Nodes and refs of an axis-aligned BSP over the faces ids (list of triangle indices)."""
+def build_bsp(P, tris, ids, max_faces=30, depth=0):
+    """Nodes and refs of an axis-aligned BSP over the faces ids (list of triangle indices).
+    Each split tries the three axes at the faces' median and keeps the one duplicating least."""
     nodes, refs = [], []
+    T = np.asarray(tris)
+    tmin_all = P[T].min(1)
+    tmax_all = P[T].max(1)
+    cent_all = P[T].mean(1)
 
-    def rec(faces, lo, hi, depth):
+    def leaf(me, faces):
+        nodes[me] = [4, -1, -1, len(faces), len(refs), 0.0]
+        refs.extend(faces)
+        return me
+
+    def rec(faces, depth):
         me = len(nodes)
         nodes.append(None)
-        ext = hi - lo
-        if len(faces) <= max_faces or depth > 24:
-            nodes[me] = [4, -1, -1, len(faces), len(refs), 0.0]
-            refs.extend(faces)
-            return me
-        axis = int(np.argmax(ext))
-        cents = np.array([P[tris[f][:3]].mean(0)[axis] for f in faces])
-        split = float(np.median(cents))
-        tmin = np.array([P[tris[f][:3]][:, axis].min() for f in faces])
-        tmax = np.array([P[tris[f][:3]][:, axis].max() for f in faces])
-        neg = [f for f, a in zip(faces, tmin) if a <= split]
-        pos = [f for f, b in zip(faces, tmax) if b >= split]
-        if len(neg) == len(faces) and len(pos) == len(faces) or not neg or not pos or \
-                (len(neg) + len(pos)) > 1.8 * len(faces):
-            # try the middle of the box instead
-            split = float(lo[axis] + ext[axis] / 2)
-            neg = [f for f, a in zip(faces, tmin) if a <= split]
-            pos = [f for f, b in zip(faces, tmax) if b >= split]
-            if not neg or not pos or (len(neg) == len(faces) and len(pos) == len(faces)):
-                nodes[me] = [4, -1, -1, len(faces), len(refs), 0.0]
-                refs.extend(faces)
-                return me
-        hi_n = hi.copy(); hi_n[axis] = split
-        lo_p = lo.copy(); lo_p[axis] = split
-        a = rec(neg, lo, hi_n, depth + 1)
-        b = rec(pos, lo_p, hi, depth + 1)
+        if len(faces) <= max_faces or depth > 30:
+            return leaf(me, faces)
+        f = np.asarray(faces)
+        best = None
+        for axis in range(3):
+            split = float(np.median(cent_all[f, axis]))
+            lo, hi = tmin_all[f, axis], tmax_all[f, axis]
+            neg = f[(lo < split) | ((lo == split) & (hi == split))]
+            pos = f[hi > split]
+            if not len(neg) or not len(pos):
+                continue
+            cost = max(len(neg), len(pos)) + 0.5 * (len(neg) + len(pos) - len(f))
+            if best is None or cost < best[0]:
+                best = (cost, axis, split, neg, pos)
+        if best is None or best[0] >= len(f):
+            return leaf(me, faces)
+        _, axis, split, neg, pos = best
+        a = rec(list(neg), depth + 1)
+        b = rec(list(pos), depth + 1)
         nodes[me] = [axis, a, b, 0, 0, split]
         return me
 
     if ids:
-        Pm = P[np.array([tris[f][:3] for f in ids]).reshape(-1)]
-        rec(list(ids), Pm.min(0), Pm.max(0), 0)
+        rec(list(ids), 0)
     else:
         nodes.append([4, -1, -1, 0, 0, 0.0])
     return nodes, refs
@@ -234,7 +236,7 @@ def write_mesh(mesh, grp):
         grp.tri_flags, grp.tri_mats = flags, mats
     grp.trans_batches, grp.int_batches, grp.ext_batches = counts
     T = np.array(grp.indices).reshape(-1, 3)
-    coll = [k for k in range(len(T)) if collidable(grp.tri_flags[k])]
+    coll = list(range(len(T)))      # as Blizzard does: every face, the client also finds its group with it
     nodes, refs = build_bsp(P, T, coll)
     grp.bsp_nodes = nodes
     grp.bsp_refs = refs

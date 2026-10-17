@@ -293,7 +293,7 @@ def corridor(b, att, room, axis, face, out, along, u0, u1, z0, z1):
         merge.add_quad(rm, pts, nrm, uvs, FLAG_FACE, mat, merge.BT_INT, color=col)
 
 
-def build(hall_wmo, keep, attachments, seal_material=None, portals=False):
+def build(hall_wmo, keep, attachments, seal_material=None, portals=True):
     root_data = game.read(hall_wmo)
     r0 = wmo.Root(root_data)
     gdatas = {g: game.read('%s_%03d.wmo' % (hall_wmo[:-4], g)) for g in range(len(r0.group_infos))}
