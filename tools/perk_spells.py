@@ -42,6 +42,7 @@ SPELLS = [
                    ru='Призывает поставщика гильдии (реагенты и ремонт) на несколько минут.')),
     # the Hearthstone's cast: 10 seconds, its visual, broken by moving or damage
     dict(id=92025, icon=2637, cast=7, visual=220, interrupt=31,
+         attributes={4: 0x8010000, 5: 0x400, 7: 0x20000000},   # the Hearthstone's
          name=dict(en='Guild House', fr='Maison de guilde', de='Gildenhaus', es='Casa de hermandad', ru='Дом гильдии'),
          desc=dict(en="Takes you to your guild's house; inside, takes you back where you came from.",
                    fr="Vous emmène dans la maison de votre guilde ; à l'intérieur, vous ramène d'où vous veniez.",
@@ -58,6 +59,7 @@ def fields(sp):
         131: sp['visual'], 133: sp['icon'], 205: 133, 206: 1500, 225: 1,
         152: MASK, 169: MASK, 186: MASK, 203: MASK,
     }
+    f.update(sp.get('attributes', {}))
     for loc, i in LOC.items():
         lang = 'es' if loc == 'mx' else loc
         f[136 + i] = sp['name'][lang]
@@ -117,6 +119,12 @@ DELETE FROM `spell_dbc` WHERE `ID` IN (%s);
 DELETE FROM `spell_script_names` WHERE `ScriptName` = 'spell_guild_level_perk';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 %s;
+
+-- THE WAY OUT OF THE HALLS: back where the player came from (at_guild_level_house_exit).
+DELETE FROM `areatrigger_scripts` WHERE `ScriptName` = 'at_guild_level_house_exit';
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(2530, 'at_guild_level_house_exit'),
+(2534, 'at_guild_level_house_exit');
 """ % (ids, ids, '\n'.join(sql()), ',\n'.join("(%d, 'spell_guild_level_perk')" % s['id'] for s in SPELLS))
     open(r'E:\WoW-mods\mod-guild-level\data\sql\world\guild_level_09_perk_spells.sql', 'w', encoding='utf-8',
          newline='\n').write(text)
