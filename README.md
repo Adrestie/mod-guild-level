@@ -455,16 +455,16 @@ in a group, characters with a client to accept summons and resurrections.
 49. **Empty house:** everyone leaves; a minute later the phase is free again
     (a GM with `.modify phase` sees nothing there). Going back in brings the
     mailbox back.
-51. **Paragon 2 to 8:** a guild at Paragon 8: going home shows the supplier,
+50. **Paragon 2 to 8:** a guild at Paragon 8: going home shows the supplier,
     banker and repairer by the entrance, the class trainers and stable master,
     the profession trainers with forge, anvil and fire, two auctioneers and
     seven portals. At Paragon 4, only what Paragon 1 to 4 unlock. Each NPC
     works: training, bank, auction house of the faction, repairs; each portal
     goes where it says (the Caverns of Time one to Tanaris).
-52. **Layout:** a GM in the hall: `.guildlevel house list`, then
+51. **Layout:** a GM in the hall: `.guildlevel house list`, then
     `.guildlevel house move <id>` somewhere else: the NPC moves in every open
     house of the hall. `add` and `del` likewise.
-50. **Logout inside:** a member logs out in the house and back in: he is in
+52. **Logout inside:** a member logs out in the house and back in: he is in
     his house again, in its phase.
 
 ## Roadmap
