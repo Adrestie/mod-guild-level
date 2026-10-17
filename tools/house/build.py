@@ -4,6 +4,7 @@ Each attachment: a source WMO, its groups, the source portal used as the door, t
 (axis, face coordinate, outward sign), the door's position along the wall, the floor height there,
 the corridor length."""
 import math
+import struct
 
 import numpy as np
 
@@ -140,10 +141,64 @@ def attach(b, hall, att):
     else:
         removed = cut_wall(hm, axis, face, out, along, hall_out, u0, u1, z0, z1, att.get('cut_in', 0.35))
     corridor(b, att, room, axis, face, out, along, u0, u1, z0, z1)
+    clear_doodads(b, hall, axis, face, out, along, u0 - 0.7, u1 + 0.7, z0 - 0.5, z1, att.get('clearance', 3.0))
     # the portal between hall and room, on the hall's wall face
     pv = [_P(axis, u0, z0, face), _P(axis, u1, z0, face), _P(axis, u1, z1, face), _P(axis, u0, z1, face)]
     b.add_portal(pv, hall, room)
     return ids, removed
+
+
+_m2_boxes = {}
+
+
+def m2_box(name):
+    """Bounding box of an M2 model (its own axes), None if unreadable."""
+    key = name.lower()
+    if key not in _m2_boxes:
+        n = name[:-4] + '.m2' if name.lower().endswith(('.mdx', '.mdl')) else name
+        data = game.read(n)
+        box = None
+        if data:
+            if data[:4] == b'MD21':
+                data = data[8:]
+            if data[:4] == b'MD20':
+                box = struct.unpack_from('<6f', data, 0xA0)
+        _m2_boxes[key] = box
+    return _m2_boxes[key]
+
+
+def quat_rotate(q, v):
+    x, y, z, w = q
+    u = np.array([x, y, z])
+    return 2 * (u @ v) * u + (w * w - u @ u) * v + 2 * w * np.cross(u, v)
+
+
+def clear_doodads(b, g, axis, face, out, along, u0, u1, z0, z1, depth):
+    """Takes out of group g the decorations standing in front of a doorway."""
+    root = b.root
+    grp = b.groups[g]
+    keep = []
+    for d in grp.doodad_refs:
+        dd = root.doodads[d]
+        name = root.modn.get(dd[0] & 0xFFFFFF)
+        box = m2_box(name)
+        pos = np.array(dd[1:4])
+        if box is None:
+            corners = [pos]
+        else:
+            corners = [pos + dd[8] * quat_rotate(dd[4:8], np.array([box[0 + 3 * i], box[1 + 3 * j], box[2 + 3 * k]]))
+                       for i in (0, 1) for j in (0, 1) for k in (0, 1)]
+        C = np.array(corners)
+        us = C @ along
+        ws = (face - C[:, axis]) * out          # distance into the hall from the wall face
+        zs = C[:, 2]
+        hit = us.max() > u0 and us.min() < u1 and ws.max() > -0.5 and ws.min() < depth and \
+            zs.max() > z0 and zs.min() < z1
+        if hit:
+            print('   decoration removed in front of the door:', name)
+        else:
+            keep.append(d)
+    grp.doodad_refs = keep
 
 
 def _P(axis, u, z, w):

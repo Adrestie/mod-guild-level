@@ -7,12 +7,12 @@ import footprint
 HALL_RECTS = [(-10.6, 11.6, -39.1, -1.3), (-2.7, 3.5, -2.3, 2.0)]   # interior + walls, vestibule
 # slot: name, axis of the wall normal, wall face, outward sign, along range, floor z
 SLOTS = [
-    ('end', 1, -38.1, -1, (0.45, 0.45), 1.06),
+    ('end', 1, -38.1, -1, (-6.0, 7.0), 1.06),
+    ('mezz', 1, 8.72, 1, (-6.0, 7.0), 5.49),
     ('w_back', 0, -9.6, -1, (-36.0, -19.0), 1.06),
     ('w_front', 0, -9.6, -1, (-14.5, -4.5), -0.26),
     ('e_back', 0, 10.6, 1, (-36.0, -19.0), 1.06),
     ('e_front', 0, 10.6, 1, (-8.5, -4.5), -0.26),
-    ('vestibule', 1, 1.99, 1, (0.42, 0.42), -0.26),
     ('f_west', 1, -2.3, 1, (-8.0, -4.0), -0.26),
     ('f_east', 1, -2.3, 1, (5.0, 9.0), -0.26),
 ]
@@ -92,19 +92,19 @@ def solve(rooms, fixed=None, weights=None):
 
 
 if __name__ == '__main__':
-    B = 'World\\wmo\\Azeroth\\Buildings\\'
+    B = 'World/wmo/Azeroth/Buildings/'
     fps = {
-        'cathedral': footprint.footprint('World\\wmo\\Northrend\\Dragonblight\\NewHearthglen\\NH_Cathedral.wmo', [0], 2),
-        'townhall': footprint.footprint(B + 'TownHall\\TownHall.wmo', [0], 3),
-        'barracks28': footprint.footprint(B + 'Human_Barracks\\Human_Barracks.wmo', [1], 28),
-        'chapel': footprint.footprint(B + 'Chapel\\RedridgeChapel.wmo', [0], 0),
-        'guildhouse': footprint.footprint(B + 'GuildHouses\\GuildHouseA.wmo', [0, 2, 3, 4], 0),
+        'inn': footprint.footprint(B + 'GoldshireInn/GoldshireInn.wmo', [5, 0, 1, 2, 3, 6, 7, 8, 9, 10], 0),
+        'townhall': footprint.footprint(B + 'TownHall/TownHall.wmo', [0], 3),
+        'barracks': footprint.footprint(B + 'Human_Barracks/Human_Barracks.wmo', [1], 28),
+        'guildhouseA': footprint.footprint(B + 'GuildHouses/GuildHouseA.wmo', [0, 2, 3, 4], 1),
+        'guildhouseB0': footprint.footprint(B + 'GuildHouses/GuildHouseB.wmo', [2, 1], 0),
+        'guildhouseB1': footprint.footprint(B + 'GuildHouses/GuildHouseB.wmo', [2, 1], 1),
     }
-    fps['barracks27'] = footprint.footprint(B + 'Human_Barracks\\Human_Barracks.wmo', [1], 27)
-    for bar in ('barracks28', 'barracks27'):
-        rooms = [(k, fps[k]) for k in ('cathedral', 'guildhouse', 'townhall', bar, 'chapel')]
-        sol, cost = solve(rooms, fixed={'cathedral': 'end'})
-        print('==', bar, 'cost', cost)
+    for gb in ('guildhouseB0', 'guildhouseB1'):
+        rooms = [(k, fps[k]) for k in ('guildhouseA', 'inn', gb, 'townhall', 'barracks')]
+        sol, cost = solve(rooms, fixed={'guildhouseA': 'mezz', 'inn': 'end'})
+        print('==', gb, 'cost', cost)
         if sol:
             for label, slot, at, gap, r in sol:
-                print('  %-11s %-10s at %6.1f gap %4.1f  x %6.1f..%6.1f  y %6.1f..%6.1f' % (label, slot[0], at, gap, *r))
+                print('  %-12s %-8s at %6.1f gap %4.1f  x %6.1f..%6.1f  y %6.1f..%6.1f' % (label, slot[0], at, gap, *r))

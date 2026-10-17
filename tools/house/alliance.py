@@ -8,18 +8,19 @@ HALL = 'World/wmo/Azeroth/Buildings/Stormwind/AZ_PvPbarracks.wmo'
 OUT = 'World\\wmo\\GuildHouse\\GuildHall_Alliance.wmo'
 B = 'World/wmo/Azeroth/Buildings/'
 ATT = [
-    # the great hall, straight through the back wall
-    dict(key='cathedral', wmo='World/wmo/Northrend/Dragonblight/NewHearthglen/NH_Cathedral.wmo', groups=[0], door=2,
-         wall=(1, -38.1, -1), at=0.45, floor=1.06, gap=2.0, max_h=5.2),
-    # through the entrance
-    dict(key='guildhouse', wmo=B + 'GuildHouses/GuildHouseA.wmo', groups=[2, 3, 4, 0], door=0, door_group=2,
-         wall=(1, 1.99, 1), at=0.42, floor=-0.26, gap=2.0, through=True),
+    # the inn, whole, through its front door in the back wall
+    dict(key='inn', wmo=B + 'GoldshireInn/GoldshireInn.wmo', groups=[5, 0, 1, 2, 3, 6, 7, 8, 9, 10], door=0, door_group=0,
+         wall=(1, -38.1, -1), at=7.0, floor=1.06, gap=1.5),
+    # Blizzard's unused guild house, entered by its upper door from the hall's mezzanine
+    dict(key='guildhouseA', wmo=B + 'GuildHouses/GuildHouseA.wmo', groups=[0, 2, 3, 4], door=1, door_group=0,
+         wall=(1, 8.72, 1), at=-1.0, floor=5.49, gap=5.0),
+    # the other one, entered by its upper door
+    dict(key='guildhouseB', wmo=B + 'GuildHouses/GuildHouseB.wmo', groups=[2, 1], door=1, door_group=2,
+         wall=(0, 10.6, 1), at=-30.0, floor=1.06, gap=1.5),
     dict(key='townhall', wmo=B + 'TownHall/TownHall.wmo', groups=[0], door=3, sets=('Set_$DefaultGlobal', 'Set_A'),
-         wall=(0, -9.6, -1), at=-6.5, floor=-0.26, gap=1.5),
+         wall=(0, -9.6, -1), at=-12.0, floor=-0.26, gap=1.5),
     dict(key='barracks', wmo=B + 'Human_Barracks/Human_Barracks.wmo', groups=[1], door=28,
-         sets=('Set_$DefaultGlobal', 'set_Barracks01'), wall=(0, 10.6, 1), at=-33.0, floor=1.06, gap=1.5, max_h=4.4),
-    dict(key='chapel', wmo=B + 'Chapel/RedridgeChapel.wmo', groups=[0], door=0, sets=('set_Chapel',),
-         wall=(0, -9.6, -1), at=-30.0, floor=1.06, gap=1.5),
+         sets=('Set_$DefaultGlobal', 'set_Barracks01'), wall=(0, -9.6, -1), at=-35.0, floor=1.06, gap=3.0, max_h=4.4),
 ]
 
 

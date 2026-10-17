@@ -395,7 +395,7 @@ class Building(object):
             grp.liquid = None
             grp.sub = [s for s in grp.sub if s[0] != 'MLIQ']
             grp.flags &= ~0x1000
-            grp.liquid_type = 0
+            grp.liquid_type = 15        # "no liquid": 0 fills the group with water
             grp.fog_ids = [0, 0, 0, 0]
             if unique_id is not None:
                 grp.unique_id = unique_id
