@@ -12,10 +12,10 @@ SLOTS = [
     ('e_back', 0, 10.6, 1, (-35.0, -20.0), 1.06),
 
 ]
-BAR = [23, 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27]
+BAR = [1, 0, 2, 5, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 26, 27]
 t = time.time()
 rooms = [
-    ('barracks', layout3d.occupancy(B + 'Human_Barracks/Human_Barracks.wmo', BAR, 0)),
+    ('barracks', layout3d.occupancy(B + 'Human_Barracks/Human_Barracks.wmo', BAR, 28)),
     ('inn', layout3d.occupancy(B + 'GoldshireInn/GoldshireInn.wmo', [5, 0, 1, 2, 3, 6, 7, 8, 9, 10], 0)),
     ('guildhouseB', layout3d.occupancy(B + 'GuildHouses/GuildHouseB.wmo', [2, 1], 1)),
     ('guildhouseA', layout3d.occupancy(B + 'GuildHouses/GuildHouseA.wmo', [0, 2, 3, 4], 1)),
