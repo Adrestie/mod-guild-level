@@ -105,6 +105,11 @@ public:
     // The spells of the perks the character's guild has, and those only.
     void SyncSpells(Player* player);
 
+    // The cooldown of a perk on its button: shown as it runs, or hidden while
+    // the perk stays usable (inside the guild house, its spell leads out).
+    void ShowCooldown(Player* player, GuildActivePerk perk) const;
+    void HideCooldown(Player* player, GuildActivePerk perk) const;
+
     // The perk a spell casts, -1 for none.
     [[nodiscard]] static int PerkOfSpell(uint32 spellId);
 

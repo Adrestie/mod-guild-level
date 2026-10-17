@@ -114,6 +114,19 @@ void GuildActivePerkMgr::Load(Player* player)
             SendCooldown(player, GuildActivePerk(i), left);
 }
 
+void GuildActivePerkMgr::ShowCooldown(Player* player, GuildActivePerk perk) const
+{
+    if (uint32 const left = Remaining(player, perk))
+        SendCooldown(player, perk, left);
+}
+
+void GuildActivePerkMgr::HideCooldown(Player* player, GuildActivePerk perk) const
+{
+    uint32 const spell = GUILD_ACTIVE_SPELLS[perk];
+    if (player->HasSpellCooldown(spell))
+        player->RemoveSpellCooldown(spell, true);
+}
+
 int GuildActivePerkMgr::PerkOfSpell(uint32 spellId)
 {
     for (uint8 i = 0; i < GUILD_ACTIVE_COUNT; ++i)

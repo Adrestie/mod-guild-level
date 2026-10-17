@@ -16,6 +16,7 @@
  */
 
 #include "GuildHouse.h"
+#include "GuildActivePerks.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
 
@@ -192,6 +193,10 @@ void GuildHouseMgr::OnPlayerEnterMap(Map* map, Player* player)
     if (!IsHouseMap(map->GetId()))
         return;
 
+    // Inside, the house's spell takes him back out, whatever its cooldown,
+    // which counts for going in only: shown again on the way out.
+    sGuildActivePerkMgr->HideCooldown(player, GUILD_ACTIVE_HOME);
+
     // A game master keeps his phase: `.modify phase` shows him any house.
     if (player->IsGameMaster())
         return;
@@ -216,8 +221,11 @@ void GuildHouseMgr::OnPlayerEnterMap(Map* map, Player* player)
 
 void GuildHouseMgr::OnPlayerLeaveMap(Map* map, Player* player)
 {
+    if (!IsHouseMap(map->GetId()))
+        return;
+    sGuildActivePerkMgr->ShowCooldown(player, GUILD_ACTIVE_HOME);
     // Nothing of a house's phase follows the player out.
-    if (IsHouseMap(map->GetId()) && !player->IsGameMaster() && player->GetPhaseMask() != PHASEMASK_NORMAL)
+    if (!player->IsGameMaster() && player->GetPhaseMask() != PHASEMASK_NORMAL)
         player->SetPhaseMask(PHASEMASK_NORMAL, false);
 }
 
