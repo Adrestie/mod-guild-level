@@ -17,15 +17,41 @@ def world_box(g):
     return -x1, -y1, z0, -x0, -y0, z1
 
 
-def room_cells(groups, level=None):
-    cells = {}
+def room_cells(groups, door=None, inward=None, level=None):
+    """Walkable cells of a room. Rooms' boxes may overlap in plan: with a door (world x, y) and the
+    way in (unit vector), only the cells reachable from just inside that door are kept."""
+    nodes = set()
     for x, y, z in REACH:
         cx, cy = x + 0.5, y + 0.5
         for g in groups:
             a = world_box(g)
             if a[0] <= cx <= a[3] and a[1] <= cy <= a[4] and a[2] - 0.5 <= z <= a[5]:
-                cells.setdefault((int(x), int(y)), []).append(z)
+                nodes.add((int(x), int(y), z))
                 break
+    if door is not None:
+        sx, sy = door[0] + inward[0] * 2.5, door[1] + inward[1] * 2.5
+        start = min(nodes, key=lambda n: (n[0] + 0.5 - sx) ** 2 + (n[1] + 0.5 - sy) ** 2)
+        by = {}
+        for n in nodes:
+            by.setdefault(n[:2], []).append(n[2])
+        seen = {start}
+        todo = [start]
+        while todo:
+            x, y, z = todo.pop()
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for nz in by.get((x + dx, y + dy), []):
+                        n = (x + dx, y + dy, nz)
+                        if n not in seen and abs(nz - z) <= 1.0:
+                            seen.add(n)
+                            todo.append(n)
+        nodes = seen
+    cells = {}
+    for x, y, z in nodes:
+        # nothing in the corridor, or on the hall's side of the door
+        if door is not None and (x + 0.5 - door[0]) * inward[0] + (y + 0.5 - door[1]) * inward[1] < 1.0:
+            continue
+        cells.setdefault((x, y), []).append(z)
     levels = {}
     for k, zs in cells.items():
         for z in zs:
