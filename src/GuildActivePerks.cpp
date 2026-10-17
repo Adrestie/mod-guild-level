@@ -205,7 +205,8 @@ void GuildActivePerkMgr::ResetCooldowns(ObjectGuid guid)
 uint32 GuildActivePerkMgr::Remaining(Player* player, GuildActivePerk perk) const
 {
     auto const* data = player ? player->CustomData.Get<GuildActivePerkPlayerData>(DATA_KEY) : nullptr;
-    if (!data)
+    // A perk without cooldown (the guild house by default) is always ready.
+    if (!data || !_config.cooldown[perk])
         return 0;
     int64 const left = data->readyAt[perk] - Now();
     return left > 0 ? uint32(left) : 0;

@@ -61,7 +61,7 @@ enum GuildActivePerk : uint8
 struct GuildActivePerkConfig
 {
     std::array<uint8, GUILD_ACTIVE_COUNT> level = { 21, 22, 23, 24, 25 };
-    std::array<uint32, GUILD_ACTIVE_COUNT> cooldown = { 3600, 600, 3600, 3600, 3600 };   // seconds
+    std::array<uint32, GUILD_ACTIVE_COUNT> cooldown = { 3600, 600, 3600, 3600, 0 };   // seconds
     uint32 rezPercent = 35;             // health and mana of the resurrection offered
     uint32 bankEntryAlliance = GUILD_CHEST_ALLIANCE_ENTRY;
     uint32 bankEntryHorde = GUILD_CHEST_HORDE_ENTRY;

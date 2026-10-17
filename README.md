@@ -262,7 +262,7 @@ their step costs climb at once, without announcement.
 | `GuildLevel.House.Paragon` | 1 | The Paragon level that opens the house. |
 | `GuildLevel.House.EmptyDelay` | 60 | Seconds an empty house keeps its phase. |
 | `GuildLevel.Active.<Perk>.Level` | 21 to 25 | Guild level of each active perk (Raid, Rez, Bank, Vendor, Home). |
-| `GuildLevel.Active.<Perk>.Cooldown` | 3600 (Rez 600) | Seconds; 0 = none. |
+| `GuildLevel.Active.<Perk>.Cooldown` | 3600 (Rez 600, Home 0) | Seconds; 0 = none. |
 | `GuildLevel.Active.Rez.Percent` | 35 | Health and mana of the resurrection offered. |
 | `GuildLevel.Active.Bank.Duration` | 300 | Seconds the chest stays. |
 | `GuildLevel.Active.Bank.Entry.Alliance` / `.Horde` | 920000 / 920001 | The chest of each faction (any gameobject of the guild bank type; 187294 is the game's Guild Vault). |

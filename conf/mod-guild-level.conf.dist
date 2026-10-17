@@ -184,7 +184,7 @@ GuildLevel.Active.Vendor.Cooldown   = 3600
 GuildLevel.Active.Vendor.Duration   = 300
 GuildLevel.Active.Vendor.Entry      = 92001
 GuildLevel.Active.Home.Level        = 25
-GuildLevel.Active.Home.Cooldown     = 3600
+GuildLevel.Active.Home.Cooldown     = 0
 
 ###############################################################################
 #
