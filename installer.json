@@ -118,9 +118,15 @@
       "World/GuildLevel"
     ]
   },
+  "server_data": {
+    "sources": [
+      "data/server"
+    ]
+  },
   "exclude_from_sources": [
     "data/art",
     "data/dbc",
-    "tools"
+    "tools",
+    "data/server"
   ]
 }
