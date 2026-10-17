@@ -8,6 +8,7 @@ import pickle
 import numpy as np
 from PIL import Image, ImageDraw
 
+STEP = 1.0
 BOXES = pickle.load(open('alliance_bboxes.pkl', 'rb'))      # wmo coords
 REACH = [tuple(map(float, s.split(','))) for s in json.load(open('../newnav/room_449.json'))]
 
@@ -17,7 +18,7 @@ def world_box(g):
     return -x1, -y1, z0, -x0, -y0, z1
 
 
-def room_cells(groups, door=None, inward=None, level=None):
+def room_cells(groups, door=None, inward=None, level=None, door_z=None):
     """Walkable cells of a room. Rooms' boxes may overlap in plan: with a door (world x, y) and the
     way in (unit vector), only the cells reachable from just inside that door are kept."""
     nodes = set()
@@ -30,7 +31,8 @@ def room_cells(groups, door=None, inward=None, level=None):
                 break
     if door is not None:
         sx, sy = door[0] + inward[0] * 2.5, door[1] + inward[1] * 2.5
-        start = min(nodes, key=lambda n: (n[0] + 0.5 - sx) ** 2 + (n[1] + 0.5 - sy) ** 2)
+        start = min(nodes, key=lambda n: (n[0] + 0.5 - sx) ** 2 + (n[1] + 0.5 - sy) ** 2 +
+                    ((n[2] - door_z) ** 2 if door_z is not None else 0))
         by = {}
         for n in nodes:
             by.setdefault(n[:2], []).append(n[2])
@@ -42,7 +44,7 @@ def room_cells(groups, door=None, inward=None, level=None):
                 for dy in (-1, 0, 1):
                     for nz in by.get((x + dx, y + dy), []):
                         n = (x + dx, y + dy, nz)
-                        if n not in seen and abs(nz - z) <= 1.0:
+                        if n not in seen and abs(nz - z) <= STEP:
                             seen.add(n)
                             todo.append(n)
         nodes = seen
