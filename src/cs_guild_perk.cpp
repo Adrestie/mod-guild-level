@@ -24,6 +24,7 @@
 #include "Chat.h"
 #include "ChatCommand.h"
 #include "GuildActivePerks.h"
+#include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -45,6 +46,7 @@ public:
             { "bank",   HandleBankCommand,   SEC_PLAYER, Console::No },
             { "vendor", HandleVendorCommand, SEC_PLAYER, Console::No },
             { "home",   HandleHomeCommand,   SEC_PLAYER, Console::No },
+            { "leave",  HandleLeaveCommand,  SEC_PLAYER, Console::No },
             { "reset",  HandleResetCommand,  SEC_GAMEMASTER, Console::Yes },
         };
 
@@ -104,6 +106,13 @@ public:
 
         sGuildActivePerkMgr->ResetCooldowns(target->GetGUID());
         handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_ACTIVE_RESET, target->GetName()));
+        return true;
+    }
+
+    // Out of the guild house, back where the player came from. No cooldown.
+    static bool HandleLeaveCommand(ChatHandler* handler)
+    {
+        sGuildHouseMgr->Leave(handler, handler->GetPlayer());
         return true;
     }
 

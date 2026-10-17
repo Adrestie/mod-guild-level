@@ -165,8 +165,8 @@ GuildLevel.Perk.Consumables       = "20:30"
 #            guild bank type does: 187294 is the game's own Guild Vault.
 #    Vendor  a reagent vendor and repairer in front of the player for
 #            .Duration seconds (.Entry: creature 92001 of the module).
-#    Home    to the guild house: it comes with the guild house. For now the
-#            command says so and starts no cooldown.
+#    Home    into the guild house, once the guild has one (Paragon 1, see
+#            THE GUILD HOUSE below); without it, no cooldown starts.
 #
 
 GuildLevel.Active.Raid.Level        = 21
@@ -185,3 +185,26 @@ GuildLevel.Active.Vendor.Duration   = 300
 GuildLevel.Active.Vendor.Entry      = 92001
 GuildLevel.Active.Home.Level        = 25
 GuildLevel.Active.Home.Cooldown     = 3600
+
+###############################################################################
+#
+#    THE GUILD HOUSE (PARAGON 1 AND UP)
+#
+#    Champions' Hall (map 449) for the Alliance, the Hall of Legends (map 450)
+#    for the Horde: every guild has its own house, in one of the hall's 31
+#    phases while it is open (the core cannot give a guild its own instance:
+#    it refuses a second player who is not in the first one's group). Up to
+#    31 houses open at once per hall; any number of guilds in all.
+#    `.gperk home` goes in (guild level 25), `.gperk leave` goes back.
+#    What stands in a house is in the world table mod_guild_level_house_spawn,
+#    Paragon level by Paragon level.
+#
+#    GuildLevel.House.Enable       0 = no guild house.
+#    GuildLevel.House.Paragon      the Paragon level that opens the house.
+#    GuildLevel.House.EmptyDelay   seconds an empty house keeps its phase
+#                                  before it goes back to the pool.
+#
+
+GuildLevel.House.Enable           = 1
+GuildLevel.House.Paragon          = 1
+GuildLevel.House.EmptyDelay       = 60

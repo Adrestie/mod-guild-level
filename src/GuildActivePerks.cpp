@@ -16,6 +16,7 @@
  */
 
 #include "GuildActivePerks.h"
+#include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
 
@@ -317,12 +318,11 @@ bool GuildActivePerkMgr::SummonSupplier(ChatHandler* handler, Player* player)
     return true;
 }
 
-bool GuildActivePerkMgr::GoHome(ChatHandler* handler, Player* /*player*/)
+bool GuildActivePerkMgr::GoHome(ChatHandler* handler, Player* player)
 {
-    // THE HOOK OF THE GUILD HOUSE: it comes with the Paragon levels. Until
-    // then the perk answers, and starts no cooldown.
-    Say(handler, GUILD_LEVEL_STR_ACTIVE_NO_HOME);
-    return false;
+    // Into the guild house, which a Paragon level opens (GuildHouseMgr);
+    // without it, the player is told and no cooldown starts.
+    return sGuildHouseMgr->Enter(handler, player);
 }
 
 void GuildActivePerkMgr::List(ChatHandler* handler, uint8 guildLevel, Player* player) const

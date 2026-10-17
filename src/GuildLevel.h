@@ -100,7 +100,13 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_ACTIVE_LEFT     = 137,  // {} minutes, {} seconds
     GUILD_LEVEL_STR_ACTIVE_NAME     = 138,  // 138 to 142: the names, in GuildActivePerk order
     GUILD_LEVEL_STR_ACTIVE_FAILED   = 143,
-    GUILD_LEVEL_STR_ACTIVE_RESET    = 144   // {} character
+    GUILD_LEVEL_STR_ACTIVE_RESET    = 144,  // {} character
+
+    // the guild house
+    GUILD_LEVEL_STR_HOUSE_LOCKED    = 145,  // {} Paragon level
+    GUILD_LEVEL_STR_HOUSE_FULL      = 146,
+    GUILD_LEVEL_STR_HOUSE_NOT_IN    = 147,
+    GUILD_LEVEL_STR_HOUSE_NOT_YOURS = 148
 };
 
 struct GuildLevelConfig

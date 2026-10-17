@@ -12,7 +12,8 @@
     "src/guild_level_loader.cpp",
     "src/GuildLevel.cpp",
     "src/GuildPerks.cpp",
-    "src/GuildActivePerks.cpp"
+    "src/GuildActivePerks.cpp",
+    "src/GuildHouse.cpp"
   ],
   "configuration": {
     "file": "mod-guild-level.conf",
@@ -93,6 +94,9 @@
           "table": "updates",
           "where": "name IN ({sql_files:world})"
         }
+      ],
+      "tables": [
+        "mod_guild_level_house_spawn"
       ]
     }
   },

@@ -16,6 +16,7 @@
  */
 
 #include "GuildLevel.h"
+#include "GuildHouse.h"
 #include "GuildPerks.h"
 
 #include "Chat.h"
@@ -338,7 +339,10 @@ void GuildLevelMgr::Update(uint32 diff)
 
     // The perks follow the level: auras of the members online, at once.
     for (uint32 guildId : changed)
+    {
         sGuildPerkMgr->RefreshGuild(guildId);
+        sGuildHouseMgr->OnGuildChanged(guildId);
+    }
 
     _saveTimer += diff;
     if (_saveTimer >= _config.saveInterval * IN_MILLISECONDS)

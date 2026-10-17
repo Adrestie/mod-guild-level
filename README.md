@@ -144,7 +144,7 @@ one dead, nothing could be placed) starts no cooldown.
 | 22 | `.gperk rez` | Every dead member of the group on the same map and instance gets a resurrection to accept, where the player stands, with 35% of their health and mana (full for guildmates, thanks to the level 10 perk). Out of combat. | 10 min |
 | 23 | `.gperk bank` | The Guild Chest of Cataclysm's Mobile Banking stands in front of the player for 5 minutes: blue banner for the Alliance (gameobject 920000), red for the Horde (920001). Not in a battleground or an arena. | 1 h |
 | 24 | `.gperk vendor` | The Guild Supplier (creature 92001), a reagent vendor who repairs, waits in front of the player for 5 minutes. Not in a battleground or an arena. | 1 h |
-| 25 | `.gperk home` | To the guild house: **it comes with the guild house**. For now the command says so and starts no cooldown. | 1 h |
+| 25 | `.gperk home` | Into the guild house, once the guild has one (Paragon 1, see [The guild house](#the-guild-house)). `.gperk leave` goes back. | 1 h |
 
 `.gperk list` shows the active perks of your guild: locked, ready, or the time
 left. A game master resets every cooldown of a character with
@@ -154,6 +154,33 @@ prices: Arcane Powder, Runes of Teleportation and of Portals, Light Feather,
 Symbols of Kings and of Divinity, Holy, Sacred and Devout Candles, Ankh,
 Infernal Stone, Demonic Figurine, Corpse Dust, Flash Powder, Maple and
 Ironwood Seeds, Wild Quillvine, Wild Spineleaf and Starleaf Seed.
+
+## The guild house
+
+From **Paragon 1**, a guild has a house: **Champions' Hall** (map 449) for an
+Alliance guild, the **Hall of Legends** (map 450) for a Horde one -- the two PvP
+halls the game left empty in 2.0. Members go in with `.gperk home` (the level
+25 perk, 1 h cooldown) and out with `.gperk leave`, back where they came from.
+
+**Every guild has its own house, by phases.** An instance per guild is not
+possible without changing the core: it refuses a second player into an
+instance someone of another group is in. So the halls stay open maps, and a
+guild whose house is open owns one of the hall's 31 phases: its members, its
+creatures and its objects live in that phase only, and no guild sees another.
+The phase goes back to the pool once the house has been empty for
+`GuildLevel.House.EmptyDelay` seconds; what stands in it is in the database and
+comes back. Up to 31 houses can be open at once per hall, any number of guilds
+in all; a 32nd guild is asked to try again a few minutes later.
+
+**What stands in it** is in the world table `mod_guild_level_house_spawn`, one
+row per creature or object, each unlocked at a Paragon level: placed when the
+house opens, and at once in an open house when the guild reaches that level.
+Paragon 1 places a mailbox. Rows under id 1000 are the module's; a server adds
+its own above.
+
+Someone who is not a member (or whose guild has no house) and ends up in a
+hall -- a GM teleport, a login after leaving the guild -- is sent back. Game
+masters keep their own phase there (`.modify phase` shows a house).
 
 ## GM commands
 
@@ -204,6 +231,9 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Perk.Resurrection` | `10:1` | Above 0: full resurrection by a guildmate. |
 | `GuildLevel.Perk.Consumables` | `20:30` | Minutes added to flasks, elixirs and food buffs. |
 
+| `GuildLevel.House.Enable` | 1 | 0 = no guild house. |
+| `GuildLevel.House.Paragon` | 1 | The Paragon level that opens the house. |
+| `GuildLevel.House.EmptyDelay` | 60 | Seconds an empty house keeps its phase. |
 | `GuildLevel.Active.<Perk>.Level` | 21 to 25 | Guild level of each active perk (Raid, Rez, Bank, Vendor, Home). |
 | `GuildLevel.Active.<Perk>.Cooldown` | 3600 (Rez 600) | Seconds; 0 = none. |
 | `GuildLevel.Active.Rez.Percent` | 35 | Health and mana of the resurrection offered. |
@@ -370,8 +400,11 @@ in a group, characters with a client to accept summons and resurrections.
 40. **Supplier:** at level 24, `.gperk vendor`: the Guild Supplier stands in
     front of the player, sells the 19 reagents and repairs. After 5 minutes he
     disappears. Cooldown 1 h.
-41. **House:** at level 25, `.gperk home` answers that the perk comes with the
-    guild house; no cooldown starts.
+41. **House:** a guild at level 25, Paragon 0: `.gperk home` answers that the
+    house opens at Paragon 1, no cooldown. At Paragon 1, `.gperk home` takes an
+    Alliance member to Champions' Hall, a Horde member to the Hall of Legends,
+    with a mailbox near the entrance; `.gperk leave` takes him back where he
+    was.
 42. **Cooldowns kept:** use `.gperk bank`, restart the worldserver, `.gperk
     list`: the time left has gone on counting. The row is in
     `mod_guild_level_perk_cooldown`.
@@ -380,6 +413,23 @@ in a group, characters with a client to accept summons and resurrections.
     the answer names the character, `.gperk list` shows the perk ready again,
     and his rows are gone from `mod_guild_level_perk_cooldown`. A player
     without GM rights cannot use it.
+
+### Guild house
+
+45. **Own house:** two guilds at Paragon 1, one member of each goes home: each
+    sees his mailbox, neither sees the other. Two members of the same guild,
+    not grouped, both go home: they see each other.
+46. **Strangers:** a player of another guild, or none, teleported into the hall
+    by a GM, is sent back with "This is not your guild's house".
+47. **Leaving the guild:** a member inside is removed from the guild: he is
+    sent out at once.
+48. **Paragon change:** with a member inside, `.guildlevel setparagon 0` then
+    `setparagon 1`: the mailbox goes, then comes back.
+49. **Empty house:** everyone leaves; a minute later the phase is free again
+    (a GM with `.modify phase` sees nothing there). Going back in brings the
+    mailbox back.
+50. **Logout inside:** a member logs out in the house and back in: he is in
+    his house again, in its phase.
 
 ## Roadmap
 

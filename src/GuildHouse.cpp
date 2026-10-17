@@ -1,0 +1,361 @@
+/*
+ * This file is part of mod-guild-level.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "GuildHouse.h"
+#include "GuildLevel.h"
+#include "GuildPerks.h"
+
+#include "Chat.h"
+#include "Common.h"
+#include "Config.h"
+#include "Creature.h"
+#include "DatabaseEnv.h"
+#include "GameObject.h"
+#include "Log.h"
+#include "Map.h"
+#include "ObjectAccessor.h"
+#include "Player.h"
+#include "QueryResult.h"
+#include "TemporarySummon.h"
+
+#include <algorithm>
+
+namespace
+{
+    template<typename... Args>
+    void Say(ChatHandler* handler, uint32 id, Args&&... args)
+    {
+        handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, id, std::forward<Args>(args)...));
+    }
+
+    // Back where the player came from before the house; his home if he has
+    // no way back (a character created or moved by a GM inside).
+    void SendBack(Player* player)
+    {
+        if (!player->TeleportToEntryPoint())
+            player->TeleportTo(player->m_homebindMapId, player->m_homebindX, player->m_homebindY,
+                player->m_homebindZ, player->GetOrientation());
+    }
+}
+
+GuildHouseMgr* GuildHouseMgr::instance()
+{
+    static GuildHouseMgr instance;
+    return &instance;
+}
+
+void GuildHouseMgr::LoadConfig()
+{
+    GuildHouseConfig c;
+    c.enable = sConfigMgr->GetOption<bool>("GuildLevel.House.Enable", true);
+    c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Paragon", 1), 0, GUILD_PARAGON_MAX));
+    c.emptyDelay = sConfigMgr->GetOption<uint32>("GuildLevel.House.EmptyDelay", 60);
+    _config = c;
+}
+
+void GuildHouseMgr::LoadFromDB()
+{
+    _spawns.clear();
+    if (QueryResult result = WorldDatabase.Query(
+            "SELECT `id`, `map`, `paragon`, `kind`, `entry`, `x`, `y`, `z`, `o` FROM `mod_guild_level_house_spawn`"))
+    {
+        do
+        {
+            Field* f = result->Fetch();
+            GuildHouseSpawn s{ f[0].Get<uint32>(), f[1].Get<uint32>(), f[2].Get<uint8>(), f[3].Get<uint8>(),
+                f[4].Get<uint32>(), f[5].Get<float>(), f[6].Get<float>(), f[7].Get<float>(), f[8].Get<float>() };
+            if (!IsHouseMap(s.map))
+            {
+                LOG_ERROR("sql.sql", "mod-guild-level: house spawn {} is on map {}, not a hall: skipped.", s.id, s.map);
+                continue;
+            }
+            _spawns.push_back(s);
+        } while (result->NextRow());
+    }
+    LOG_INFO("server.loading", ">> mod-guild-level: loaded {} guild house spawns", _spawns.size());
+}
+
+uint8 GuildHouseMgr::ParagonOf(uint32 guildId) const
+{
+    GuildLevelState const state = sGuildLevelMgr->Get(guildId);
+    return state.level < GUILD_LEVEL_MAX ? 0 : state.paragon;
+}
+
+int GuildHouseMgr::SlotOf(uint32 mapId, uint32 guildId, bool take)
+{
+    Hall& hall = HallOf(mapId);
+    for (uint8 i = 0; i < GUILD_HOUSE_SLOTS; ++i)
+        if (hall.slots[i].guildId == guildId)
+            return i;
+    if (!take)
+        return -1;
+    for (uint8 i = 0; i < GUILD_HOUSE_SLOTS; ++i)
+        if (!hall.slots[i].guildId)
+        {
+            hall.slots[i] = Slot();
+            hall.slots[i].guildId = guildId;
+            return i;
+        }
+    return -1;
+}
+
+bool GuildHouseMgr::Enter(ChatHandler* handler, Player* player)
+{
+    if (!_config.enable)
+    {
+        Say(handler, GUILD_LEVEL_STR_PERKS_DISABLED);
+        return false;
+    }
+    uint32 const guildId = player->GetGuildId();
+    if (!guildId)
+    {
+        Say(handler, GUILD_LEVEL_STR_ACTIVE_NO_GUILD);
+        return false;
+    }
+    if (ParagonOf(guildId) < _config.paragon)
+    {
+        Say(handler, GUILD_LEVEL_STR_HOUSE_LOCKED, uint32(_config.paragon));
+        return false;
+    }
+    if (player->InBattleground() || player->InArena())
+    {
+        Say(handler, GUILD_LEVEL_STR_ACTIVE_BG);
+        return false;
+    }
+    if (player->IsInCombat())
+    {
+        Say(handler, GUILD_LEVEL_STR_ACTIVE_COMBAT);
+        return false;
+    }
+
+    bool const horde = player->GetTeamId() == TEAM_HORDE;
+    uint32 const mapId = horde ? GUILD_HOUSE_MAP_HORDE : GUILD_HOUSE_MAP_ALLIANCE;
+    {
+        std::lock_guard<std::mutex> guard(_lock);
+        if (SlotOf(mapId, guildId, true) < 0)
+        {
+            Say(handler, GUILD_LEVEL_STR_HOUSE_FULL);
+            return false;
+        }
+    }
+
+    // The phase is set on arrival (OnPlayerEnterMap): set now, the player
+    // would vanish where he still stands.
+    if (!IsHouseMap(player->GetMapId()))
+        player->SetEntryPoint();
+    auto const& p = horde ? _config.horde : _config.alliance;
+    return player->TeleportTo(mapId, p[0], p[1], p[2], p[3]);
+}
+
+bool GuildHouseMgr::Leave(ChatHandler* handler, Player* player)
+{
+    if (!IsHouseMap(player->GetMapId()))
+    {
+        Say(handler, GUILD_LEVEL_STR_HOUSE_NOT_IN);
+        return false;
+    }
+    SendBack(player);
+    return true;
+}
+
+void GuildHouseMgr::OnPlayerEnterMap(Map* map, Player* player)
+{
+    if (!IsHouseMap(map->GetId()))
+        return;
+
+    // A game master keeps his phase: `.modify phase` shows him any house.
+    if (player->IsGameMaster())
+        return;
+
+    uint32 const guildId = player->GetGuildId();
+    bool const allowed = _config.enable && guildId && ParagonOf(guildId) >= _config.paragon;
+
+    std::lock_guard<std::mutex> guard(_lock);
+    int const slot = allowed ? SlotOf(map->GetId(), guildId, true) : -1;
+    if (slot < 0)
+    {
+        // Not his house, or no room left: out on the next update of the map.
+        _sendOut.insert(player->GetGUID());
+        return;
+    }
+
+    Slot& s = HallOf(map->GetId()).slots[slot];
+    s.emptyFor = 0;
+    s.furnish = true;
+    player->SetPhaseMask(MaskOf(uint8(slot)), true);
+}
+
+void GuildHouseMgr::OnPlayerLeaveMap(Map* map, Player* player)
+{
+    // Nothing of a house's phase follows the player out.
+    if (IsHouseMap(map->GetId()) && !player->IsGameMaster() && player->GetPhaseMask() != PHASEMASK_NORMAL)
+        player->SetPhaseMask(PHASEMASK_NORMAL, false);
+}
+
+void GuildHouseMgr::Furnish(Map* map, Slot& slot, uint8 index)
+{
+    uint8 const paragon = ParagonOf(slot.guildId);
+    uint32 const mask = MaskOf(index);
+    for (GuildHouseSpawn const& s : _spawns)
+    {
+        if (s.map != map->GetId() || s.paragon > paragon || slot.placed.count(s.id))
+            continue;
+
+        if (s.kind == 0)
+        {
+            if (TempSummon* creature = map->SummonCreature(s.entry, Position(s.x, s.y, s.z, s.o)))
+            {
+                creature->SetPhaseMask(mask, true);
+                slot.objects.push_back(creature->GetGUID());
+                slot.placed.insert(s.id);
+            }
+        }
+        else if (GameObject* go = map->SummonGameObject(s.entry, s.x, s.y, s.z, s.o, 0.0f, 0.0f, 0.0f, 0.0f, 0))
+        {
+            go->SetPhaseMask(mask, true);
+            slot.objects.push_back(go->GetGUID());
+            slot.placed.insert(s.id);
+        }
+    }
+}
+
+void GuildHouseMgr::Empty(Map* map, Slot& slot)
+{
+    for (ObjectGuid const& guid : slot.objects)
+    {
+        if (guid.IsGameObject())
+        {
+            if (GameObject* go = map->GetGameObject(guid))
+            {
+                go->SetRespawnTime(0);
+                go->Delete();
+            }
+        }
+        else if (Creature* creature = map->GetCreature(guid))
+            creature->DespawnOrUnsummon();
+    }
+    slot.objects.clear();
+    slot.placed.clear();
+}
+
+void GuildHouseMgr::OnMapUpdate(Map* map, uint32 diff)
+{
+    if (!IsHouseMap(map->GetId()))
+        return;
+
+    // Those who have nothing to do in the house.
+    std::vector<ObjectGuid> out;
+    {
+        std::lock_guard<std::mutex> guard(_lock);
+        for (auto itr = _sendOut.begin(); itr != _sendOut.end();)
+        {
+            if (ObjectAccessor::GetPlayer(map, *itr))
+            {
+                out.push_back(*itr);
+                itr = _sendOut.erase(itr);
+            }
+            else
+                ++itr;
+        }
+    }
+    for (ObjectGuid const& guid : out)
+        if (Player* player = ObjectAccessor::GetPlayer(map, guid))
+        {
+            ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_HOUSE_NOT_YOURS);
+            SendBack(player);
+        }
+
+    Hall& hall = HallOf(map->GetId());
+    hall.timer += diff;
+    if (hall.timer < IN_MILLISECONDS)
+        return;
+    uint32 const elapsed = hall.timer;
+    hall.timer = 0;
+
+    // Who is in which house.
+    std::array<uint32, GUILD_HOUSE_SLOTS> inside{};
+    for (auto const& ref : map->GetPlayers())
+        if (Player* player = ref.GetSource())
+            if (!player->IsGameMaster())
+                for (uint8 i = 0; i < GUILD_HOUSE_SLOTS; ++i)
+                    if (player->GetPhaseMask() & MaskOf(i))
+                        ++inside[i];
+
+    std::lock_guard<std::mutex> guard(_lock);
+    for (uint8 i = 0; i < GUILD_HOUSE_SLOTS; ++i)
+    {
+        Slot& slot = hall.slots[i];
+        if (!slot.guildId)
+            continue;
+
+        if (!inside[i])
+        {
+            // Empty long enough: the phase goes back to the pool.
+            slot.emptyFor += elapsed;
+            if (slot.emptyFor >= _config.emptyDelay * IN_MILLISECONDS)
+            {
+                Empty(map, slot);
+                slot = Slot();
+            }
+            continue;
+        }
+
+        slot.emptyFor = 0;
+        if (slot.rebuild)
+        {
+            // The Paragon level went down (a GM): what it no longer unlocks goes.
+            Empty(map, slot);
+            slot.rebuild = false;
+            slot.furnish = true;
+        }
+        if (slot.furnish)
+        {
+            Furnish(map, slot, i);
+            slot.furnish = false;
+        }
+    }
+}
+
+void GuildHouseMgr::OnGuildChanged(uint32 guildId)
+{
+    std::lock_guard<std::mutex> guard(_lock);
+    for (Hall* hall : { &_alliance, &_horde })
+        for (Slot& slot : hall->slots)
+            if (slot.guildId == guildId)
+                slot.rebuild = true;
+}
+
+void GuildHouseMgr::OnMemberLeft(ObjectGuid guid)
+{
+    // Only someone standing in a house has to go: the others never get in.
+    Player* player = ObjectAccessor::FindConnectedPlayer(guid);
+    if (!player || !IsHouseMap(player->GetMapId()) || player->IsGameMaster())
+        return;
+    std::lock_guard<std::mutex> guard(_lock);
+    _sendOut.insert(guid);
+}
+
+void GuildHouseMgr::DeleteGuild(uint32 guildId)
+{
+    // Its members are removed one by one before (OnMemberLeft): the house is
+    // empty soon, and its phase goes back to the pool as usual.
+    std::lock_guard<std::mutex> guard(_lock);
+    for (Hall* hall : { &_alliance, &_horde })
+        for (Slot& slot : hall->slots)
+            if (slot.guildId == guildId)
+                slot.rebuild = true;
+}

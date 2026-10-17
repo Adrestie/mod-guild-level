@@ -21,6 +21,7 @@
 
 #include "Guild.h"
 #include "GuildActivePerks.h"
+#include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
 #include "ObjectAccessor.h"
@@ -47,6 +48,7 @@ public:
         sGuildLevelMgr->LoadConfig();
         sGuildPerkMgr->LoadConfig();
         sGuildActivePerkMgr->LoadConfig();
+        sGuildHouseMgr->LoadConfig();
 
         // New amounts for the members online at once.
         if (reload)
@@ -58,6 +60,7 @@ public:
     void OnStartup() override
     {
         sGuildLevelMgr->LoadFromDB();
+        sGuildHouseMgr->LoadFromDB();
     }
 
     void OnUpdate(uint32 diff) override
@@ -201,12 +204,44 @@ public:
     void OnRemoveMember(Guild* /*guild*/, Player* player, bool /*isDisbanding*/, bool /*isKicked*/) override
     {
         if (player)
+        {
             sGuildPerkMgr->QueueRefresh(player->GetGUID());
+            // Out of the house he no longer belongs to.
+            sGuildHouseMgr->OnMemberLeft(player->GetGUID());
+        }
     }
 
     void OnDisband(Guild* guild) override
     {
         sGuildLevelMgr->DeleteGuild(guild->GetId());
+        sGuildHouseMgr->DeleteGuild(guild->GetId());
+    }
+};
+
+// The guild house: halls 449 and 450, one phase per open house.
+class GuildLevelAllMapScript : public AllMapScript
+{
+public:
+    GuildLevelAllMapScript() : AllMapScript("GuildLevelAllMapScript",
+        {
+            ALLMAPHOOK_ON_PLAYER_ENTER_ALL,
+            ALLMAPHOOK_ON_PLAYER_LEAVE_ALL,
+            ALLMAPHOOK_ON_MAP_UPDATE
+        }) { }
+
+    void OnPlayerEnterAll(Map* map, Player* player) override
+    {
+        sGuildHouseMgr->OnPlayerEnterMap(map, player);
+    }
+
+    void OnPlayerLeaveAll(Map* map, Player* player) override
+    {
+        sGuildHouseMgr->OnPlayerLeaveMap(map, player);
+    }
+
+    void OnMapUpdate(Map* map, uint32 diff) override
+    {
+        sGuildHouseMgr->OnMapUpdate(map, diff);
     }
 };
 
@@ -219,6 +254,7 @@ void AddSC_guild_level_scripts()
     new GuildLevelPlayerScript();
     new GuildLevelGuildScript();
     new GuildLevelUnitScript();
+    new GuildLevelAllMapScript();
     RegisterSpellScript(spell_guild_level_hearthstone);
     AddSC_guild_level_commands();
     AddSC_guild_perk_commands();
