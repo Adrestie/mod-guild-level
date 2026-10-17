@@ -39,6 +39,7 @@
 #include "TemporarySummon.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace
 {
@@ -73,6 +74,83 @@ static bool EntranceOf(uint32 mapId, WorldLocation& out)
         return false;
     out.WorldRelocate(uint32(entranceMap), x, y, z + 0.5f, 0.0f);
     return true;
+}
+
+// Out of the triggers that would send the player straight back into the
+// dungeon (a portal's box, around its entrance): the nearest spot around the
+// trigger, on a floor near the same height, in sight of where he would have
+// stood.
+static void OutOfTriggers(WorldLocation& p)
+{
+    QueryResult result = WorldDatabase.Query("SELECT a.`x`, a.`y`, a.`z`, a.`radius`, a.`length`, a.`width`, a.`height`, a.`orientation` "
+        "FROM `areatrigger` a JOIN `areatrigger_teleport` t ON t.`ID` = a.`entry` "
+        "WHERE a.`map` = {} AND ABS(a.`x` - {}) < 100 AND ABS(a.`y` - {}) < 100", p.GetMapId(), p.GetPositionX(), p.GetPositionY());
+    if (!result)
+        return;
+
+    struct Box { float x, y, z, radius, length, width, height, o; };
+    std::vector<Box> boxes;
+    do
+    {
+        Field* f = result->Fetch();
+        boxes.push_back({ f[0].Get<float>(), f[1].Get<float>(), f[2].Get<float>(), f[3].Get<float>(),
+            f[4].Get<float>(), f[5].Get<float>(), f[6].Get<float>(), f[7].Get<float>() });
+    } while (result->NextRow());
+
+    auto inside = [&boxes](float x, float y, float z, float margin)
+    {
+        for (Box const& b : boxes)
+        {
+            float const dx = x - b.x, dy = y - b.y, dz = z - b.z;
+            if (b.radius > 0.0f)
+            {
+                if (dx * dx + dy * dy + dz * dz <= (b.radius + margin) * (b.radius + margin))
+                    return &b;
+                continue;
+            }
+            float const c = std::cos(b.o), s = std::sin(b.o);
+            float const lx = dx * c + dy * s, ly = -dx * s + dy * c;
+            if (std::fabs(lx) <= b.length / 2 + margin && std::fabs(ly) <= b.width / 2 + margin &&
+                std::fabs(dz) <= b.height / 2 + margin)
+                return &b;
+        }
+        return static_cast<Box const*>(nullptr);
+    };
+
+    Box const* in = inside(p.GetPositionX(), p.GetPositionY(), p.GetPositionZ(), 2.0f);
+    if (!in)
+        return;
+    Map* map = sMapMgr->CreateBaseMap(p.GetMapId());
+    if (!map)
+        return;
+
+    float const reach = in->radius > 0.0f ? in->radius : std::sqrt(in->length * in->length + in->width * in->width) / 2;
+    float bestDist = 0.0f;
+    WorldLocation best;
+    bool found = false;
+    for (float extra : { 3.0f, 6.0f, 10.0f })
+        for (int step = 0; step < 24; ++step)
+        {
+            float const angle = float(step) * float(2 * M_PI) / 24.0f;
+            float const x = in->x + std::cos(angle) * (reach + extra);
+            float const y = in->y + std::sin(angle) * (reach + extra);
+            float const z = map->GetHeight(PHASEMASK_NORMAL, x, y, p.GetPositionZ() + 4.0f, true, 10.0f);
+            if (z <= INVALID_HEIGHT || std::fabs(z - p.GetPositionZ()) > 6.0f || inside(x, y, z, 2.0f))
+                continue;
+            if (!map->isInLineOfSight(p.GetPositionX(), p.GetPositionY(), p.GetPositionZ() + 2.0f, x, y, z + 2.0f,
+                    PHASEMASK_NORMAL, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::Nothing))
+                continue;
+            float const d = std::hypot(x - p.GetPositionX(), y - p.GetPositionY());
+            if (!found || d < bestDist)
+            {
+                // facing the portal
+                best.WorldRelocate(p.GetMapId(), x, y, z + 0.5f, std::atan2(in->y - y, in->x - x));
+                bestDist = d;
+                found = true;
+            }
+        }
+    if (found)
+        p = best;
 }
 
 GuildHouseMgr* GuildHouseMgr::instance()
@@ -191,6 +269,7 @@ bool GuildHouseMgr::Enter(ChatHandler* handler, Player* player)
                 origin.WorldRelocate(out->target_mapId, out->target_X, out->target_Y, out->target_Z, out->target_Orientation);
             else if (!EntranceOf(player->GetMapId(), origin))
                 origin = player->GetEntryPoint();
+            OutOfTriggers(origin);
         }
         {
             std::lock_guard<std::mutex> guard(_lock);
