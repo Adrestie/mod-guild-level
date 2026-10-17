@@ -229,6 +229,7 @@ void GuildHouseMgr::Furnish(Map* map, Slot& slot, uint8 index)
             {
                 creature->SetPhaseMask(mask, true);
                 slot.objects.push_back(creature->GetGUID());
+                slot.spawnOf[creature->GetGUID()] = s.id;
                 slot.placed.insert(s.id);
             }
         }
@@ -236,6 +237,7 @@ void GuildHouseMgr::Furnish(Map* map, Slot& slot, uint8 index)
         {
             go->SetPhaseMask(mask, true);
             slot.objects.push_back(go->GetGUID());
+            slot.spawnOf[go->GetGUID()] = s.id;
             slot.placed.insert(s.id);
         }
     }
@@ -257,7 +259,21 @@ void GuildHouseMgr::Empty(Map* map, Slot& slot)
             creature->DespawnOrUnsummon();
     }
     slot.objects.clear();
+    slot.spawnOf.clear();
     slot.placed.clear();
+}
+
+uint32 GuildHouseMgr::SpawnOf(ObjectGuid guid)
+{
+    std::lock_guard<std::mutex> guard(_lock);
+    for (Hall* hall : { &_alliance, &_horde })
+        for (Slot const& slot : hall->slots)
+        {
+            auto itr = slot.spawnOf.find(guid);
+            if (itr != slot.spawnOf.end())
+                return itr->second;
+        }
+    return 0;
 }
 
 void GuildHouseMgr::OnMapUpdate(Map* map, uint32 diff)

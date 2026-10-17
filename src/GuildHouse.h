@@ -50,6 +50,7 @@
 #include "Define.h"
 #include "ObjectGuid.h"
 #include <array>
+#include <map>
 #include <mutex>
 #include <set>
 #include <vector>
@@ -115,6 +116,8 @@ public:
     // and every open house of the hall is furnished again at once.
     void ListSpawns(ChatHandler* handler, uint32 mapId);
     bool MoveSpawn(uint32 id, uint32 mapId, float x, float y, float z, float o);
+    // The spawn a house's creature or object was placed from, 0 if none.
+    uint32 SpawnOf(ObjectGuid guid);
     uint32 AddSpawn(uint32 mapId, uint8 paragon, uint8 kind, uint32 entry, float x, float y, float z, float o);
     bool DeleteSpawn(uint32 id);
 
@@ -129,6 +132,7 @@ private:
         bool rebuild = false;                   // take everything away, then furnish
         std::set<uint32> placed;                // spawn ids standing
         std::vector<ObjectGuid> objects;        // what was placed, to take away
+        std::map<ObjectGuid, uint32> spawnOf;   // and the spawn each one came from
     };
 
     struct Hall

@@ -200,11 +200,24 @@ public:
     }
 
     // `.guildlevel house move <id>`: the spot moves where the GM stands, facing his way.
-    static bool HandleHouseMoveCommand(ChatHandler* handler, uint32 id)
+    // Without an id: the targeted creature of the house.
+    static bool HandleHouseMoveCommand(ChatHandler* handler, Optional<uint32> spawnId)
     {
         Player* player = InHall(handler);
         if (!player)
             return true;
+        uint32 id = spawnId.value_or(0);
+        if (!id)
+        {
+            Unit* target = handler->getSelectedUnit();
+            if (target && target != player)
+                id = sGuildHouseMgr->SpawnOf(target->GetGUID());
+            if (!id)
+            {
+                handler->SendSysMessage("Target a creature of the house, or give a spawn id (.guildlevel house list).");
+                return true;
+            }
+        }
         if (sGuildHouseMgr->MoveSpawn(id, player->GetMapId(), player->GetPositionX(), player->GetPositionY(),
                 player->GetPositionZ(), player->GetOrientation()))
             Say(handler, GUILD_LEVEL_STR_CMD_DONE);
