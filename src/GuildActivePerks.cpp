@@ -108,10 +108,13 @@ void GuildActivePerkMgr::Load(Player* player)
     }
     player->CustomData.Set(DATA_KEY, data);
 
-    // The cooldowns still running, on the buttons of the spells.
+    // The cooldowns still running, on the buttons of the spells. Logged in
+    // inside the guild house: its spell leads out, whatever the core restored.
     for (uint8 i = 0; i < GUILD_ACTIVE_COUNT; ++i)
         if (uint32 const left = Remaining(player, GuildActivePerk(i)))
             SendCooldown(player, GuildActivePerk(i), left);
+    if (GuildHouseMgr::IsHouseMap(player->GetMapId()))
+        HideCooldown(player, GUILD_ACTIVE_HOME);
 }
 
 void GuildActivePerkMgr::ShowCooldown(Player* player, GuildActivePerk perk) const
@@ -168,6 +171,9 @@ void GuildActivePerkMgr::SendCooldown(Player* player, GuildActivePerk perk, uint
 {
     uint32 const spell = GUILD_ACTIVE_SPELLS[perk];
     if (!player->HasSpell(spell))
+        return;
+    // Inside the guild house, its spell leads out: no cooldown on it there.
+    if (perk == GUILD_ACTIVE_HOME && GuildHouseMgr::IsHouseMap(player->GetMapId()))
         return;
     player->AddSpellCooldown(spell, 0, seconds * IN_MILLISECONDS);
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4 + 4);
