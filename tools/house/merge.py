@@ -370,6 +370,8 @@ class Building(object):
         lt_map = {}
         q_rot = (0.0, 0.0, math.sin(math.atan2(R[1, 0], R[0, 0]) / 2), math.cos(math.atan2(R[1, 0], R[0, 0]) / 2))
         old = {g: len(self.groups) + k for k, g in enumerate(src_groups)}
+        self._rooms = getattr(self, '_rooms', 0) + 1
+        room_no = self._rooms
         new_ids = []
         for g in src_groups:
             grp = wmo.Group(src_group_datas[g])
@@ -429,7 +431,7 @@ class Building(object):
                 s, c = src_root.portals[p][:2]
                 verts = [R @ np.array(v) + t for v in src_root.portal_verts[s:s + c]]
                 if other in old:
-                    key = ('src', id(src_root), p)
+                    key = ('src', room_no, p)      # not id(src_root): Python reuses ids of freed objects
                     if not hasattr(self, '_pidx'):
                         self._pidx = {}
                     if key not in self._pidx:
