@@ -515,7 +515,9 @@ GuildTalentResult GuildTalentMgr::Reset(Player* player, uint32& price)
     trans->Append("DELETE FROM `mod_guild_level_talent` WHERE `guildid` = {}", guildId);
     trans->Append("REPLACE INTO `mod_guild_level_talent_reset` (`guildid`, `next_price`, `last_reset`) VALUES ({}, {}, {})",
         guildId, next, now);
-    CharacterDatabase.DirectCommitTransaction(trans);
+    // The bank money is a prepared statement of the async connections only:
+    // never DirectCommitTransaction here (it asserts).
+    CharacterDatabase.CommitTransaction(trans);
 
     {
         std::lock_guard<std::mutex> guard(_lock);
