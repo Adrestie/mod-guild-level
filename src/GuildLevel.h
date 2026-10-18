@@ -125,7 +125,8 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_TALENT_LINE       = 162,  // {} node, {} points, {} maximum, {} amount, {} effect
     GUILD_LEVEL_STR_TALENT_PRICE      = 163,  // {} gold
     GUILD_LEVEL_STR_TALENT_EDITED     = 164,  // {} node
-    GUILD_LEVEL_STR_TALENT_BAD_EDIT   = 165
+    GUILD_LEVEL_STR_TALENT_BAD_EDIT   = 165,
+    GUILD_LEVEL_STR_TALENT_TIER       = 166
 };
 
 struct GuildLevelConfig

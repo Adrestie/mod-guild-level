@@ -54,6 +54,7 @@ namespace
             case GuildTalentResult::NoNode:         Say(handler, GUILD_LEVEL_STR_TALENT_NO_NODE); break;
             case GuildTalentResult::Full:           Say(handler, GUILD_LEVEL_STR_TALENT_FULL); break;
             case GuildTalentResult::NotLinked:      Say(handler, GUILD_LEVEL_STR_TALENT_NOT_LINKED); break;
+            case GuildTalentResult::Tier:           Say(handler, GUILD_LEVEL_STR_TALENT_TIER); break;
             case GuildTalentResult::NoPoints:       Say(handler, GUILD_LEVEL_STR_TALENT_NO_POINTS); break;
             case GuildTalentResult::NothingToReset: Say(handler, GUILD_LEVEL_STR_TALENT_NOTHING); break;
             case GuildTalentResult::NoMoney:        Say(handler, GUILD_LEVEL_STR_TALENT_NO_MONEY, price); break;
@@ -159,17 +160,22 @@ public:
         return true;
     }
 
-    static bool HandleNodeAddCommand(ChatHandler* handler, int32 x, int32 y, uint32 effect, float amount, uint32 maxPoints)
+    // [chance %] [cooldown seconds] [tier 1-3] after the maximum.
+    static bool HandleNodeAddCommand(ChatHandler* handler, int32 x, int32 y, uint32 effect, float amount, uint32 maxPoints,
+        Optional<float> chance, Optional<uint32> cooldown, Optional<uint32> tier)
     {
         uint32 const id = IsGuildTalentEffect(effect) && maxPoints && maxPoints <= 255 ?
-            sGuildTalentMgr->AddNode(x, y, GuildTalentEffect(effect), amount, uint8(maxPoints)) : 0;
+            sGuildTalentMgr->AddNode(x, y, GuildTalentEffect(effect), amount, uint8(maxPoints), chance.value_or(0.0f),
+                cooldown.value_or(0), uint8(std::min<uint32>(tier.value_or(1), 255))) : 0;
         return Edited(handler, id != 0, id);
     }
 
-    static bool HandleNodeSetCommand(ChatHandler* handler, uint32 id, uint32 effect, float amount, uint32 maxPoints)
+    static bool HandleNodeSetCommand(ChatHandler* handler, uint32 id, uint32 effect, float amount, uint32 maxPoints,
+        Optional<float> chance, Optional<uint32> cooldown, Optional<uint32> tier)
     {
         bool const done = IsGuildTalentEffect(effect) && maxPoints && maxPoints <= 255 &&
-            sGuildTalentMgr->SetNode(id, GuildTalentEffect(effect), amount, uint8(maxPoints));
+            sGuildTalentMgr->SetNode(id, GuildTalentEffect(effect), amount, uint8(maxPoints), chance.value_or(0.0f),
+                cooldown.value_or(0), uint8(std::min<uint32>(tier.value_or(1), 255)));
         return Edited(handler, done, id);
     }
 

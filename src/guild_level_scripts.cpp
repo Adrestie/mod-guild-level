@@ -247,6 +247,30 @@ class spell_guild_level_perk : public SpellScript
     }
 };
 
+// The guild talents' hidden aura (spell_script_names, data/sql/world): the
+// hits, blocks, parries, dodges and spells of a member roll the special effects.
+class spell_guild_talent_procs : public AuraScript
+{
+    PrepareAuraScript(spell_guild_talent_procs);
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        return sGuildTalentMgr->CheckProc(GetTarget()->ToPlayer(), eventInfo);
+    }
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        sGuildTalentMgr->OnProc(GetTarget()->ToPlayer(), eventInfo);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_guild_talent_procs::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_guild_talent_procs::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
 // The way out of the halls (areatrigger_scripts, data/sql/world): 2534 in
 // Champions' Hall, 2530 in the Hall of Legends lead to their city; from a
 // guild house, back where the player came from instead.
@@ -340,6 +364,7 @@ void AddSC_guild_level_scripts()
     new GuildLevelAllMapScript();
     RegisterSpellScript(spell_guild_level_hearthstone);
     RegisterSpellScript(spell_guild_level_perk);
+    RegisterSpellScript(spell_guild_talent_procs);
     new at_guild_level_house_exit();
     AddSC_guild_level_commands();
     AddSC_guild_perk_commands();

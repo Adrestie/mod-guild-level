@@ -39,6 +39,8 @@ end
 
 local Handlers = AIO.AddHandlers("GuildTalents", {})
 
+local EffectName                            -- forward
+
 local floor, max, min, abs, sqrt = math.floor, math.max, math.min, math.abs, math.sqrt
 local fmt = string.format
 
@@ -82,6 +84,8 @@ local EFFECTS = {
     { id = 25, kind = 1, icon = "Spell_Frost_WizardMark" },
     { id = 26, kind = 1, icon = "INV_Potion_54" },
     { id = 27, kind = 1, icon = "INV_Potion_76" },
+    { id = 28, kind = 1, icon = "Spell_Holy_HolyBolt" },
+    { id = 29, kind = 1, icon = "Spell_Fire_FireBolt02" },
     { id = 40, kind = 2, icon = "Spell_Shadow_UnholyFrenzy" },
     { id = 41, kind = 2, icon = "Spell_Holy_GreaterHeal" },
     { id = 42, kind = 2, icon = "Spell_Holy_PowerWordShield" },
@@ -96,6 +100,17 @@ local EFFECTS = {
     { id = 51, kind = 2, icon = "Trade_Herbalism" },
     { id = 52, kind = 2, icon = "INV_Potion_97" },
     { id = 53, kind = 2, icon = "INV_Misc_Rune_01" },
+    { id = 54, kind = 2, icon = "Ability_Rogue_Eviscerate" },
+    { id = 61, kind = 2, icon = "Ability_Warrior_Sunder", proc = true },
+    { id = 62, kind = 2, icon = "Spell_Nature_Bloodlust", proc = true },
+    { id = 63, kind = 2, icon = "Ability_Rogue_SliceDice", proc = true },
+    { id = 64, kind = 2, icon = "Spell_Holy_PowerWordShield", proc = true },
+    { id = 65, kind = 2, icon = "Ability_Warrior_Riposte", proc = true },
+    { id = 66, kind = 2, icon = "Spell_Shadow_ShadowWard", proc = true },
+    { id = 67, kind = 2, icon = "Spell_Shadow_ManaBurn", proc = true },
+    { id = 68, kind = 2, icon = "Spell_Nature_EnchantArmor", proc = true },
+    { id = 69, kind = 2, icon = "Spell_Nature_Rejuvenation", proc = true },
+    { id = 60, kind = 3, icon = "Spell_Holy_ChampionsBond" },
 }
 local EFFECT = {}
 for _, e in ipairs(EFFECTS) do EFFECT[e.id] = e end
@@ -116,7 +131,10 @@ local TEXTS = {
         start = "Start talent", clickBuy = "Click to spend a point.", needLink = "Needs a linked talent that holds a point.",
         officers = "The guild master and the officers spend the points.", noPoints = "No talent point left.",
         full = "Complete.",
-        kind = { [0] = "Main statistic", [1] = "Secondary statistic", [2] = "Special effect" },
+        kind = { [0] = "Main statistic", [1] = "Secondary statistic", [2] = "Special effect", [3] = "Origin" },
+        origin = "The origin of the tree: always held.", tier = "Tier %d", tierLocked = "Tier %d: needs %d points spent by the guild.",
+        chance = "Chance (%)", cooldown = "Cooldown (s)", tierLabel = "Tier (1-3)",
+        cooldownText = " (%s sec. cooldown)",
         edit = "Edit", editHelp = "Click: new talent or edit one.  Drag: move.  Shift+click two talents: link.",
         effect = "Effect", amount = "Amount per point", maxPoints = "Max points", icon = "Icon (empty: the effect's)",
         create = "Create", save = "Save", delete = "Delete", cancel = "Cancel", newNode = "New talent at %d, %d",
@@ -136,6 +154,23 @@ local TEXTS = {
             [49] = "%s%% off vendor prices and repairs", [50] = "%s%% of looted gold added to the guild bank",
             [51] = "+%s%% chance of a lucky gathering", [52] = "+%s minutes on flasks, elixirs and food buffs",
             [53] = "%s minutes off the Hearthstone cooldown",
+            [28] = "+%s healing power", [29] = "+%s spell damage", [54] = "+%s%% critical damage",
+            [60] = "Origin",
+            [61] = "Your attacks have a {c}% chance to ignore {a}% of the target's armor for 3 sec.",
+            [62] = "Your attacks have a {c}% chance to increase your damage by {a}% for 10 sec.",
+            [63] = "Your melee hits have a {c}% chance to give you {a} extra attack(s).",
+            [64] = "Blocking has a {c}% chance to shield you for {a}% of your maximum health.",
+            [65] = "Parrying has a {c}% chance to strike back for {a}% of your maximum health.",
+            [66] = "Dodging has a {c}% chance to reduce damage taken by {a}% for 5 sec., up to 5 times.",
+            [67] = "Your spells have a {c}% chance to make your next spell free.",
+            [68] = "Your spells have a {c}% chance to make your next spell instant.",
+            [69] = "Your attacks and spells have a {c}% chance to give you {a} rage, energy or runic power, or {m}% of your mana.",
+        },
+        names = {
+            [28] = "Healing power", [29] = "Spell damage", [54] = "Critical damage", [60] = "Origin",
+            [61] = "Armor ignored", [62] = "Damage burst", [63] = "Extra attack", [64] = "Shield on block",
+            [65] = "Riposte on parry", [66] = "Evasion on dodge", [67] = "Free spell", [68] = "Instant spell",
+            [69] = "Resource",
         },
     },
     frFR = {
@@ -151,7 +186,11 @@ local TEXTS = {
         needLink = "Doit être relié à un talent qui a au moins un point.",
         officers = "Le maître de guilde et les officiers dépensent les points.", noPoints = "Plus aucun point de talent.",
         full = "Complet.",
-        kind = { [0] = "Statistique principale", [1] = "Statistique secondaire", [2] = "Effet spécial" },
+        kind = { [0] = "Statistique principale", [1] = "Statistique secondaire", [2] = "Effet spécial", [3] = "Origine" },
+        origin = "L'origine de l'arbre : toujours acquise.", tier = "Palier %d",
+        tierLocked = "Palier %d : la guilde doit avoir dépensé %d points.",
+        chance = "Chance (%)", cooldown = "Recharge (s)", tierLabel = "Palier (1-3)",
+        cooldownText = " (recharge %s s)",
         edit = "Édition", editHelp = "Clic : nouveau talent ou modifier.  Glisser : déplacer.  Maj+clic sur deux talents : relier.",
         effect = "Effet", amount = "Valeur par point", maxPoints = "Points max", icon = "Icône (vide : celle de l'effet)",
         create = "Créer", save = "Enregistrer", delete = "Supprimer", cancel = "Annuler", newNode = "Nouveau talent en %d, %d",
@@ -173,6 +212,23 @@ local TEXTS = {
             [50] = "%s%% de l'or ramassé versé à la banque de guilde",
             [51] = "+%s%% de chances de récolte chanceuse", [52] = "+%s minutes aux flacons, élixirs et nourritures",
             [53] = "%s minutes de moins au temps de recharge de la pierre de foyer",
+            [28] = "+%s à la puissance des soins", [29] = "+%s aux dégâts des sorts", [54] = "+%s%% aux dégâts critiques",
+            [60] = "Origine",
+            [61] = "Vos attaques ont {c}% de chances d'ignorer {a}% de l'armure de la cible pendant 3 s.",
+            [62] = "Vos attaques ont {c}% de chances d'augmenter vos dégâts de {a}% pendant 10 s.",
+            [63] = "Vos coups en mêlée ont {c}% de chances de vous donner {a} attaque(s) supplémentaire(s).",
+            [64] = "Bloquer a {c}% de chances de vous protéger d'un bouclier de {a}% de vos points de vie maximum.",
+            [65] = "Parer a {c}% de chances de contre-attaquer pour {a}% de vos points de vie maximum.",
+            [66] = "Esquiver a {c}% de chances de réduire les dégâts subis de {a}% pendant 5 s, cumulable 5 fois.",
+            [67] = "Vos sorts ont {c}% de chances de rendre votre prochain sort gratuit.",
+            [68] = "Vos sorts ont {c}% de chances de rendre votre prochain sort instantané.",
+            [69] = "Vos attaques et vos sorts ont {c}% de chances de vous rendre {a} points de rage, d'énergie ou de puissance runique, ou {m}% de votre mana.",
+        },
+        names = {
+            [28] = "Puissance des soins", [29] = "Dégâts des sorts", [54] = "Dégâts critiques", [60] = "Origine",
+            [61] = "Armure ignorée", [62] = "Sursaut de dégâts", [63] = "Attaque supplémentaire", [64] = "Bouclier au blocage",
+            [65] = "Riposte à la parade", [66] = "Dérobade à l'esquive", [67] = "Sort gratuit", [68] = "Sort instantané",
+            [69] = "Ressource",
         },
     },
 }
@@ -180,6 +236,7 @@ local L = TEXTS[GetLocale()] or TEXTS.enUS
 if L ~= TEXTS.enUS then
     setmetatable(L, { __index = TEXTS.enUS })
     setmetatable(L.effects, { __index = TEXTS.enUS.effects })
+    if L.names then setmetatable(L.names, { __index = TEXTS.enUS.names }) end
 end
 
 local function Num(v)
@@ -188,9 +245,27 @@ local function Num(v)
     return fmt("%g", v)
 end
 
-local function EffectText(effect, amount)
+-- What an amount of an effect gives; an effect that procs also says its
+-- chance and cooldown.
+local function EffectText(effect, amount, chance, cooldown)
     local text = L.effects[effect] or ("effect " .. effect .. ": %s")
+    if text:find("{a}") or text:find("{c}") then
+        text = text:gsub("{a}", Num(amount)):gsub("{c}", Num(chance or 0)):gsub("{m}", Num(amount / 5))
+        if cooldown and cooldown > 0 then text = text .. fmt(L.cooldownText, Num(cooldown)) end
+        return text
+    end
+    if not text:find("%%s") then return text end
     return fmt(text, Num(amount))
+end
+
+-- An effect's short name, for the lists and the tooltips' titles.
+EffectName = function(id)
+    if L.names and L.names[id] then return L.names[id] end
+    return (EffectText(id, 0):gsub("^[%+%-]?0%%? ?", ""):gsub("^0 ", ""))
+end
+
+local function NodeText(n, points)
+    return EffectText(n.effect, n.amount * points, n.chance, n.cooldown)
 end
 
 local function IconOf(node)
@@ -224,8 +299,19 @@ local function Take(tree, state)
     end
 end
 
+local ORIGIN = 60
+
+-- The origin always holds its point.
 local function Points(id)
+    local n = S.byId[id]
+    if n and n.effect == ORIGIN then return 1 end
     return S.state and S.state.points[id] or 0
+end
+
+-- Points the guild must have spent before a node of this tier.
+local function TierNeed(n)
+    local t = S.state and S.state.tiers
+    return t and t[n.tier or 1] or 0
 end
 
 local function Left()
@@ -240,15 +326,23 @@ local function Reachable(n)
     return false
 end
 
--- Every effect of the guild, summed: the aura's lines.
+-- Every effect of the guild, summed: the aura's lines. Effects that proc
+-- keep the better chance and the shorter cooldown (GuildTalentMgr::Total).
 local function Totals()
     local totals, order = {}, {}
     if not S.tree then return totals, order end
     for _, n in ipairs(S.tree.nodes) do
         local p = min(Points(n.id), n.max)
-        if p > 0 then
-            if not totals[n.effect] then order[#order + 1] = n.effect end
-            totals[n.effect] = (totals[n.effect] or 0) + n.amount * p
+        if p > 0 and n.effect ~= ORIGIN then
+            local t = totals[n.effect]
+            if not t then
+                t = { amount = 0, chance = n.chance or 0, cooldown = n.cooldown or 0 }
+                totals[n.effect] = t
+                order[#order + 1] = n.effect
+            end
+            t.amount = t.amount + n.amount * p
+            t.chance = max(t.chance, n.chance or 0)
+            t.cooldown = min(t.cooldown, n.cooldown or 0)
         end
     end
     table.sort(order)
@@ -302,7 +396,7 @@ end
 local UI
 local Refresh                               -- forward
 
-local KIND_COLOR = { [0] = { 1, 0.82, 0.2 }, [1] = { 0.35, 0.7, 1 }, [2] = { 0.8, 0.45, 1 } }
+local KIND_COLOR = { [0] = { 1, 0.82, 0.2 }, [1] = { 0.35, 0.7, 1 }, [2] = { 0.8, 0.45, 1 }, [3] = { 1, 1, 1 } }
 
 StaticPopupDialogs["GUILD_TALENTS_BUY"] = {
     text = "%s", button1 = YES, button2 = NO, timeout = 0, whileDead = true, hideOnEscape = true,
@@ -333,21 +427,34 @@ local function NodeTooltip(button)
     if not n then return end
     local e = EFFECT[n.effect]
     GameTooltip:SetOwner(button, "ANCHOR_RIGHT")
-    GameTooltip:AddLine(EffectText(n.effect, n.amount * max(1, Points(n.id))), 1, 1, 1)
+    local p = Points(n.id)
+    GameTooltip:AddLine(EffectName(n.effect), 1, 1, 1)
     if e then
         local c = KIND_COLOR[e.kind]
-        GameTooltip:AddLine(L.kind[e.kind], c[1], c[2], c[3])
+        GameTooltip:AddLine(L.kind[e.kind] .. (n.effect ~= ORIGIN and ("  -  " .. fmt(L.tier, n.tier or 1)) or ""),
+            c[1], c[2], c[3])
     end
-    local p = Points(n.id)
+    if n.effect == ORIGIN then
+        GameTooltip:AddLine(L.origin, 0.8, 0.8, 0.8, true)
+        if S.edit then GameTooltip:AddLine(fmt(L.node, n.id) .. fmt("  (%d, %d)", n.x, n.y), 0.5, 0.5, 0.5) end
+        GameTooltip:Show()
+        return
+    end
     GameTooltip:AddLine(fmt(L.rank, p, n.max), 1, 0.82, 0)
-    GameTooltip:AddLine(fmt(L.perPoint, EffectText(n.effect, n.amount)), 0.8, 0.8, 0.8, true)
-    if p > 0 then
-        GameTooltip:AddLine(fmt(L.now, EffectText(n.effect, n.amount * p)), 0.2, 1, 0.2, true)
+    if n.max > 1 then
+        GameTooltip:AddLine(fmt(L.perPoint, NodeText(n, 1)), 0.8, 0.8, 0.8, true)
     end
-    if p < n.max and p > 0 then
-        GameTooltip:AddLine(fmt(L.next, EffectText(n.effect, n.amount * (p + 1))), 0.8, 0.8, 0.8, true)
+    if p > 0 then
+        GameTooltip:AddLine(fmt(L.now, NodeText(n, p)), 0.2, 1, 0.2, true)
+    end
+    if p < n.max then
+        GameTooltip:AddLine(p > 0 and fmt(L.next, NodeText(n, p + 1)) or NodeText(n, 1), 0.8, 0.8, 0.8, true)
     end
     if n.start then GameTooltip:AddLine(L.start, 1, 0.82, 0) end
+    local need = TierNeed(n)
+    if not S.edit and p < n.max and S.state.spent < need then
+        GameTooltip:AddLine(fmt(L.tierLocked, n.tier or 1, need), 1, 0.2, 0.2, true)
+    end
     if S.edit then
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine(fmt(L.node, n.id) .. fmt("  (%d, %d)", n.x, n.y), 0.5, 0.5, 0.5)
@@ -367,13 +474,9 @@ end
 
 -- EDIT PANEL --------------------------------------------------------------
 
-local function EffectName(id)
-    return (EffectText(id, 0):gsub("^[%+%-]?0%%? ?", ""):gsub("^0 ", ""))
-end
-
 local function BuildEditor()
     local p = CreateFrame("Frame", "GuildTalentsEditor", UI)
-    p:SetSize(300, 236)
+    p:SetSize(300, 300)
     p:SetPoint("TOPRIGHT", UI, "TOPRIGHT", -18, -70)
     p:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 16, edgeSize = 16,
@@ -405,19 +508,40 @@ local function BuildEditor()
     local dd = CreateFrame("Frame", "GuildTalentsEffectDropDown", p, "UIDropDownMenuTemplate")
     dd:SetPoint("TOPLEFT", -4, -44)
     UIDropDownMenu_SetWidth(dd, 250)
+    -- a menu per kind, its effects in a sub-menu: the list stays on screen
+    local function Colored(e)
+        local c = KIND_COLOR[e.kind]
+        return fmt("|cff%02x%02x%02x%s|r", c[1] * 255, c[2] * 255, c[3] * 255, EffectName(e.id))
+    end
     UIDropDownMenu_Initialize(dd, function(self, level)
-        for _, e in ipairs(EFFECTS) do
-            local info = UIDropDownMenu_CreateInfo()
-            local c = KIND_COLOR[e.kind]
-            info.text = fmt("|cff%02x%02x%02x%s|r", c[1] * 255, c[2] * 255, c[3] * 255, EffectName(e.id))
-            info.value = e.id
-            info.checked = p.effect == e.id
-            info.func = function()
-                p.effect = e.id
-                UIDropDownMenu_SetText(dd, info.text)
-                CloseDropDownMenus()
+        level = level or 1
+        if level == 1 then
+            for _, kind in ipairs({ 0, 1, 2, 3 }) do
+                local info = UIDropDownMenu_CreateInfo()
+                local c = KIND_COLOR[kind]
+                info.text = fmt("|cff%02x%02x%02x%s|r", c[1] * 255, c[2] * 255, c[3] * 255, L.kind[kind])
+                info.hasArrow = true
+                info.notCheckable = true
+                info.value = kind
+                UIDropDownMenu_AddButton(info, level)
             end
-            UIDropDownMenu_AddButton(info, level)
+            return
+        end
+        local kind = UIDROPDOWNMENU_MENU_VALUE
+        for _, e in ipairs(EFFECTS) do
+            if e.kind == kind then
+                local info = UIDropDownMenu_CreateInfo()
+                info.text = Colored(e)
+                info.value = e.id
+                info.checked = p.effect == e.id
+                info.func = function()
+                    p.effect = e.id
+                    UIDropDownMenu_SetText(dd, Colored(e))
+                    p:UpdateFields()
+                    CloseDropDownMenus()
+                end
+                UIDropDownMenu_AddButton(info, level)
+            end
         end
     end)
     p.dropdown = dd
@@ -431,12 +555,35 @@ local function BuildEditor()
     p.max:ClearAllPoints()
     p.max:SetPoint("TOPLEFT", 154, -92)
 
-    Label(L.icon, -118)
-    p.icon = Box("GuildTalentsEditIcon", -130, 260)
+    p.chanceLabel = Label(L.chance, -118)
+    p.chance = Box("GuildTalentsEditChance", -130, 60)
+    p.cooldownLabel = p:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    p.cooldownLabel:SetPoint("TOPLEFT", 100, -118)
+    p.cooldownLabel:SetText(L.cooldown)
+    p.cooldown = Box("GuildTalentsEditCooldown", -130, 60)
+    p.cooldown:ClearAllPoints()
+    p.cooldown:SetPoint("TOPLEFT", 104, -130)
+    local tl = p:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    tl:SetPoint("TOPLEFT", 190, -118)
+    tl:SetText(L.tierLabel)
+    p.tier = Box("GuildTalentsEditTier", -130, 40)
+    p.tier:ClearAllPoints()
+    p.tier:SetPoint("TOPLEFT", 194, -130)
+
+    Label(L.icon, -156)
+    p.icon = Box("GuildTalentsEditIcon", -168, 260)
 
     p.start = CreateFrame("CheckButton", "GuildTalentsEditStart", p, "UICheckButtonTemplate")
     p.start:SetSize(24, 24)
-    p.start:SetPoint("TOPLEFT", 10, -156)
+    p.start:SetPoint("TOPLEFT", 10, -194)
+
+    -- the chance and the cooldown belong to the effects that proc
+    function p:UpdateFields()
+        local e = EFFECT[self.effect]
+        local proc = e and e.proc
+        if proc then self.chance:Show(); self.cooldown:Show(); self.chanceLabel:Show(); self.cooldownLabel:Show()
+        else self.chance:Hide(); self.cooldown:Hide(); self.chanceLabel:Hide(); self.cooldownLabel:Hide() end
+    end
     _G["GuildTalentsEditStartText"]:SetText(L.start)
 
     local function Button(text, x, w)
@@ -462,13 +609,17 @@ local function BuildEditor()
         maxPoints = floor(maxPoints)
         local start = p.start:GetChecked() and true or false
         local icon = p.icon:GetText() or ""
+        local chance = tonumber(p.chance:GetText()) or 0
+        local cooldown = floor(tonumber(p.cooldown:GetText()) or 0)
+        local tier = max(1, min(3, floor(tonumber(p.tier:GetText()) or 1)))
+        if not (EFFECT[p.effect] and EFFECT[p.effect].proc) then chance, cooldown = 0, 0 end
         if p.id then
             local n = S.byId[p.id]
-            AIO.Handle("GuildTalents", "Set", p.id, p.effect, amount, maxPoints)
+            AIO.Handle("GuildTalents", "Set", p.id, p.effect, amount, maxPoints, chance, cooldown, tier)
             if n and n.start ~= start then AIO.Handle("GuildTalents", "Start", p.id, start) end
             if n and (n.icon or "") ~= icon then AIO.Handle("GuildTalents", "Icon", p.id, icon) end
         else
-            AIO.Handle("GuildTalents", "Add", p.x, p.y, p.effect, amount, maxPoints)
+            AIO.Handle("GuildTalents", "Add", p.x, p.y, p.effect, amount, maxPoints, chance, cooldown, tier)
         end
         p:Hide()
     end)
@@ -483,6 +634,10 @@ local function BuildEditor()
         self.amount:SetText(n and Num(n.amount) or (self.amount:GetText() ~= "" and self.amount:GetText() or "10"))
         self.max:SetText(n and tostring(n.max) or (self.max:GetText() ~= "" and self.max:GetText() or "5"))
         self.icon:SetText(n and n.icon or "")
+        self.chance:SetText(n and Num(n.chance or 0) or (self.chance:GetText() ~= "" and self.chance:GetText() or "10"))
+        self.cooldown:SetText(n and tostring(n.cooldown or 0) or (self.cooldown:GetText() ~= "" and self.cooldown:GetText() or "30"))
+        self.tier:SetText(n and tostring(n.tier or 1) or (self.tier:GetText() ~= "" and self.tier:GetText() or "1"))
+        self:UpdateFields()
         self.start:SetChecked(n and n.start or false)
         Shown(self.start, n ~= nil)
         self.ok:SetText(n and L.save or L.create)
@@ -573,10 +728,11 @@ local function NodeButton(i)
             end
             return
         end
-        if button ~= "LeftButton" or not S.state.canSpend or Points(n.id) >= n.max or not Reachable(n) or Left() <= 0 then
+        if button ~= "LeftButton" or n.effect == ORIGIN or not S.state.canSpend or Points(n.id) >= n.max
+            or not Reachable(n) or Left() <= 0 or S.state.spent < TierNeed(n) then
             return
         end
-        local dialog = StaticPopup_Show("GUILD_TALENTS_BUY", fmt(L.confirmBuy, EffectText(n.effect, n.amount)))
+        local dialog = StaticPopup_Show("GUILD_TALENTS_BUY", fmt(L.confirmBuy, EffectName(n.effect)))
         if dialog then dialog.data = n.id end
     end)
     UI.buttons[i] = b
@@ -662,8 +818,9 @@ Refresh = function()
         local e = EFFECT[n.effect]
         local c = KIND_COLOR[e and e.kind or 2]
         b.border:SetVertexColor(c[1], c[2], c[3])
-        b.rank:SetText(fmt("%d/%d", p, n.max))
-        local reach = Reachable(n)
+        b.rank:SetText(n.effect == ORIGIN and "" or fmt("%d/%d", p, n.max))
+        Shown(b.rankBg, n.effect ~= ORIGIN)
+        local reach = Reachable(n) and S.state.spent >= TierNeed(n)
         if p > 0 then
             b.icon:SetDesaturated(false); b.icon:SetVertexColor(1, 1, 1)
             b.rank:SetTextColor(p >= n.max and 1 or 0.2, p >= n.max and 0.82 or 1, p >= n.max and 0 or 0.2)
@@ -913,7 +1070,8 @@ function GUILD_TALENTS_ON_BUFF_TOOLTIP(tip, unit, index, filter)
     if #order == 0 then return end
     tip:AddLine(" ")
     for _, effect in ipairs(order) do
-        tip:AddLine(EffectText(effect, totals[effect]), 0.2, 1, 0.2, true)
+        local t = totals[effect]
+        tip:AddLine(EffectText(effect, t.amount, t.chance, t.cooldown), 0.2, 1, 0.2, true)
     end
     tip:Show()
 end

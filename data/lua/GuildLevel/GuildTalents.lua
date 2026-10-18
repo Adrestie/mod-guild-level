@@ -54,18 +54,22 @@ local function Settings()
         rank = math.min(9, Conf("GuildLevel.Talents.Rank", 1)),
         cost = Conf("GuildLevel.Talents.Reset.Cost", 5000),
         decrease = math.max(0, Conf("GuildLevel.Talents.Reset.Decrease", 10)),
+        tier2 = Conf("GuildLevel.Talents.Tier2.Points", 10),
+        tier3 = Conf("GuildLevel.Talents.Tier3.Points", 25),
     }
 end
 
 -- The tree: nodes and links.
 local function Tree()
     local nodes, links = {}, {}
-    local q = WorldDBQuery("SELECT id, x, y, effect, amount, max_points, start, icon FROM mod_guild_level_talent_node")
+    local q = WorldDBQuery("SELECT id, x, y, effect, amount, max_points, start, icon, chance, cooldown, tier "
+        .. "FROM mod_guild_level_talent_node")
     if q then
         repeat
             nodes[#nodes + 1] = {
                 id = q:GetUInt32(0), x = q:GetInt32(1), y = q:GetInt32(2), effect = q:GetUInt32(3),
                 amount = q:GetFloat(4), max = q:GetUInt32(5), start = q:GetUInt32(6) ~= 0, icon = q:GetString(7),
+                chance = q:GetFloat(8), cooldown = q:GetUInt32(9), tier = q:GetUInt32(10),
             }
         until not q:NextRow()
     end
@@ -85,7 +89,7 @@ local function State(player)
     local state = {
         guild = guildId ~= 0, name = player:GetGuildName() or "", points = {}, earned = 0, spent = 0,
         price = s.cost, canSpend = false, canEdit = player:GetGMRank() >= ADMIN_RANK, enable = s.enable,
-        rank = s.rank, level = 0, paragon = 0,
+        rank = s.rank, level = 0, paragon = 0, tiers = { 0, s.tier2, math.max(s.tier2, s.tier3) },
     }
     if guildId == 0 then
         return state
@@ -158,16 +162,21 @@ end
 
 local function Int(v) v = tonumber(v); return v and math.floor(v) or nil end
 
-function Handlers.Add(player, x, y, effect, amount, max)
-    x, y, effect, amount, max = Int(x), Int(y), Int(effect), tonumber(amount), Int(max)
-    if not Admin(player) or not (x and y and effect and amount and max) then return end
-    Run(player, fmt("gtalent node add %d %d %d %s %d", x, y, effect, fmt("%g", amount), max))
+-- chance (%), cooldown (seconds) and tier follow the maximum.
+local function Extra(chance, cooldown, tier)
+    return fmt("%s %d %d", fmt("%g", tonumber(chance) or 0), Int(cooldown) or 0, Int(tier) or 1)
 end
 
-function Handlers.Set(player, id, effect, amount, max)
+function Handlers.Add(player, x, y, effect, amount, max, chance, cooldown, tier)
+    x, y, effect, amount, max = Int(x), Int(y), Int(effect), tonumber(amount), Int(max)
+    if not Admin(player) or not (x and y and effect and amount and max) then return end
+    Run(player, fmt("gtalent node add %d %d %d %s %d %s", x, y, effect, fmt("%g", amount), max, Extra(chance, cooldown, tier)))
+end
+
+function Handlers.Set(player, id, effect, amount, max, chance, cooldown, tier)
     id, effect, amount, max = Int(id), Int(effect), tonumber(amount), Int(max)
     if not Admin(player) or not (id and effect and amount and max) then return end
-    Run(player, fmt("gtalent node set %d %d %s %d", id, effect, fmt("%g", amount), max))
+    Run(player, fmt("gtalent node set %d %d %s %d %s", id, effect, fmt("%g", amount), max, Extra(chance, cooldown, tier)))
 end
 
 function Handlers.Move(player, id, x, y)

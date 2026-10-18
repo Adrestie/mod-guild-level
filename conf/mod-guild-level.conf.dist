@@ -230,6 +230,8 @@ GuildLevel.House.EmptyDelay       = 60
 #    GuildLevel.Talents.Rank            the members of guild rank 0 (the guild
 #                                       master) to this one spend the points
 #                                       and reset them: 1 = the officers.
+#    GuildLevel.Talents.Tier2.Points    points the guild must have spent before
+#    GuildLevel.Talents.Tier3.Points    a talent of tier 2, of tier 3, is bought.
 #
 #    A RESET gives every point back and costs gold from the guild bank:
 #    GuildLevel.Talents.Reset.Cost      gold, the first time.
@@ -242,6 +244,8 @@ GuildLevel.Talents.Enable          = 1
 GuildLevel.Talents.FromLevel       = 10
 GuildLevel.Talents.PointsPerLevel  = 1
 GuildLevel.Talents.Rank            = 1
+GuildLevel.Talents.Tier2.Points    = 10
+GuildLevel.Talents.Tier3.Points    = 25
 GuildLevel.Talents.Reset.Cost      = 5000
 GuildLevel.Talents.Reset.Increase  = 10
 GuildLevel.Talents.Reset.Decrease  = 10

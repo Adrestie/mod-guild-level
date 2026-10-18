@@ -11,14 +11,25 @@
 --             (ratings), 15 attack power, 16 spell power, 17 mana per 5 sec.,
 --             18 defense, 19 dodge, 20 parry, 21 block, 22 resilience
 --             (ratings), 23 armor, 24 spell penetration, 25 resistance to all
---             schools, 26 health, 27 mana;
+--             schools, 26 health, 27 mana, 28 healing power, 29 spell damage;
 --             40 % damage done, 41 % healing done, 42 % less damage taken,
 --             43 % maximum health, 44 % run speed, 45 % experience, 46 % honor,
 --             47 % reputation, 48 % mounted speed, 49 % off vendors and
 --             repairs, 50 % of looted gold to the guild bank, 51 % chance of a
 --             lucky gathering, 52 minutes on flasks, elixirs and food,
---             53 minutes off the Hearthstone.
+--             53 minutes off the Hearthstone, 54 % critical damage;
+--             60 the origin: no effect, always held, the tree starts from it;
+--             with a chance and an internal cooldown: 61 a hit ignores % of
+--             armor (3 s), 62 a hit gives % damage (10 s), 63 a melee hit
+--             gives extra attacks, 64 a block gives a shield of % of maximum
+--             health, 65 a parry strikes back for % of maximum health, 66 a
+--             dodge gives % less damage taken (5 s, up to 5 times), 67 a spell
+--             makes the next one free, 68 instant, 69 a hit or a spell gives
+--             rage, energy or runic power (a fifth of it as % of mana).
 --   `amount`  per point; `max_points` how many points the node takes.
+--   `chance`  % (effects 61-69), `cooldown` seconds between two procs.
+--   `tier`    1 to 3: the points the guild must have spent first
+--             (GuildLevel.Talents.Tier2.Points, Tier3.Points).
 --   `start`   1: bought without a neighbour.
 --   `icon`    a texture path; empty, the effect's own.
 --
@@ -31,6 +42,9 @@ CREATE TABLE IF NOT EXISTS `mod_guild_level_talent_node` (
   `effect` TINYINT UNSIGNED NOT NULL,
   `amount` FLOAT NOT NULL DEFAULT 0 COMMENT 'per point',
   `max_points` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `chance` FLOAT NOT NULL DEFAULT 0 COMMENT '%, the effects that proc',
+  `cooldown` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'seconds between two procs',
+  `tier` TINYINT UNSIGNED NOT NULL DEFAULT 1,
   `start` TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `icon` VARCHAR(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
@@ -50,8 +64,8 @@ INSERT INTO `command` (`name`, `security`, `help`) VALUES
 ('gtalent', 0, 'Syntax: .gtalent\n\nThe talent points of your guild and what it bought. The talent window (the button of the guild window) does the same and more.'),
 ('gtalent buy', 0, 'Syntax: .gtalent buy $node\n\nPuts a point of your guild into the node: the guild master and the officers only.'),
 ('gtalent reset', 0, 'Syntax: .gtalent reset [confirm]\n\nThe price of a reset; with confirm, gives back every point of your guild, paid from the guild bank. The guild master and the officers only.'),
-('gtalent node add', 3, 'Syntax: .gtalent node add $x $y $effect $amount $maxpoints\n\nA new node of the tree (effects: see data/sql/world/guild_level_10_talents.sql).'),
-('gtalent node set', 3, 'Syntax: .gtalent node set $id $effect $amount $maxpoints\n\nChanges what a node gives.'),
+('gtalent node add', 3, 'Syntax: .gtalent node add $x $y $effect $amount $maxpoints [$chance $cooldown $tier]\n\nA new node of the tree (effects: see data/sql/world/guild_level_10_talents.sql).'),
+('gtalent node set', 3, 'Syntax: .gtalent node set $id $effect $amount $maxpoints [$chance $cooldown $tier]\n\nChanges what a node gives.'),
 ('gtalent node move', 3, 'Syntax: .gtalent node move $id $x $y'),
 ('gtalent node start', 3, 'Syntax: .gtalent node start $id 0|1\n\nWhether the node can be bought without a neighbour.'),
 ('gtalent node icon', 3, 'Syntax: .gtalent node icon $id [$texture]\n\nThe node''s icon; none, the effect''s own.'),
@@ -78,7 +92,8 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level', 162, '  talent {}: {}/{}, +{} {}'),
 ('mod-guild-level', 163, 'A reset costs {} gold.'),
 ('mod-guild-level', 164, 'Talent {} saved.'),
-('mod-guild-level', 165, 'Nothing changed: unknown talent or values that do not hold.');
+('mod-guild-level', 165, 'Nothing changed: unknown talent or values that do not hold.'),
+('mod-guild-level', 166, 'Your guild has not spent enough points yet for this tier of talents.');
 
 DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 150 AND 169;
 INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
@@ -97,4 +112,5 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 162, 'frFR', '  talent {} : {}/{}, +{} {}'),
 ('mod-guild-level', 163, 'frFR', 'Une réinitialisation coûte {} po.'),
 ('mod-guild-level', 164, 'frFR', 'Talent {} enregistré.'),
-('mod-guild-level', 165, 'frFR', 'Rien de changé : talent inconnu ou valeurs incorrectes.');
+('mod-guild-level', 165, 'frFR', 'Rien de changé : talent inconnu ou valeurs incorrectes.'),
+('mod-guild-level', 166, 'frFR', 'Votre guilde n''a pas encore dépensé assez de points pour ce palier de talents.');

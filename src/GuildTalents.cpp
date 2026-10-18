@@ -60,14 +60,21 @@ namespace
         { GT_DEFENSE, "Defense rating" }, { GT_DODGE, "Dodge rating" }, { GT_PARRY, "Parry rating" },
         { GT_BLOCK, "Block rating" }, { GT_RESILIENCE, "Resilience rating" }, { GT_ARMOR, "Armor" },
         { GT_SPELL_PEN, "Spell penetration" }, { GT_RESISTANCE, "Resistance to all schools" },
-        { GT_HEALTH, "Health" }, { GT_MANA, "Mana" },
+        { GT_HEALTH, "Health" }, { GT_MANA, "Mana" }, { GT_HEALING_POWER, "Healing power" },
+        { GT_SPELL_DAMAGE, "Spell damage" },
         { GT_DAMAGE_PCT, "% damage done" }, { GT_HEALING_PCT, "% healing done" },
         { GT_DAMAGE_TAKEN_PCT, "% less damage taken" }, { GT_HEALTH_PCT, "% maximum health" },
         { GT_RUN_SPEED_PCT, "% run speed" }, { GT_XP_PCT, "% experience" }, { GT_HONOR_PCT, "% honor" },
         { GT_REPUTATION_PCT, "% reputation" }, { GT_MOUNT_SPEED_PCT, "% mounted speed" },
         { GT_VENDOR_PCT, "% off vendor prices and repairs" }, { GT_GOLD_TO_BANK_PCT, "% of looted gold to the guild bank" },
         { GT_GATHERING_PCT, "% chance of a lucky gathering" }, { GT_CONSUMABLE_MIN, "minutes on flasks, elixirs and food" },
-        { GT_HEARTHSTONE_MIN, "minutes off the Hearthstone" },
+        { GT_HEARTHSTONE_MIN, "minutes off the Hearthstone" }, { GT_CRIT_DAMAGE_PCT, "% critical damage" },
+        { GT_ORIGIN, "the origin" },
+        { GT_PROC_SUNDER, "% armor ignored after a hit" }, { GT_PROC_FERVOR, "% damage after a hit" },
+        { GT_PROC_EXTRA_HIT, "extra attacks after a melee hit" }, { GT_PROC_SHIELD, "% health shield after a block" },
+        { GT_PROC_RIPOSTE, "% health riposte after a parry" }, { GT_PROC_EVASION, "% less damage after a dodge" },
+        { GT_PROC_FREE_SPELL, "free spell after a spell" }, { GT_PROC_INSTANT_SPELL, "instant spell after a spell" },
+        { GT_PROC_RESOURCE, "resource after a hit or a spell" },
     };
 
     char const* NameOf(GuildTalentEffect effect)
@@ -153,13 +160,15 @@ namespace
                 break;
             case GT_HEALTH: p->HandleStatFlatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, amount, apply); break;
             case GT_MANA:   p->HandleStatFlatModifier(UNIT_MOD_MANA, TOTAL_VALUE, amount, apply); break;
+            case GT_HEALING_POWER: p->ApplySpellHealingBonus(v, apply); break;
+            case GT_SPELL_DAMAGE:  p->ApplySpellDamageBonus(v, apply); break;
             default: break;
         }
     }
 
     bool IsStat(GuildTalentEffect effect)
     {
-        return effect >= GT_STAMINA && effect <= GT_MANA;
+        return effect >= GT_STAMINA && effect <= GT_SPELL_DAMAGE;
     }
 
     GuildTalentPlayerData const* DataOf(Unit const* unit)
@@ -189,8 +198,15 @@ bool IsGuildTalentEffect(uint32 effect)
     return false;
 }
 
+bool IsProc(GuildTalentEffect effect)
+{
+    return effect > GT_ORIGIN;
+}
+
 GuildTalentKind KindOf(GuildTalentEffect effect)
 {
+    if (effect == GT_ORIGIN)
+        return GT_KIND_ORIGIN;
     if (effect < GT_CRIT)
         return GT_KIND_MAIN;
     if (effect < GT_DAMAGE_PCT)
@@ -214,6 +230,9 @@ void GuildTalentMgr::LoadConfig()
     c.resetCost = sConfigMgr->GetOption<uint32>("GuildLevel.Talents.Reset.Cost", 5000);
     c.resetIncrease = std::max(sConfigMgr->GetOption<float>("GuildLevel.Talents.Reset.Increase", 10.0f), 0.0f);
     c.resetDecrease = std::max(sConfigMgr->GetOption<float>("GuildLevel.Talents.Reset.Decrease", 10.0f), 0.0f);
+    c.tierPoints[0] = 0;
+    c.tierPoints[1] = sConfigMgr->GetOption<uint32>("GuildLevel.Talents.Tier2.Points", 10);
+    c.tierPoints[2] = std::max(sConfigMgr->GetOption<uint32>("GuildLevel.Talents.Tier3.Points", 25), c.tierPoints[1]);
 
     std::lock_guard<std::mutex> guard(_lock);
     _config = c;
@@ -223,7 +242,8 @@ void GuildTalentMgr::LoadTree()
 {
     std::map<uint32, GuildTalentNode> tree;
     if (QueryResult result = WorldDatabase.Query(
-            "SELECT `id`, `x`, `y`, `effect`, `amount`, `max_points`, `start`, `icon` FROM `mod_guild_level_talent_node`"))
+            "SELECT `id`, `x`, `y`, `effect`, `amount`, `max_points`, `start`, `icon`, `chance`, `cooldown`, `tier` "
+            "FROM `mod_guild_level_talent_node`"))
     {
         do
         {
@@ -243,6 +263,11 @@ void GuildTalentMgr::LoadTree()
             node.maxPoints = std::max<uint8>(f[5].Get<uint8>(), 1);
             node.start = f[6].Get<uint8>() != 0;
             node.icon = f[7].Get<std::string>();
+            node.chance = f[8].Get<float>();
+            node.cooldown = f[9].Get<uint32>();
+            node.tier = uint8(std::clamp<uint32>(f[10].Get<uint8>(), 1, GUILD_TALENT_TIERS));
+            if (node.effect == GT_ORIGIN)
+                node.maxPoints = 1;
             tree[node.id] = node;
         } while (result->NextRow());
     }
@@ -307,14 +332,26 @@ void GuildTalentMgr::LoadGuilds()
 
 void GuildTalentMgr::Total(uint32 guildId)
 {
-    std::array<float, GT_EFFECT_END> totals{};
+    GuildTalentTotals totals;
     auto itr = _guilds.find(guildId);
     if (itr != _guilds.end())
         for (auto const& [nodeId, points] : itr->second.points)
         {
             auto node = _tree.find(nodeId);
-            if (node != _tree.end())
-                totals[node->second.effect] += node->second.amount * std::min(points, node->second.maxPoints);
+            if (node == _tree.end() || node->second.effect == GT_ORIGIN)
+                continue;
+            GuildTalentNode const& n = node->second;
+            uint8 const held = std::min(points, n.maxPoints);
+            if (!held)
+                continue;
+            totals.amount[n.effect] += n.amount * held;
+            // Two nodes of one effect that procs: the better chance, the shorter cooldown.
+            if (IsProc(n.effect))
+            {
+                bool const first = totals.chance[n.effect] == 0.0f;
+                totals.chance[n.effect] = std::max(totals.chance[n.effect], n.chance);
+                totals.cooldown[n.effect] = first ? n.cooldown : std::min(totals.cooldown[n.effect], n.cooldown);
+            }
         }
     _totals[guildId] = totals;
 }
@@ -395,6 +432,9 @@ GuildTalentResult GuildTalentMgr::Buy(Player* player, uint32 nodeId)
         if (node == _tree.end())
             return GuildTalentResult::NoNode;
 
+        if (node->second.effect == GT_ORIGIN)
+            return GuildTalentResult::Full;
+
         GuildTalentState& state = _guilds[guildId];
         uint8& points = state.points[nodeId];
         if (points >= node->second.maxPoints)
@@ -406,11 +446,13 @@ GuildTalentResult GuildTalentMgr::Buy(Player* player, uint32 nodeId)
 
         // A start node, a node already holding a point, or one linked to a
         // node that holds one.
+        // The origin always holds its point.
         bool reachable = node->second.start || points > 0;
         for (uint32 other : node->second.links)
         {
             auto held = state.points.find(other);
-            if (held != state.points.end() && held->second > 0)
+            auto def = _tree.find(other);
+            if ((held != state.points.end() && held->second > 0) || (def != _tree.end() && def->second.effect == GT_ORIGIN))
                 reachable = true;
         }
         if (!reachable)
@@ -423,6 +465,12 @@ GuildTalentResult GuildTalentMgr::Buy(Player* player, uint32 nodeId)
         uint32 spent = 0;
         for (auto const& [id, p] : state.points)
             spent += p;
+        if (spent < _config.tierPoints[node->second.tier - 1])
+        {
+            if (!points)
+                state.points.erase(nodeId);
+            return GuildTalentResult::Tier;
+        }
         if (spent >= earned)
         {
             if (!points)
@@ -506,7 +554,7 @@ void GuildTalentMgr::DeleteGuild(uint32 guildId)
 float GuildTalentMgr::AmountLocked(uint32 guildId, GuildTalentEffect effect) const
 {
     auto itr = _totals.find(guildId);
-    return itr != _totals.end() ? itr->second[effect] : 0.0f;
+    return itr != _totals.end() ? itr->second.amount[effect] : 0.0f;
 }
 
 float GuildTalentMgr::Amount(uint32 guildId, GuildTalentEffect effect) const
@@ -529,16 +577,18 @@ void GuildTalentMgr::Apply(Player* player)
     if (!player || !player->IsInWorld())
         return;
 
-    std::array<float, GT_EFFECT_END> totals{};
+    GuildTalentTotals all;
     if (_config.enable && player->GetGuildId())
     {
         std::lock_guard<std::mutex> guard(_lock);
         auto itr = _totals.find(player->GetGuildId());
         if (itr != _totals.end())
-            totals = itr->second;
+            all = itr->second;
     }
+    std::array<float, GT_EFFECT_END> const& totals = all.amount;
 
     GuildTalentPlayerData* data = player->CustomData.GetDefault<GuildTalentPlayerData>(PLAYER_DATA);
+    data->totals = all;
     bool changed = false;
     for (GuildTalentEffect effect : GuildTalentEffects())
     {
@@ -561,8 +611,19 @@ void GuildTalentMgr::Apply(Player* player)
     // The aura: shown while the guild has any point, with its run speed and
     // maximum health.
     bool any = false;
-    for (float amount : totals)
-        any = any || amount != 0.0f;
+    bool procs = false;
+    for (GuildTalentEffect effect : GuildTalentEffects())
+    {
+        any = any || totals[effect] != 0.0f;
+        procs = procs || (IsProc(effect) && totals[effect] != 0.0f && all.chance[effect] > 0.0f);
+    }
+
+    // The hidden aura that rolls the special effects.
+    if (!procs)
+        player->RemoveAurasDueToSpell(GUILD_TALENT_PROC_AURA);
+    else if (!player->HasAura(GUILD_TALENT_PROC_AURA) && sSpellMgr->GetSpellInfo(GUILD_TALENT_PROC_AURA))
+        player->AddAura(GUILD_TALENT_PROC_AURA, player);
+
     if (!any)
     {
         player->RemoveAurasDueToSpell(GUILD_TALENT_AURA);
@@ -579,8 +640,9 @@ void GuildTalentMgr::Apply(Player* player)
         aura = player->AddAura(GUILD_TALENT_AURA, player);
     if (!aura)
         return;
-    std::array<int32, 2> const amounts = { int32(std::lround(totals[GT_RUN_SPEED_PCT])),
-                                           int32(std::lround(totals[GT_HEALTH_PCT])) };
+    std::array<int32, 3> const amounts = { int32(std::lround(totals[GT_RUN_SPEED_PCT])),
+                                           int32(std::lround(totals[GT_HEALTH_PCT])),
+                                           int32(std::lround(totals[GT_CRIT_DAMAGE_PCT])) };
     for (uint8 i = 0; i < amounts.size(); ++i)
         if (AuraEffect* effect = aura->GetEffect(i))
             if (effect->GetAmount() != amounts[i])
@@ -641,12 +703,14 @@ void GuildTalentMgr::ModifyHeal(Unit* healer, uint32& heal)
 void GuildTalentMgr::SaveNode(GuildTalentNode const& node) const
 {
     WorldDatabase.DirectExecute(
-        "REPLACE INTO `mod_guild_level_talent_node` (`id`, `x`, `y`, `effect`, `amount`, `max_points`, `start`, `icon`) "
-        "VALUES ({}, {}, {}, {}, {}, {}, {}, '{}')",
-        node.id, node.x, node.y, uint32(node.effect), node.amount, uint32(node.maxPoints), node.start ? 1 : 0, node.icon);
+        "REPLACE INTO `mod_guild_level_talent_node` (`id`, `x`, `y`, `effect`, `amount`, `max_points`, `start`, `icon`, "
+        "`chance`, `cooldown`, `tier`) VALUES ({}, {}, {}, {}, {}, {}, {}, '{}', {}, {}, {})",
+        node.id, node.x, node.y, uint32(node.effect), node.amount, uint32(node.maxPoints), node.start ? 1 : 0, node.icon,
+        node.chance, node.cooldown, uint32(node.tier));
 }
 
-uint32 GuildTalentMgr::AddNode(int32 x, int32 y, GuildTalentEffect effect, float amount, uint8 maxPoints)
+uint32 GuildTalentMgr::AddNode(int32 x, int32 y, GuildTalentEffect effect, float amount, uint8 maxPoints,
+    float chance, uint32 cooldown, uint8 tier)
 {
     if (!IsGuildTalentEffect(effect) || !maxPoints)
         return 0;
@@ -661,9 +725,12 @@ uint32 GuildTalentMgr::AddNode(int32 x, int32 y, GuildTalentEffect effect, float
         node.y = y;
         node.effect = effect;
         node.amount = amount;
-        node.maxPoints = maxPoints;
+        node.maxPoints = effect == GT_ORIGIN ? 1 : maxPoints;
+        node.chance = std::clamp(chance, 0.0f, 100.0f);
+        node.cooldown = cooldown;
+        node.tier = uint8(std::clamp<uint32>(tier, 1, GUILD_TALENT_TIERS));
         // The first node of a tree is where it starts.
-        node.start = _tree.empty();
+        node.start = _tree.empty() && effect != GT_ORIGIN;
         _tree[node.id] = node;
     }
     SaveNode(node);
@@ -671,7 +738,8 @@ uint32 GuildTalentMgr::AddNode(int32 x, int32 y, GuildTalentEffect effect, float
     return node.id;
 }
 
-bool GuildTalentMgr::SetNode(uint32 id, GuildTalentEffect effect, float amount, uint8 maxPoints)
+bool GuildTalentMgr::SetNode(uint32 id, GuildTalentEffect effect, float amount, uint8 maxPoints,
+    float chance, uint32 cooldown, uint8 tier)
 {
     if (!IsGuildTalentEffect(effect) || !maxPoints)
         return false;
@@ -682,9 +750,14 @@ bool GuildTalentMgr::SetNode(uint32 id, GuildTalentEffect effect, float amount, 
         auto itr = _tree.find(id);
         if (itr == _tree.end())
             return false;
+        if (effect == GT_ORIGIN)
+            maxPoints = 1;
         itr->second.effect = effect;
         itr->second.amount = amount;
         itr->second.maxPoints = maxPoints;
+        itr->second.chance = std::clamp(chance, 0.0f, 100.0f);
+        itr->second.cooldown = cooldown;
+        itr->second.tier = uint8(std::clamp<uint32>(tier, 1, GUILD_TALENT_TIERS));
         node = itr->second;
         // Points above a lowered maximum go back to their guild.
         for (auto& [guildId, state] : _guilds)
@@ -842,4 +915,103 @@ void GuildTalentMgr::Show(ChatHandler* handler, uint32 guildId) const
             Acore::StringFormat("{:g}", node->second.amount * points), NameOf(node->second.effect));
     }
     Say(handler, GUILD_LEVEL_STR_TALENT_PRICE, ResetPrice(guildId));
+}
+
+bool GuildTalentMgr::CheckProc(Player* player, ProcEventInfo& /*eventInfo*/) const
+{
+    return player && _config.enable && player->CustomData.Get<GuildTalentPlayerData>(PLAYER_DATA);
+}
+
+void GuildTalentMgr::OnProc(Player* player, ProcEventInfo& eventInfo)
+{
+    GuildTalentPlayerData* data = player ? player->CustomData.Get<GuildTalentPlayerData>(PLAYER_DATA) : nullptr;
+    if (!data)
+        return;
+
+    uint32 const type = eventInfo.GetTypeMask();
+    uint32 const hit = eventInfo.GetHitMask();
+    uint32 const now = uint32(GameTime::GetGameTimeMS().count());
+
+    // The amount of an effect when it procs now (its chance, past its
+    // cooldown), else 0; a proc starts the cooldown.
+    auto roll = [&](GuildTalentEffect effect) -> float
+    {
+        float const amount = data->totals.amount[effect];
+        float const chance = data->totals.chance[effect];
+        if (amount <= 0.0f || chance <= 0.0f || now < data->nextProc[effect] || !roll_chance_f(chance))
+            return 0.0f;
+        data->nextProc[effect] = now + data->totals.cooldown[effect] * IN_MILLISECONDS;
+        return amount;
+    };
+    auto self = [player](uint32 spellId, int32 amount)
+    {
+        player->CastCustomSpell(player, spellId, &amount, nullptr, nullptr, true);
+    };
+    auto resource = [&]()
+    {
+        float const a = roll(GT_PROC_RESOURCE);
+        if (a <= 0.0f)
+            return;
+        switch (player->getPowerType())
+        {
+            case POWER_RAGE:        player->ModifyPower(POWER_RAGE, int32(a * 10)); break;
+            case POWER_RUNIC_POWER: player->ModifyPower(POWER_RUNIC_POWER, int32(a * 10)); break;
+            case POWER_ENERGY:      player->ModifyPower(POWER_ENERGY, int32(a)); break;
+            case POWER_MANA:        player->ModifyPower(POWER_MANA, int32(player->GetMaxPower(POWER_MANA) * a / 5.0f / 100.0f)); break;
+            default: break;
+        }
+    };
+
+    constexpr uint32 TAKEN_MELEE = PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS;
+    constexpr uint32 DONE_MELEE = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS;
+    constexpr uint32 DONE_ATTACK = DONE_MELEE | PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS;
+    constexpr uint32 DONE_SPELL = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG |
+        PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG;
+
+    // STRUCK: a block, a parry, a dodge.
+    if (type & TAKEN_MELEE)
+    {
+        if (hit & (PROC_HIT_BLOCK | PROC_HIT_FULL_BLOCK))
+            if (float const a = roll(GT_PROC_SHIELD))
+                self(GUILD_TALENT_SPELL_SHIELD, int32(player->GetMaxHealth() * a / 100.0f));
+        if (hit & PROC_HIT_PARRY)
+        {
+            Unit* attacker = eventInfo.GetActor();
+            if (attacker && attacker != player && attacker->IsAlive())
+                if (float const a = roll(GT_PROC_RIPOSTE))
+                {
+                    int32 damage = int32(player->GetMaxHealth() * a / 100.0f);
+                    player->CastCustomSpell(attacker, GUILD_TALENT_SPELL_RIPOSTE, &damage, nullptr, nullptr, true);
+                }
+        }
+        if (hit & PROC_HIT_DODGE)
+            if (float const a = roll(GT_PROC_EVASION))
+                self(GUILD_TALENT_SPELL_EVASION, -int32(std::lround(a)));
+        return;
+    }
+
+    // STRIKING: a hit that landed.
+    if ((type & DONE_ATTACK) && (hit & (PROC_HIT_NORMAL | PROC_HIT_CRITICAL | PROC_HIT_ABSORB)))
+    {
+        if (float const a = roll(GT_PROC_SUNDER))
+            self(GUILD_TALENT_SPELL_SUNDER, int32(std::lround(a)));
+        if (float const a = roll(GT_PROC_FERVOR))
+            self(GUILD_TALENT_SPELL_FERVOR, int32(std::lround(a)));
+        if (type & DONE_MELEE)
+            if (float const a = roll(GT_PROC_EXTRA_HIT))
+                player->AddExtraAttacks(std::max<uint32>(uint32(std::lround(a)), 1));
+        resource();
+        return;
+    }
+
+    // CASTING: a spell of the player's own (triggered spells do not proc).
+    if ((type & DONE_SPELL) && eventInfo.GetSpellInfo())
+    {
+        uint8 const playerClass = player->getClass();
+        if (roll(GT_PROC_FREE_SPELL) > 0.0f)
+            player->CastSpell(player, GUILD_TALENT_SPELL_FREE_BASE + playerClass, true);
+        if (roll(GT_PROC_INSTANT_SPELL) > 0.0f)
+            player->CastSpell(player, GUILD_TALENT_SPELL_INSTANT_BASE + playerClass, true);
+        resource();
+    }
 }
