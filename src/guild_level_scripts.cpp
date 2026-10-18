@@ -25,6 +25,7 @@
 #include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
+#include "GuildTalents.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -50,6 +51,7 @@ public:
         sGuildPerkMgr->LoadConfig();
         sGuildActivePerkMgr->LoadConfig();
         sGuildHouseMgr->LoadConfig();
+        sGuildTalentMgr->LoadConfig();
 
         // New amounts for the members online at once.
         if (reload)
@@ -62,6 +64,8 @@ public:
     {
         sGuildLevelMgr->LoadFromDB();
         sGuildHouseMgr->LoadFromDB();
+        sGuildTalentMgr->LoadTree();
+        sGuildTalentMgr->LoadGuilds();
     }
 
     void OnUpdate(uint32 diff) override
@@ -156,7 +160,11 @@ class GuildLevelUnitScript : public UnitScript
 public:
     GuildLevelUnitScript() : UnitScript("GuildLevelUnitScript", true,
         {
-            UNITHOOK_ON_AURA_APPLY
+            UNITHOOK_ON_AURA_APPLY,
+            UNITHOOK_MODIFY_MELEE_DAMAGE,
+            UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
+            UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
+            UNITHOOK_MODIFY_HEAL_RECEIVED
         }) { }
 
     // Flasks, elixirs and food buffs of guild members.
@@ -164,6 +172,31 @@ public:
     {
         if (Player* player = unit->ToPlayer())
             sGuildPerkMgr->OnAuraApply(player, aura);
+    }
+
+    // The talents' damage done and taken, and healing done.
+    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
+    {
+        sGuildTalentMgr->ModifyDamage(target, attacker, damage);
+    }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* /*spellInfo*/) override
+    {
+        if (damage <= 0)
+            return;
+        uint32 amount = uint32(damage);
+        sGuildTalentMgr->ModifyDamage(target, attacker, amount);
+        damage = int32(amount);
+    }
+
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* /*spellInfo*/) override
+    {
+        sGuildTalentMgr->ModifyDamage(target, attacker, damage);
+    }
+
+    void ModifyHealReceived(Unit* /*target*/, Unit* healer, uint32& heal, SpellInfo const* /*spellInfo*/) override
+    {
+        sGuildTalentMgr->ModifyHeal(healer, heal);
     }
 };
 
@@ -263,6 +296,7 @@ public:
     {
         sGuildLevelMgr->DeleteGuild(guild->GetId());
         sGuildHouseMgr->DeleteGuild(guild->GetId());
+        sGuildTalentMgr->DeleteGuild(guild->GetId());
     }
 };
 
@@ -295,6 +329,7 @@ public:
 
 void AddSC_guild_level_commands();
 void AddSC_guild_perk_commands();
+void AddSC_guild_talent_commands();
 
 void AddSC_guild_level_scripts()
 {
@@ -308,4 +343,5 @@ void AddSC_guild_level_scripts()
     new at_guild_level_house_exit();
     AddSC_guild_level_commands();
     AddSC_guild_perk_commands();
+    AddSC_guild_talent_commands();
 }

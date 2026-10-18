@@ -52,7 +52,35 @@ SPELLS = [
 ]
 
 
+# THE GUILD TALENTS' AURA: visible, on the members of a guild with talents, kept through death. Its
+# effects: run speed (0) and maximum health (1), set by the module; the tooltip's lines are the
+# talent window's client file's.
+TALENT_AURA = dict(id=92026, icon=1800,
+    name=dict(en='Guild Talents', fr='Talents de guilde', de='Gildentalente', es='Talentos de hermandad',
+              ru='Таланты гильдии'),
+    desc=dict(en="The talents of your guild.", fr='Les talents de votre guilde.', de='Die Talente Eurer Gilde.',
+              es='Los talentos de tu hermandad.', ru='Таланты вашей гильдии.'),
+    aura=dict(en="The talents of your guild grant:", fr='Les talents de votre guilde accordent :',
+              de='Die Talente Eurer Gilde gewähren:', es='Los talentos de tu hermandad otorgan:',
+              ru='Таланты вашей гильдии дают:'))
+
+
+def aura_fields(sp):
+    f = {0: sp['id'], 4: 0x80000000, 7: 0x100000, 28: 1, 35: 101, 40: 21, 46: 1, 68: -1,
+         71: 6, 72: 6, 73: 6, 74: 1, 75: 1, 76: 1, 80: -1, 81: -1, 82: -1, 86: 1, 87: 1, 88: 1,
+         95: 31, 96: 133, 97: 4, 133: sp['icon'], 216: ONE, 217: ONE, 218: ONE, 225: 1,
+         152: MASK, 169: MASK, 186: MASK, 203: MASK}
+    for loc, i in LOC.items():
+        lang = 'es' if loc == 'mx' else loc
+        f[136 + i] = sp['name'][lang]
+        f[170 + i] = sp['desc'][lang]
+        f[187 + i] = sp['aura'][lang]
+    return f
+
+
 def fields(sp):
+    if 'aura' in sp:
+        return aura_fields(sp)
     f = {
         0: sp['id'], 28: sp['cast'], 31: sp.get('interrupt', 0), 46: 1, 68: -1,
         71: 3, 74: 1, 86: 1, 216: ONE, 217: ONE, 218: ONE,
@@ -82,7 +110,7 @@ def sql():
         "AND table_name = 'spell_dbc' ORDER BY ORDINAL_POSITION;")]
     assert len(cols) == 234
     out = []
-    for sp in SPELLS:
+    for sp in SPELLS + [TALENT_AURA]:
         f = fields(sp)
         names = [cols[i] for i in sorted(f)]
         vals = []
@@ -100,7 +128,7 @@ def sql():
 
 
 if __name__ == '__main__':
-    ids = ', '.join(str(s['id']) for s in SPELLS)
+    ids = ', '.join(str(s['id']) for s in SPELLS + [TALENT_AURA])
     text = """-- mod-guild-level — the active perks as spells, in the General tab of the
 -- spellbook (spells %s, tranche 92 of the WoW-mods registry).
 --
@@ -109,7 +137,7 @@ if __name__ == '__main__':
 -- a dummy effect on the caster that does what its `.gperk` command does
 -- (spell_guild_level_perk); the module teaches them to the members of a guild
 -- of the level and sets their cooldowns. The guild house's spell has the
--- Hearthstone's 10-second cast.
+-- Hearthstone's 10-second cast. Spell 92026 is the guild talents' aura.
 --
 -- Idempotent: every row is deleted before being written again.
 
@@ -131,12 +159,13 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 
     p = r'E:\WoW-mods\mod-guild-level\installer.json'
     m = json.load(open(p, encoding='utf-8'))
-    rows = [{str(k): v for k, v in sorted(fields(sp).items())} for sp in SPELLS]
+    rows = [{str(k): v for k, v in sorted(fields(sp).items())} for sp in SPELLS + [TALENT_AURA]]
     m['dbc'] = [d for d in m['dbc'] if d['file'] != 'Spell.dbc'] + [{
         'file': 'Spell.dbc', 'fields': 234, 'text_fields': [[136, 151], [153, 168], [170, 185], [187, 202]],
         'client': True, 'server': False, 'rows': rows}]
     world = m['database']['world']['rows']
-    for r in ({'table': 'spell_dbc', 'where': 'ID BETWEEN 92021 AND 92025'},
+    world[:] = [r for r in world if r != {'table': 'spell_dbc', 'where': 'ID BETWEEN 92021 AND 92025'}]
+    for r in ({'table': 'spell_dbc', 'where': 'ID BETWEEN 92021 AND 92026'},
               {'table': 'spell_script_names', 'where': "ScriptName = 'spell_guild_level_perk'"}):
         if r not in world:
             world.insert(len(world) - 1, r)

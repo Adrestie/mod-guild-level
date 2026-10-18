@@ -54,8 +54,10 @@ namespace
 
     // A list of amounts, separated by spaces or commas. A short list repeats
     // its last value; a missing or unreadable one keeps the built-in curve.
-    template<std::size_t N>
-    void ReadCurve(std::array<uint64, N>& curve, char const* option, char const* fallback)
+    // A list of amounts, separated by spaces or commas, into `count` steps. A
+    // short list repeats its last value; a missing or unreadable one keeps the
+    // built-in curve.
+    std::vector<uint64> ReadCurve(char const* option, char const* fallback, std::size_t count)
     {
         auto parse = [](std::string text, std::vector<uint64>& out)
         {
@@ -79,11 +81,13 @@ namespace
             values.clear();
             parse(fallback, values);
         }
-        else if (values.size() > N)
-            LOG_ERROR("server.loading", "mod-guild-level: {} holds {} amounts, only the first {} are used.", option, values.size(), N);
+        else if (values.size() > count)
+            LOG_ERROR("server.loading", "mod-guild-level: {} holds {} amounts, only the first {} are used.", option, values.size(), count);
 
-        for (std::size_t i = 0; i < N; ++i)
+        std::vector<uint64> curve(count);
+        for (std::size_t i = 0; i < count; ++i)
             curve[i] = i < values.size() ? values[i] : values.back();
+        return curve;
     }
 }
 
@@ -101,17 +105,25 @@ void GuildLevelMgr::LoadConfig()
     c.minMembers = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.MinMembers", 2), 1);
     c.rate = std::max(sConfigMgr->GetOption<float>("GuildLevel.Rate", 1.0f), 0.0f);
     c.announce = sConfigMgr->GetOption<bool>("GuildLevel.Announce", true);
-    ReadCurve(c.levelXp, "GuildLevel.Curve.Levels", DEFAULT_LEVEL_CURVE);
-    ReadCurve(c.paragonXp, "GuildLevel.Curve.Paragon", DEFAULT_PARAGON_CURVE);
+    std::vector<uint64> const levels = ReadCurve("GuildLevel.Curve.Levels", DEFAULT_LEVEL_CURVE, GUILD_LEVEL_MAX);
+    std::copy(levels.begin(), levels.end(), c.levelXp.begin());
+    c.paragonMax = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Paragon.Max", 99), 1, GUILD_PARAGON_LIMIT));
+    c.paragonXp = ReadCurve("GuildLevel.Curve.Paragon", DEFAULT_PARAGON_CURVE, c.paragonMax);
     c.saveInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.SaveInterval", 10), 1);
 
     std::lock_guard<std::mutex> guard(_lock);
     _config = c;
 
     // A shorter curve may leave a guild with more than its step needs: it
-    // climbs at once, without announcement (the change is the server's).
+    // climbs at once, without announcement (the change is the server's). A
+    // lower Paragon.Max brings the guilds above it down to it.
     for (auto& [guildId, state] : _guilds)
     {
+        if (state.paragon > c.paragonMax)
+        {
+            state.paragon = c.paragonMax;
+            _changed.insert(guildId);
+        }
         Climb(guildId, state);
         _dirty.insert(guildId);
     }
@@ -140,7 +152,7 @@ void GuildLevelMgr::LoadFromDB()
             Field* fields = result->Fetch();
             GuildLevelState state;
             state.level = std::min<uint8>(fields[1].Get<uint8>(), GUILD_LEVEL_MAX);
-            state.paragon = state.level < GUILD_LEVEL_MAX ? 0 : std::min<uint8>(fields[2].Get<uint8>(), GUILD_PARAGON_MAX);
+            state.paragon = state.level < GUILD_LEVEL_MAX ? 0 : std::min<uint8>(fields[2].Get<uint8>(), _config.paragonMax);
             state.xp = fields[3].Get<uint64>();
             state.totalXp = fields[4].Get<uint64>();
             _guilds[fields[0].Get<uint32>()] = state;
@@ -161,7 +173,7 @@ uint64 GuildLevelMgr::Needed(GuildLevelState const& state) const
 {
     if (state.level < GUILD_LEVEL_MAX)
         return _config.levelXp[state.level];
-    if (state.paragon < GUILD_PARAGON_MAX)
+    if (state.paragon < _config.paragonMax)
         return _config.paragonXp[state.paragon];
     return 0;
 }
@@ -185,11 +197,11 @@ void GuildLevelMgr::Climb(uint32 guildId, GuildLevelState& state)
         {
             ++state.paragon;
             _announcements.push_back({ guildId,
-                state.paragon == GUILD_PARAGON_MAX ? GUILD_LEVEL_STR_PARAGON_MAX : GUILD_LEVEL_STR_PARAGON_UP, state.paragon });
+                state.paragon == _config.paragonMax ? GUILD_LEVEL_STR_PARAGON_MAX : GUILD_LEVEL_STR_PARAGON_UP, state.paragon });
         }
     }
 
-    // Paragon 9: the bar stays empty, only the lifetime total grows.
+    // The last Paragon level: the bar stays empty, only the lifetime total grows.
     state.xp = 0;
 }
 
@@ -273,7 +285,7 @@ GuildLevelState GuildLevelMgr::SetParagon(uint32 guildId, uint8 paragon)
     std::lock_guard<std::mutex> guard(_lock);
     GuildLevelState& state = _guilds[guildId];
     state.level = GUILD_LEVEL_MAX;
-    state.paragon = std::min(paragon, GUILD_PARAGON_MAX);
+    state.paragon = std::min(paragon, _config.paragonMax);
     _changed.insert(guildId);
     state.xp = 0;
     SaveNow(guildId, state);
