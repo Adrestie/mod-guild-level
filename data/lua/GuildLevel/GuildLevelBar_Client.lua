@@ -69,8 +69,9 @@ end
 local INFO
 local bars = {}
 local Update                                -- forward
-local FILL_LEVEL = "ui-hud-experiencebar-fill-reputation-faction-yellow-camelot"
-local FILL_PARAGON = "ui-hud-experiencebar-fill-experience-camelot"
+local GAUGE_BG = "common-stat-bar-bg"
+local GAUGE_FILL = "Interface\\ForeverUI\\Bars\\statbarfill"
+local GAUGE_H = 29                          -- ReputationTab.lua BAR_H
 
 Update = function(bar)
     local i = INFO
@@ -99,11 +100,20 @@ Update = function(bar)
     local fraction = i.need > 0 and math.min(i.xp / i.need, 1) or 1
     bar.value:SetText(i.need > 0 and fmt(L.xp, Big(i.xp), Big(i.need)) or L.max)
     if bar.fill then
-        -- ForeverUI's experience bar: the fill cropped to the fraction, gold for the levels
-        -- (the yellow of the reputation bar), the experience purple for the Paragon levels
-        local width = bar.track:GetWidth()
-        if width and width > 0 then
-            ForeverUI.SetAtlasFill(bar.fill, paragon and FILL_PARAGON or FILL_LEVEL, fraction, width)
+        -- the gauge's fill: cropped to the fraction, gold for the levels, purple past them
+        local width = bar.track:GetWidth() or 0
+        if fraction * width < 1 then
+            bar.fill:Hide()
+        else
+            bar.fill:SetTexture(GAUGE_FILL)
+            bar.fill:SetTexCoord(0, fraction, 0, 1)
+            bar.fill:SetWidth(width * fraction)
+            if paragon then bar.fill:SetVertexColor(0.62, 0.32, 0.95) else bar.fill:SetVertexColor(0.95, 0.72, 0.12) end
+            bar.fill:Show()
+        end
+        if bar.nextText then
+            bar.nextText:SetText(i.need > 0 and fmt(L.next, i.level < i.levelMax and fmt(L.nextLevel, i.level + 1)
+                or fmt(L.nextParagon, i.paragon + 1)) or "")
         end
     else
         bar.status:SetMinMaxValues(0, 1)
@@ -131,12 +141,19 @@ local function Tooltip(bar)
     GameTooltip:Show()
 end
 
-local function Make(parent, x, y, width)
+-- wide: ForeverUI's guild page, the band over the right pane (anchor: { point, relative,
+-- relativePoint, x, y } and a right edge), the gauge as long as the band.
+local function Make(parent, x, y, width, wide)
     if not parent or bars[parent] then return end
     local bar = CreateFrame("Frame", nil, parent)
-    bar:SetWidth(width)
     bar:SetHeight(40)
-    bar:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+    if wide then
+        bar:SetPoint("TOPLEFT", wide.left, wide.leftPoint, wide.x, wide.y)
+        bar:SetPoint("RIGHT", parent, "RIGHT", wide.right, 0)
+    else
+        bar:SetWidth(width)
+        bar:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+    end
     bar:SetFrameLevel(parent:GetFrameLevel() + 10)
     bar:EnableMouse(true)
     bar:SetScript("OnEnter", Tooltip)
@@ -160,26 +177,25 @@ local function Make(parent, x, y, width)
     bar.title = bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     bar.title:SetPoint("TOPLEFT", bar.ring, "TOPRIGHT", 4, -4)
 
-    if ForeverUI and ForeverUI.SetAtlas and ForeverUI.SetAtlasFill and ForeverUI.AtlasEntry(FILL_LEVEL) then
-        -- ForeverUI's experience bar (StatusBars.lua, camelot's StatusTrackingBar): background,
-        -- fill, frame over them, centred text; 13 high as camelot's image
+    if wide and ForeverUI and ForeverUI.CreateNineSlice and ForeverUI.AtlasEntry(GAUGE_BG) then
+        -- ForeverUI's reputation gauge (ReputationTab.lua): common-stat-bar-bg nine-sliced (its
+        -- rounded ends span 10 px of the art), the fill baked with camelot's mask
+        -- (Bars\statbarfill), cropped to the fraction and tinted; the text over it
         bar.track = CreateFrame("Frame", nil, bar)
-        bar.track:SetHeight(13)
-        bar.track:SetPoint("BOTTOMLEFT", bar.ring, "BOTTOMRIGHT", 4, 7)
-        bar.track:SetPoint("RIGHT", bar, "RIGHT", -2, 0)
-        local bg = bar.track:CreateTexture(nil, "BACKGROUND")
-        ForeverUI.SetAtlas(bg, "ui-hud-experiencebar-background-camelot", true)
-        bg:SetAllPoints(bar.track)
-        bar.fill = bar.track:CreateTexture(nil, "ARTWORK")
+        bar.track:SetHeight(GAUGE_H)
+        bar.track:SetPoint("LEFT", bar.ring, "RIGHT", 4, -6)
+        bar.track:SetPoint("RIGHT", bar, "RIGHT", 0, -6)
+        ForeverUI.CreateNineSlice(bar.track, GAUGE_BG, 10, { 0, 0, 0, 0 }, "BACKGROUND")
+        bar.fill = bar.track:CreateTexture(nil, "BORDER")
         bar.fill:SetPoint("LEFT", bar.track, "LEFT", 0, 0)
-        bar.fill:SetHeight(13)
-        local frame = bar.track:CreateTexture(nil, "OVERLAY")
-        ForeverUI.SetAtlas(frame, "ui-hud-experiencebar-frame-camelot", true)
-        frame:SetPoint("TOPLEFT", bar.track, "TOPLEFT", -2, 2)
-        frame:SetPoint("BOTTOMRIGHT", bar.track, "BOTTOMRIGHT", 2, -2)
-        bar.value = bar.track:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        bar.value:SetPoint("CENTER", bar.track, "CENTER", 0, 1)
+        bar.fill:SetHeight(15)
+        bar.value = bar.track:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        bar.value:SetPoint("CENTER", bar.track, "CENTER", 0, 0)
         bar.track:SetScript("OnSizeChanged", function() Update(bar) end)
+        bar.title:ClearAllPoints()
+        bar.title:SetPoint("BOTTOMLEFT", bar.track, "TOPLEFT", 4, 1)
+        bar.nextText = bar:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+        bar.nextText:SetPoint("BOTTOMRIGHT", bar.track, "TOPRIGHT", -4, 2)
     else
         bar.status = CreateFrame("StatusBar", nil, bar)
         bar.status:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
@@ -209,8 +225,10 @@ end
 local foreverGuild = _G.ForeverUI and _G.ForeverUI.Guild
 
 local function Attach()
-    if foreverGuild and foreverGuild.column then
-        Make(foreverGuild.column, 12, -76, 148)
+    if foreverGuild and foreverGuild.column and foreverGuild.frame then
+        -- the band over the right pane, past the chat's channel menu (GuildChat.lua: 195 + 160)
+        Make(foreverGuild.frame, 0, 0, 0, { left = foreverGuild.frame, leftPoint = "TOPLEFT", x = 372, y = -22,
+            right = -40 })
     else
         Make(_G.GuildFrame, 70, -38, 230)
     end
