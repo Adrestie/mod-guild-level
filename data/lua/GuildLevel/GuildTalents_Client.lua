@@ -863,7 +863,7 @@ end
 -- The places of the pieces: in a window of our own, and in ForeverUI's guild window (under its
 -- title bar, inside its border).
 WINDOW = { infoX = 24, infoY = -34, buttonX = 20, buttonY = 18, viewX = 18, viewTop = -56, viewBottom = 48 }
-EMBED = { infoX = 20, infoY = -30, buttonX = 16, buttonY = 12, viewX = 14, viewTop = -50, viewBottom = 40 }
+EMBED = { infoX = 10, infoY = -8, buttonX = 6, buttonY = 6, viewX = 6, viewTop = -28, viewBottom = 34 }
 
 local function Center()
     UI.panX = (UI.view:GetWidth() / UI.zoom - (UI.canvasW or 0)) / 2
@@ -879,7 +879,16 @@ local function Build(parent)
     UI.buttons, UI.lines = {}, {}
     UI.zoom, UI.panX, UI.panY = 1, 0, 0
     if UI.embedded then
-        UI:SetAllPoints(parent)
+        -- the right pane: from the guild column to the window's border, as ForeverUI's Guild Info
+        -- view (GuildInfo.lua: column TOPRIGHT (4, -40), frame BOTTOMRIGHT (-12, 30))
+        local G = _G.ForeverUI.Guild
+        UI:SetPoint("TOPLEFT", G.column or parent, G.column and "TOPRIGHT" or "TOPLEFT", 4, -40)
+        UI:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -12, 4)
+        if _G.ForeverUI.CreateInset then
+            UI.inset = _G.ForeverUI.CreateInset(UI, "GuildTalentsInset")
+            UI.inset:SetPoint("TOPLEFT", UI, "TOPLEFT", 0, -22)
+            UI.inset:SetPoint("BOTTOMRIGHT", UI, "BOTTOMRIGHT", 0, 30)
+        end
         -- the window's title says the guild; ours stays for the window of our own
         UI.titleText = UI:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         UI.titleText:Hide()
@@ -929,7 +938,7 @@ local function Build(parent)
         S.linkFrom = nil
         if not S.edit then UI.editor:Hide() end
         Refresh()
-        Center()
+        if UI.refit then UI.refit() else Center() end
     end)
 
     UI.help = UI:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -1007,28 +1016,72 @@ end
 -- tabs size it -- then takes its size back.
 local FUI = _G.ForeverUI and _G.ForeverUI.Guild and _G.ForeverUI.Guild.registerView and _G.ForeverUI
 local VIEW = "guildtalents"
-local savedSize
+-- The guild page's own size (camelot's Communities, GuildFrame.lua), never less.
+local PAGE_W, PAGE_H = 814, 426
 
-local function FitWindow()
-    local win = FUI and FUI.Social and FUI.Social.frame
-    if not (win and UI and S.tree) or InCombatLockdown() then return end
-    if not savedSize then savedSize = { win:GetWidth(), win:GetHeight() } end
+local function Window()
+    return FUI and FUI.Social and FUI.Social.frame
+end
+
+-- The size the view wants: the tree, plus what surrounds the pane (the guild column on the left,
+-- the title bar, the buttons), within the screen.
+local function Wanted()
+    local win = Window()
+    if not (win and UI and S.tree) then return end
     Layout()
     local M = EMBED
-    local w = (UI.canvasW or 0) + 2 * M.viewX + 8
-    local h = (UI.canvasH or 0) - M.viewTop + M.viewBottom + 8
+    local left = (UI:GetLeft() and win:GetLeft()) and (UI:GetLeft() - win:GetLeft()) or 180
+    local top = (UI:GetTop() and win:GetTop()) and (win:GetTop() - UI:GetTop()) or 40
+    local w = left + (UI.canvasW or 0) + 2 * M.viewX + 12 + 16
+    local h = top + (UI.canvasH or 0) - M.viewTop + M.viewBottom + 4 + 8
     local maxW, maxH = UIParent:GetWidth() * 0.92, UIParent:GetHeight() * 0.88
-    win:SetWidth(max(savedSize[1], min(w, maxW)))
-    win:SetHeight(max(savedSize[2], min(h, maxH)))
+    return max(PAGE_W, min(w, maxW)), max(PAGE_H, min(h, maxH))
+end
+
+-- While the view is shown, the window keeps the view's size: ForeverUI sets the guild page's
+-- size again whenever the page shows (a reopened window comes back on this view at the page's
+-- size), so the view puts its own back on the next frame, then centres the tree in the pane.
+local function Hold(self)
+    local win = Window()
+    if not win or not self.wantW or InCombatLockdown() then return end
+    if math.abs(win:GetWidth() - self.wantW) > 1 or math.abs(win:GetHeight() - self.wantH) > 1 then
+        win:SetWidth(self.wantW)
+        win:SetHeight(self.wantH)
+        self.recenter = 2
+        return
+    end
+    if self.recenter then
+        self.recenter = self.recenter - 1
+        if self.recenter <= 0 then
+            self.recenter = nil
+            Center()
+        end
+    end
+end
+
+local function FitWindow()
+    if not UI then return end
+    local w, h = Wanted()
+    if not w then return end
+    UI.wantW, UI.wantH = w, h
+    UI.recenter = 2
+    UI:SetScript("OnUpdate", Hold)
+end
+
+local function Refit()
+    if UI and UI.embedded and UI:IsVisible() then FitWindow() end
 end
 
 local function RestoreWindow()
-    local win = FUI and FUI.Social and FUI.Social.frame
-    if win and savedSize and not InCombatLockdown() then
-        win:SetWidth(savedSize[1])
-        win:SetHeight(savedSize[2])
+    local win = Window()
+    if UI then
+        UI.wantW, UI.wantH = nil, nil
+        UI:SetScript("OnUpdate", nil)
     end
-    savedSize = nil
+    if win and not InCombatLockdown() then
+        win:SetWidth(PAGE_W)
+        win:SetHeight(PAGE_H)
+    end
 end
 
 local function Show()
@@ -1056,12 +1109,12 @@ if FUI then
         tooltip = function() return L.title end,
         build = function(frame)
             Build(frame)
+            UI.refit = Refit
             UI:Show()
         end,
         show = function()
             Refresh()
             FitWindow()
-            Center()
             AIO.Handle("GuildTalents", "Refresh")
         end,
         hide = function()

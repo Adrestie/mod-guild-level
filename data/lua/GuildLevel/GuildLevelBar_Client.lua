@@ -68,8 +68,11 @@ end
 
 local INFO
 local bars = {}
+local Update                                -- forward
+local FILL_LEVEL = "ui-hud-experiencebar-fill-reputation-faction-yellow-camelot"
+local FILL_PARAGON = "ui-hud-experiencebar-fill-experience-camelot"
 
-local function Update(bar)
+Update = function(bar)
     local i = INFO
     if not i or not i.guild then
         bar:Hide()
@@ -86,21 +89,25 @@ local function Update(bar)
         bar.ring:SetVertexColor(0.85, 0.55, 1)
         bar.number:SetTextColor(0.9, 0.7, 1)
         bar.title:SetText(fmt(L.paragon, i.paragon))
-        bar.status:SetStatusBarColor(0.62, 0.3, 0.95)
+        if bar.status then bar.status:SetStatusBarColor(0.62, 0.3, 0.95) end
     else
         bar.ring:SetVertexColor(1, 1, 1)
         bar.number:SetTextColor(1, 0.82, 0)
         bar.title:SetText(fmt(L.level, i.level))
-        bar.status:SetStatusBarColor(0.9, 0.7, 0.15)
+        if bar.status then bar.status:SetStatusBarColor(0.9, 0.7, 0.15) end
     end
-    if i.need > 0 then
-        bar.status:SetMinMaxValues(0, i.need)
-        bar.status:SetValue(math.min(i.xp, i.need))
-        bar.value:SetText(fmt(L.xp, Big(i.xp), Big(i.need)))
+    local fraction = i.need > 0 and math.min(i.xp / i.need, 1) or 1
+    bar.value:SetText(i.need > 0 and fmt(L.xp, Big(i.xp), Big(i.need)) or L.max)
+    if bar.fill then
+        -- ForeverUI's experience bar: the fill cropped to the fraction, gold for the levels
+        -- (the yellow of the reputation bar), the experience purple for the Paragon levels
+        local width = bar.track:GetWidth()
+        if width and width > 0 then
+            ForeverUI.SetAtlasFill(bar.fill, paragon and FILL_PARAGON or FILL_LEVEL, fraction, width)
+        end
     else
         bar.status:SetMinMaxValues(0, 1)
-        bar.status:SetValue(1)
-        bar.value:SetText(L.max)
+        bar.status:SetValue(fraction)
     end
 end
 
@@ -153,16 +160,38 @@ local function Make(parent, x, y, width)
     bar.title = bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     bar.title:SetPoint("TOPLEFT", bar.ring, "TOPRIGHT", 4, -4)
 
-    bar.status = CreateFrame("StatusBar", nil, bar)
-    bar.status:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-    bar.status:SetHeight(12)
-    bar.status:SetPoint("BOTTOMLEFT", bar.ring, "BOTTOMRIGHT", 4, 6)
-    bar.status:SetPoint("RIGHT", bar, "RIGHT", 0, 0)
-    local bg = bar.status:CreateTexture(nil, "BACKGROUND")
-    bg:SetAllPoints()
-    bg:SetTexture(0, 0, 0, 0.6)
-    bar.value = bar.status:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    bar.value:SetPoint("CENTER")
+    if ForeverUI and ForeverUI.SetAtlas and ForeverUI.SetAtlasFill and ForeverUI.AtlasEntry(FILL_LEVEL) then
+        -- ForeverUI's experience bar (StatusBars.lua, camelot's StatusTrackingBar): background,
+        -- fill, frame over them, centred text; 13 high as camelot's image
+        bar.track = CreateFrame("Frame", nil, bar)
+        bar.track:SetHeight(13)
+        bar.track:SetPoint("BOTTOMLEFT", bar.ring, "BOTTOMRIGHT", 4, 7)
+        bar.track:SetPoint("RIGHT", bar, "RIGHT", -2, 0)
+        local bg = bar.track:CreateTexture(nil, "BACKGROUND")
+        ForeverUI.SetAtlas(bg, "ui-hud-experiencebar-background-camelot", true)
+        bg:SetAllPoints(bar.track)
+        bar.fill = bar.track:CreateTexture(nil, "ARTWORK")
+        bar.fill:SetPoint("LEFT", bar.track, "LEFT", 0, 0)
+        bar.fill:SetHeight(13)
+        local frame = bar.track:CreateTexture(nil, "OVERLAY")
+        ForeverUI.SetAtlas(frame, "ui-hud-experiencebar-frame-camelot", true)
+        frame:SetPoint("TOPLEFT", bar.track, "TOPLEFT", -2, 2)
+        frame:SetPoint("BOTTOMRIGHT", bar.track, "BOTTOMRIGHT", 2, -2)
+        bar.value = bar.track:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        bar.value:SetPoint("CENTER", bar.track, "CENTER", 0, 1)
+        bar.track:SetScript("OnSizeChanged", function() Update(bar) end)
+    else
+        bar.status = CreateFrame("StatusBar", nil, bar)
+        bar.status:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+        bar.status:SetHeight(12)
+        bar.status:SetPoint("BOTTOMLEFT", bar.ring, "BOTTOMRIGHT", 4, 6)
+        bar.status:SetPoint("RIGHT", bar, "RIGHT", 0, 0)
+        local bg = bar.status:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetTexture(0, 0, 0, 0.6)
+        bar.value = bar.status:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        bar.value:SetPoint("CENTER")
+    end
 
     bars[parent] = bar
     Update(bar)
