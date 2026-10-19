@@ -1026,13 +1026,17 @@ listener:SetScript("OnEvent", function(_, event, prefix)
 end)
 
 -- ---------------------------------------------------------------------------
--- THE WAYS IN: /gtalent, and a button on the guild window (the stock one, or
--- ForeverUI's guild page).
+-- THE WAYS IN: /gtalent, and the guild window: a side tab on ForeverUI's (the
+-- place of camelot's Guild Benefits tab), a button on the stock one.
 -- ---------------------------------------------------------------------------
 
 SLASH_GUILDTALENTS1 = "/gtalent"
 SlashCmdList["GUILDTALENTS"] = function()
     if UI and UI:IsShown() then UI:Hide() else AIO.Handle("GuildTalents", "Open") end
+end
+
+local function Open()
+    AIO.Handle("GuildTalents", "Open")
 end
 
 local guildButtons = {}
@@ -1043,20 +1047,23 @@ local function AttachButton(parent, x, y)
     b:SetPoint("TOPRIGHT", parent, "TOPRIGHT", x, y)
     b:SetText(L.title)
     b:SetFrameLevel(parent:GetFrameLevel() + 10)
-    b:SetScript("OnClick", function() AIO.Handle("GuildTalents", "Open") end)
+    b:SetScript("OnClick", function() Open() end)
     guildButtons[parent] = b
 end
 
-local function AttachAll()
-    AttachButton(_G.GuildFrame, -44, -44)
-    AttachButton(_G.ForeverUISocialPage3, -40, -34)
+local foreverGuild = _G.ForeverUI and _G.ForeverUI.Guild
+if foreverGuild and foreverGuild.AddSideTab then
+    foreverGuild.AddSideTab({ key = "guildtalents", tooltip = L.title, onClick = Open })
+else
+    local function AttachAll()
+        AttachButton(_G.GuildFrame, -44, -44)
+    end
+    if FriendsFrame then
+        FriendsFrame:HookScript("OnShow", AttachAll)
+    end
+    if FriendsFrame_Update then hooksecurefunc("FriendsFrame_Update", AttachAll) end
+    AttachAll()
 end
-
-if FriendsFrame then
-    FriendsFrame:HookScript("OnShow", AttachAll)
-end
-if FriendsFrame_Update then hooksecurefunc("FriendsFrame_Update", AttachAll) end
-AttachAll()
 
 -- ---------------------------------------------------------------------------
 -- THE AURA'S TOOLTIP: the guild's effects, under the aura's own text.

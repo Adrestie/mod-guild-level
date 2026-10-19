@@ -26,7 +26,8 @@
     experience toward the next step; at the last Paragon level it stays full.
     Its tooltip: the lifetime experience, the step after, the maximum.
 
-    On the stock guild window and on ForeverUI's guild page alike.
+    On the stock guild window, or in ForeverUI's guild window (the guild
+    column, under the guild's name).
 ------------------------------------------------------------------------------]]
 
 local AIO = AIO or require("AIO")
@@ -176,14 +177,23 @@ function Handlers.Info(_, info)
     for _, bar in pairs(bars) do Update(bar) end
 end
 
+local foreverGuild = _G.ForeverUI and _G.ForeverUI.Guild
+
 local function Attach()
-    Make(_G.GuildFrame, 70, -38, 230)
-    Make(_G.ForeverUISocialPage3, 64, -60, 260)
+    if foreverGuild and foreverGuild.column then
+        Make(foreverGuild.column, 12, -76, 148)
+    else
+        Make(_G.GuildFrame, 70, -38, 230)
+    end
     Request()
 end
 
-if FriendsFrame then FriendsFrame:HookScript("OnShow", Attach) end
-if FriendsFrame_Update then hooksecurefunc("FriendsFrame_Update", Attach) end
+if foreverGuild and foreverGuild.frame then
+    foreverGuild.frame:HookScript("OnShow", Attach)
+else
+    if FriendsFrame then FriendsFrame:HookScript("OnShow", Attach) end
+    if FriendsFrame_Update then hooksecurefunc("FriendsFrame_Update", Attach) end
+end
 
 -- fresh after a level-up (the toast's message) and now and then while shown
 local listener = CreateFrame("Frame")
@@ -198,7 +208,8 @@ listener:SetScript("OnUpdate", function(_, e)
     elapsed = elapsed + e
     if elapsed < 15 then return end
     elapsed = 0
-    if FriendsFrame and FriendsFrame:IsShown() then Request() end
+    local window = foreverGuild and foreverGuild.frame or FriendsFrame
+    if window and window:IsShown() then Request() end
 end)
 
 Request()
