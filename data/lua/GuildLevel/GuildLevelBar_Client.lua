@@ -26,7 +26,7 @@
     experience toward the next step; at the last Paragon level it stays full.
     Its tooltip: the lifetime experience, the step after, the maximum.
 
-    On the stock guild window, or in ForeverUI's guild window (the guild
+    On the stock guild window, or in ForeverUI's guild page (the guild
     column, under the guild's name).
 ------------------------------------------------------------------------------]]
 

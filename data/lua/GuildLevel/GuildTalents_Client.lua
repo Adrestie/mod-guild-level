@@ -1106,7 +1106,7 @@ listener:SetScript("OnEvent", function(_, event, prefix)
 end)
 
 -- ---------------------------------------------------------------------------
--- THE WAYS IN: /gtalent, and the guild window: a side tab on ForeverUI's (the
+-- THE WAYS IN: /gtalent, and the guild window: a side tab on ForeverUI's guild page (the
 -- place of camelot's Guild Benefits tab), a button on the stock one.
 -- ---------------------------------------------------------------------------
 
