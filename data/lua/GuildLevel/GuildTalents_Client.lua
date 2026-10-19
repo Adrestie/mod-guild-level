@@ -127,7 +127,7 @@ local TEXTS = {
         confirmBuy = "Spend a point of the guild in |cffffd100%s|r?", confirmReset =
             "Reset the guild's talents? Every point comes back, and %s gold leave the guild bank.",
         yes = "Yes", no = "No", empty = "The tree is empty.",
-        rank = "Rank %d/%d", perPoint = "%s per point", now = "Now: %s", next = "Next rank: %s",
+        rank = "Rank %d/%d", nextRank = "Next rank:", perPoint = "%s per point", now = "Now: %s", next = "Next rank: %s",
         start = "Start talent", clickBuy = "Click to spend a point.", needLink = "Needs a linked talent that holds a point.",
         officers = "The guild master and the officers spend the points.", noPoints = "No talent point left.",
         full = "Complete.",
@@ -156,15 +156,15 @@ local TEXTS = {
             [53] = "%s minutes off the Hearthstone cooldown",
             [28] = "+%s healing power", [29] = "+%s spell damage", [54] = "+%s%% critical damage",
             [60] = "Origin",
-            [61] = "Your attacks have a {c}% chance to ignore {a}% of the target's armor for 3 sec.",
-            [62] = "Your attacks have a {c}% chance to increase your damage by {a}% for 10 sec.",
-            [63] = "Your melee hits have a {c}% chance to give you {a} extra attack(s).",
-            [64] = "Blocking has a {c}% chance to shield you for {a}% of your maximum health.",
-            [65] = "Parrying has a {c}% chance to strike back for {a}% of your maximum health.",
-            [66] = "Dodging has a {c}% chance to reduce damage taken by {a}% for 5 sec., up to 5 times.",
-            [67] = "Your spells have a {c}% chance to make your next spell free.",
-            [68] = "Your spells have a {c}% chance to make your next spell instant.",
-            [69] = "Your attacks and spells have a {c}% chance to give you {a} rage, energy or runic power, or {m}% of your mana.",
+            [61] = "Your attacks can make you ignore {a}% of the target's armor for 3 sec.",
+            [62] = "Your attacks can increase your damage by {a}% for 10 sec.",
+            [63] = "Your melee hits can give you {a} extra attack(s).",
+            [64] = "Blocking can shield you for {a}% of your maximum health.",
+            [65] = "Parrying can strike back for {a}% of your maximum health.",
+            [66] = "Dodging can reduce damage taken by {a}% for 5 sec., up to 5 times.",
+            [67] = "Your spells can make your next spell free.",
+            [68] = "Your spells can make your next spell instant.",
+            [69] = "Your attacks and spells can give you {a} rage, energy or runic power, or {m}% of your mana.",
         },
         names = {
             [28] = "Healing power", [29] = "Spell damage", [54] = "Critical damage", [60] = "Origin",
@@ -181,7 +181,7 @@ local TEXTS = {
         confirmBuy = "Dépenser un point de la guilde dans |cffffd100%s|r ?", confirmReset =
             "Réinitialiser les talents de la guilde ? Tous les points reviennent, et %s po sortent de la banque de guilde.",
         yes = "Oui", no = "Non", empty = "L'arbre est vide.",
-        rank = "Rang %d/%d", perPoint = "%s par point", now = "Actuellement : %s", next = "Rang suivant : %s",
+        rank = "Rang %d/%d", nextRank = "Rang suivant :", perPoint = "%s par point", now = "Actuellement : %s", next = "Rang suivant : %s",
         start = "Talent de départ", clickBuy = "Cliquez pour dépenser un point.",
         needLink = "Doit être relié à un talent qui a au moins un point.",
         officers = "Le maître de guilde et les officiers dépensent les points.", noPoints = "Plus aucun point de talent.",
@@ -214,15 +214,15 @@ local TEXTS = {
             [53] = "%s minutes de moins au temps de recharge de la pierre de foyer",
             [28] = "+%s à la puissance des soins", [29] = "+%s aux dégâts des sorts", [54] = "+%s%% aux dégâts critiques",
             [60] = "Origine",
-            [61] = "Vos attaques ont {c}% de chances d'ignorer {a}% de l'armure de la cible pendant 3 s.",
-            [62] = "Vos attaques ont {c}% de chances d'augmenter vos dégâts de {a}% pendant 10 s.",
-            [63] = "Vos coups en mêlée ont {c}% de chances de vous donner {a} attaque(s) supplémentaire(s).",
-            [64] = "Bloquer a {c}% de chances de vous protéger d'un bouclier de {a}% de vos points de vie maximum.",
-            [65] = "Parer a {c}% de chances de contre-attaquer pour {a}% de vos points de vie maximum.",
-            [66] = "Esquiver a {c}% de chances de réduire les dégâts subis de {a}% pendant 5 s, cumulable 5 fois.",
-            [67] = "Vos sorts ont {c}% de chances de rendre votre prochain sort gratuit.",
-            [68] = "Vos sorts ont {c}% de chances de rendre votre prochain sort instantané.",
-            [69] = "Vos attaques et vos sorts ont {c}% de chances de vous rendre {a} points de rage, d'énergie ou de puissance runique, ou {m}% de votre mana.",
+            [61] = "Vos attaques peuvent ignorer {a}% de l'armure de la cible pendant 3 s.",
+            [62] = "Vos attaques peuvent augmenter vos dégâts de {a}% pendant 10 s.",
+            [63] = "Vos coups en mêlée peuvent vous donner {a} attaque(s) supplémentaire(s).",
+            [64] = "Bloquer peut vous protéger d'un bouclier de {a}% de vos points de vie maximum.",
+            [65] = "Parer peut contre-attaquer pour {a}% de vos points de vie maximum.",
+            [66] = "Esquiver peut réduire les dégâts subis de {a}% pendant 5 s, cumulable 5 fois.",
+            [67] = "Vos sorts peuvent rendre votre prochain sort gratuit.",
+            [68] = "Vos sorts peuvent rendre votre prochain sort instantané.",
+            [69] = "Vos attaques et vos sorts peuvent vous rendre {a} points de rage, d'énergie ou de puissance runique, ou {m}% de votre mana.",
         },
         names = {
             [28] = "Puissance des soins", [29] = "Dégâts des sorts", [54] = "Dégâts critiques", [60] = "Origine",
@@ -251,7 +251,6 @@ local function EffectText(effect, amount, chance, cooldown)
     local text = L.effects[effect] or ("effect " .. effect .. ": %s")
     if text:find("{a}") or text:find("{c}") then
         text = text:gsub("{a}", Num(amount)):gsub("{c}", Num(chance or 0)):gsub("{m}", Num(amount / 5))
-        if cooldown and cooldown > 0 then text = text .. fmt(L.cooldownText, Num(cooldown)) end
         return text
     end
     if not text:find("%%s") then return text end
@@ -424,52 +423,32 @@ local function CursorGrid()
     return floor((px - UI.ox) / CELL + 0.5), floor((py - UI.oy) / CELL + 0.5)
 end
 
+-- The tooltip: the talent's name, what it gives now, and what its next rank gives. In edit mode,
+-- the node's number and place under it.
 local function NodeTooltip(button)
     local n = button.node
     if not n then return end
-    local e = EFFECT[n.effect]
     GameTooltip:SetOwner(button, "ANCHOR_RIGHT")
     local p = Points(n.id)
     GameTooltip:AddLine(EffectName(n.effect), 1, 1, 1)
-    if e then
-        local c = KIND_COLOR[e.kind]
-        GameTooltip:AddLine(L.kind[e.kind] .. (n.effect ~= ORIGIN and ("  -  " .. fmt(L.tier, n.tier or 1)) or ""),
-            c[1], c[2], c[3])
-    end
     if n.effect == ORIGIN then
         GameTooltip:AddLine(L.origin, 0.8, 0.8, 0.8, true)
-        if S.edit then GameTooltip:AddLine(fmt(L.node, n.id) .. fmt("  (%d, %d)", n.x, n.y), 0.5, 0.5, 0.5) end
-        GameTooltip:Show()
-        return
-    end
-    GameTooltip:AddLine(fmt(L.rank, p, n.max), 1, 0.82, 0)
-    if n.max > 1 then
-        GameTooltip:AddLine(fmt(L.perPoint, NodeText(n, 1)), 0.8, 0.8, 0.8, true)
-    end
-    if p > 0 then
-        GameTooltip:AddLine(fmt(L.now, NodeText(n, p)), 0.2, 1, 0.2, true)
-    end
-    if p < n.max then
-        GameTooltip:AddLine(p > 0 and fmt(L.next, NodeText(n, p + 1)) or NodeText(n, 1), 0.8, 0.8, 0.8, true)
-    end
-    if n.start then GameTooltip:AddLine(L.start, 1, 0.82, 0) end
-    local need = TierNeed(n)
-    if not S.edit and p < n.max and S.state.spent < need then
-        GameTooltip:AddLine(fmt(L.tierLocked, n.tier or 1, need), 1, 0.2, 0.2, true)
+    else
+        if p > 0 then
+            GameTooltip:AddLine(NodeText(n, p), 0.2, 1, 0.2, true)
+        end
+        if p < n.max then
+            if p > 0 then
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddLine(" ")
+            end
+            GameTooltip:AddLine(L.nextRank, 1, 0.82, 0)
+            GameTooltip:AddLine(NodeText(n, p + 1), 1, 1, 1, true)
+        end
     end
     if S.edit then
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine(fmt(L.node, n.id) .. fmt("  (%d, %d)", n.x, n.y), 0.5, 0.5, 0.5)
-    elseif p >= n.max then
-        GameTooltip:AddLine(L.full, 0.5, 0.5, 0.5)
-    elseif not Reachable(n) then
-        GameTooltip:AddLine(L.needLink, 1, 0.2, 0.2, true)
-    elseif not S.state.canSpend then
-        GameTooltip:AddLine(L.officers, 0.6, 0.6, 0.6, true)
-    elseif Left() <= 0 then
-        GameTooltip:AddLine(L.noPoints, 1, 0.2, 0.2)
-    else
-        GameTooltip:AddLine(L.clickBuy, 0.2, 1, 0.2)
     end
     GameTooltip:Show()
 end
