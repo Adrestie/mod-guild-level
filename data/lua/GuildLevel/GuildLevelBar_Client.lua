@@ -226,9 +226,9 @@ local foreverGuild = _G.ForeverUI and _G.ForeverUI.Guild
 
 local function Attach()
     if foreverGuild and foreverGuild.column and foreverGuild.frame then
-        -- the band over the right pane, past the chat's channel menu (GuildChat.lua: 195 + 160)
-        Make(foreverGuild.frame, 0, 0, 0, { left = foreverGuild.frame, leftPoint = "TOPLEFT", x = 372, y = -22,
-            right = -40 })
+        -- the band over the right pane, all its width: from the guild column to the side tabs
+        Make(foreverGuild.frame, 0, 0, 0, { left = foreverGuild.column, leftPoint = "TOPRIGHT", x = 10, y = -2,
+            right = -16 })
     else
         Make(_G.GuildFrame, 70, -38, 230)
     end
@@ -250,8 +250,18 @@ listener:SetScript("OnEvent", function(_, event, prefix)
     if event == "CHAT_MSG_ADDON" and prefix ~= "GuildLevel" then return end
     Request()
 end)
+-- The chat view has its channel menu in that band: the bar steps aside there.
+local function Aside()
+    local bar = foreverGuild and foreverGuild.frame and bars[foreverGuild.frame]
+    if not bar then return end
+    local chat = foreverGuild.current == "chat"
+    bar:SetAlpha(chat and 0 or 1)
+    bar:EnableMouse(not chat)
+end
+
 local elapsed = 0
 listener:SetScript("OnUpdate", function(_, e)
+    Aside()
     elapsed = elapsed + e
     if elapsed < 15 then return end
     elapsed = 0

@@ -863,7 +863,7 @@ end
 -- The places of the pieces: in a window of our own, and in ForeverUI's guild window (under its
 -- title bar, inside its border).
 WINDOW = { infoX = 24, infoY = -34, buttonX = 20, buttonY = 18, viewX = 18, viewTop = -56, viewBottom = 48 }
-EMBED = { infoX = 10, infoY = -8, buttonX = 6, buttonY = 6, viewX = 6, viewTop = -28, viewBottom = 34 }
+EMBED = { infoX = 12, infoY = -10, buttonX = 6, buttonY = 6, viewX = 6, viewTop = -6, viewBottom = 34 }
 
 local function Center()
     UI.panX = (UI.view:GetWidth() / UI.zoom - (UI.canvasW or 0)) / 2
@@ -886,7 +886,7 @@ local function Build(parent)
         UI:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -12, 4)
         if _G.ForeverUI.CreateInset then
             UI.inset = _G.ForeverUI.CreateInset(UI, "GuildTalentsInset")
-            UI.inset:SetPoint("TOPLEFT", UI, "TOPLEFT", 0, -22)
+            UI.inset:SetPoint("TOPLEFT", UI, "TOPLEFT", 0, 0)
             UI.inset:SetPoint("BOTTOMRIGHT", UI, "BOTTOMRIGHT", 0, 30)
         end
         -- the window's title says the guild; ours stays for the window of our own
@@ -920,7 +920,15 @@ local function Build(parent)
     end
     local M = UI.embedded and EMBED or WINDOW
 
-    UI.info = UI:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    -- in the page, the points sit inside the tree's frame, in its top left corner: on a frame
+    -- above the view, which covers the frame
+    local infoParent = UI
+    if UI.embedded then
+        infoParent = CreateFrame("Frame", nil, UI)
+        infoParent:SetAllPoints(UI)
+        infoParent:SetFrameLevel(UI:GetFrameLevel() + 30)
+    end
+    UI.info = infoParent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     UI.info:SetPoint("TOPLEFT", M.infoX, M.infoY)
 
     UI.reset = CreateFrame("Button", nil, UI, "UIPanelButtonTemplate")
