@@ -396,6 +396,8 @@ end
 local UI
 local Refresh                               -- forward
 
+local WINDOW, EMBED                         -- the places of the pieces (below)
+
 local KIND_COLOR = { [0] = { 1, 0.82, 0.2 }, [1] = { 0.35, 0.7, 1 }, [2] = { 0.8, 0.45, 1 }, [3] = { 1, 1, 1 } }
 
 StaticPopupDialogs["GUILD_TALENTS_BUY"] = {
@@ -858,54 +860,70 @@ local function ClampPan()
     UI.canvas:SetPoint("TOPLEFT", UI.view, "TOPLEFT", UI.panX, -UI.panY)
 end
 
+-- The places of the pieces: in a window of our own, and in ForeverUI's guild window (under its
+-- title bar, inside its border).
+WINDOW = { infoX = 24, infoY = -34, buttonX = 20, buttonY = 18, viewX = 18, viewTop = -56, viewBottom = 48 }
+EMBED = { infoX = 20, infoY = -30, buttonX = 16, buttonY = 12, viewX = 14, viewTop = -50, viewBottom = 40 }
+
 local function Center()
     UI.panX = (UI.view:GetWidth() / UI.zoom - (UI.canvasW or 0)) / 2
     UI.panY = (UI.view:GetHeight() / UI.zoom - (UI.canvasH or 0)) / 2
     ClampPan()
 end
 
-local function Build()
-    UI = CreateFrame("Frame", "GuildTalentsFrame", UIParent)
-    UI:SetSize(820, 600)
-    UI:SetPoint("CENTER")
-    UI:SetFrameStrata("HIGH")
-    UI:SetToplevel(true)
-    UI:SetMovable(true)
-    UI:EnableMouse(true)
-    UI:SetClampedToScreen(true)
-    UI:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", tile = true, tileSize = 32, edgeSize = 32,
-        insets = { left = 11, right = 12, top = 12, bottom = 11 } })
-    UI:RegisterForDrag("LeftButton")
-    UI:SetScript("OnDragStart", UI.StartMoving)
-    UI:SetScript("OnDragStop", UI.StopMovingOrSizing)
-    tinsert(UISpecialFrames, "GuildTalentsFrame")
+-- parent: the view frame of ForeverUI's guild window (the talents are a page of it), else nil (a
+-- window of their own).
+local function Build(parent)
+    UI = CreateFrame("Frame", "GuildTalentsFrame", parent or UIParent)
+    UI.embedded = parent ~= nil
     UI.buttons, UI.lines = {}, {}
     UI.zoom, UI.panX, UI.panY = 1, 0, 0
+    if UI.embedded then
+        UI:SetAllPoints(parent)
+        -- the window's title says the guild; ours stays for the window of our own
+        UI.titleText = UI:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        UI.titleText:Hide()
+    else
+        UI:SetSize(820, 600)
+        UI:SetPoint("CENTER")
+        UI:SetFrameStrata("HIGH")
+        UI:SetToplevel(true)
+        UI:SetMovable(true)
+        UI:EnableMouse(true)
+        UI:SetClampedToScreen(true)
+        UI:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", tile = true, tileSize = 32, edgeSize = 32,
+            insets = { left = 11, right = 12, top = 12, bottom = 11 } })
+        UI:RegisterForDrag("LeftButton")
+        UI:SetScript("OnDragStart", UI.StartMoving)
+        UI:SetScript("OnDragStop", UI.StopMovingOrSizing)
+        tinsert(UISpecialFrames, "GuildTalentsFrame")
 
-    local header = UI:CreateTexture(nil, "ARTWORK")
-    header:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
-    header:SetSize(360, 64)
-    header:SetPoint("TOP", 0, 12)
-    UI.titleText = UI:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    UI.titleText:SetPoint("TOP", header, "TOP", 0, -14)
+        local header = UI:CreateTexture(nil, "ARTWORK")
+        header:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
+        header:SetSize(360, 64)
+        header:SetPoint("TOP", 0, 12)
+        UI.titleText = UI:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        UI.titleText:SetPoint("TOP", header, "TOP", 0, -14)
 
-    local close = CreateFrame("Button", nil, UI, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", -6, -6)
+        local close = CreateFrame("Button", nil, UI, "UIPanelCloseButton")
+        close:SetPoint("TOPRIGHT", -6, -6)
+    end
+    local M = UI.embedded and EMBED or WINDOW
 
     UI.info = UI:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    UI.info:SetPoint("TOPLEFT", 24, -34)
+    UI.info:SetPoint("TOPLEFT", M.infoX, M.infoY)
 
     UI.reset = CreateFrame("Button", nil, UI, "UIPanelButtonTemplate")
     UI.reset:SetSize(200, 22)
-    UI.reset:SetPoint("BOTTOMLEFT", 20, 18)
+    UI.reset:SetPoint("BOTTOMLEFT", M.buttonX, M.buttonY)
     UI.reset:SetScript("OnClick", function()
         StaticPopup_Show("GUILD_TALENTS_RESET", fmt(L.confirmReset, S.state.price))
     end)
 
     UI.editButton = CreateFrame("Button", nil, UI, "UIPanelButtonTemplate")
     UI.editButton:SetSize(110, 22)
-    UI.editButton:SetPoint("BOTTOMRIGHT", -20, 18)
+    UI.editButton:SetPoint("BOTTOMRIGHT", -M.buttonX, M.buttonY)
     UI.editButton:SetScript("OnClick", function()
         S.edit = not S.edit
         S.linkFrom = nil
@@ -915,12 +933,12 @@ local function Build()
     end)
 
     UI.help = UI:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    UI.help:SetPoint("BOTTOM", 0, 24)
+    UI.help:SetPoint("BOTTOM", 0, M.buttonY + 6)
 
     -- the view: clips the canvas
     UI.view = CreateFrame("ScrollFrame", "GuildTalentsView", UI)
-    UI.view:SetPoint("TOPLEFT", 18, -56)
-    UI.view:SetPoint("BOTTOMRIGHT", -18, 48)
+    UI.view:SetPoint("TOPLEFT", M.viewX, M.viewTop)
+    UI.view:SetPoint("BOTTOMRIGHT", -M.viewX, M.viewBottom)
     local bg = UI.view:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints()
     bg:SetTexture(0, 0, 0, 0.45)
@@ -984,7 +1002,43 @@ local function Build()
     UI:Hide()
 end
 
+-- FOREVERUI: the talents are a view of its guild window, behind a side tab (camelot's Guild
+-- Benefits place), and the window grows to hold the tree while that view is shown -- as its own
+-- tabs size it -- then takes its size back.
+local FUI = _G.ForeverUI and _G.ForeverUI.Guild and _G.ForeverUI.Guild.registerView and _G.ForeverUI
+local VIEW = "guildtalents"
+local savedSize
+
+local function FitWindow()
+    local win = FUI and FUI.Social and FUI.Social.frame
+    if not (win and UI and S.tree) or InCombatLockdown() then return end
+    if not savedSize then savedSize = { win:GetWidth(), win:GetHeight() } end
+    Layout()
+    local M = EMBED
+    local w = (UI.canvasW or 0) + 2 * M.viewX + 8
+    local h = (UI.canvasH or 0) - M.viewTop + M.viewBottom + 8
+    local maxW, maxH = UIParent:GetWidth() * 0.92, UIParent:GetHeight() * 0.88
+    win:SetWidth(max(savedSize[1], min(w, maxW)))
+    win:SetHeight(max(savedSize[2], min(h, maxH)))
+end
+
+local function RestoreWindow()
+    local win = FUI and FUI.Social and FUI.Social.frame
+    if win and savedSize and not InCombatLockdown() then
+        win:SetWidth(savedSize[1])
+        win:SetHeight(savedSize[2])
+    end
+    savedSize = nil
+end
+
 local function Show()
+    if FUI then
+        -- the Social window on its guild page, our view in it
+        if not (FriendsFrame and FriendsFrame:IsShown()) and ToggleFriendsFrame then ToggleFriendsFrame(3) end
+        if FriendsFrame and FriendsFrame.selectedTab ~= 3 and FriendsFrameTab3 then FriendsFrameTab3:Click() end
+        FUI.Guild.setView(VIEW)
+        return
+    end
     if not UI then Build() end
     Refresh()
     if not UI:IsShown() then
@@ -993,6 +1047,31 @@ local function Show()
     else
         ClampPan()
     end
+end
+
+if FUI then
+    FUI.Guild.registerView(VIEW, {
+        order = 30,
+        icon = FUI.Guild.ICONS and FUI.Guild.ICONS.benefits or "Interface\\Icons\\Ability_Marksmanship",
+        tooltip = function() return L.title end,
+        build = function(frame)
+            Build(frame)
+            UI:Show()
+        end,
+        show = function()
+            Refresh()
+            FitWindow()
+            Center()
+            AIO.Handle("GuildTalents", "Refresh")
+        end,
+        hide = function()
+            if UI and UI.editor then UI.editor:Hide() end
+            RestoreWindow()
+        end,
+        update = function()
+            if UI then Refresh() end
+        end,
+    })
 end
 
 -- ---------------------------------------------------------------------------
@@ -1010,8 +1089,9 @@ end
 
 function Handlers.Update(_, tree, state)
     Take(tree, state)
-    if UI and UI:IsShown() then
+    if UI and UI:IsVisible() then
         Refresh()
+        if UI.embedded then FitWindow() end
         ClampPan()
     end
 end
@@ -1032,7 +1112,7 @@ end)
 
 SLASH_GUILDTALENTS1 = "/gtalent"
 SlashCmdList["GUILDTALENTS"] = function()
-    if UI and UI:IsShown() then UI:Hide() else AIO.Handle("GuildTalents", "Open") end
+    if UI and UI:IsVisible() and not UI.embedded then UI:Hide() else AIO.Handle("GuildTalents", "Open") end
 end
 
 local function Open()
@@ -1051,10 +1131,7 @@ local function AttachButton(parent, x, y)
     guildButtons[parent] = b
 end
 
-local foreverGuild = _G.ForeverUI and _G.ForeverUI.Guild
-if foreverGuild and foreverGuild.AddSideTab then
-    foreverGuild.AddSideTab({ key = "guildtalents", tooltip = L.title, onClick = Open })
-else
+if not FUI then
     local function AttachAll()
         AttachButton(_G.GuildFrame, -44, -44)
     end
