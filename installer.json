@@ -2,6 +2,9 @@
   "format": "wow-mods-installer/1",
   "module": "mod-guild-level",
   "title": "Guild Level",
+  "dependencies": [
+    "dynamicloot"
+  ],
   "fields": {
     "game": "required",
     "worldserver": "required",

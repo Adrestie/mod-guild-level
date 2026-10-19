@@ -88,6 +88,9 @@ public:
             // THIS LIST GATES THE CALLS: an overridden method missing from
             // here compiles and never fires.
             PLAYERHOOK_ON_GIVE_EXP,
+            PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST,
+            PLAYERHOOK_ON_CREATURE_KILL,
+            PLAYERHOOK_ON_CREATURE_KILLED_BY_PET,
             PLAYERHOOK_ON_LOGIN,
             PLAYERHOOK_ON_GIVE_REPUTATION,
             PLAYERHOOK_ON_GET_REPUTATION_PRICE_DISCOUNT,
@@ -109,6 +112,22 @@ public:
         if (xpSource == XPSOURCE_KILL && amount)
             sGuildLevelMgr->OnKillXP(player, victim);
         sGuildPerkMgr->OnGiveXP(player, amount);
+    }
+
+    // Guild experience from quests and bosses.
+    void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
+    {
+        sGuildLevelMgr->OnQuestComplete(player, quest);
+    }
+
+    void OnPlayerCreatureKill(Player* killer, Creature* killed) override
+    {
+        sGuildLevelMgr->OnCreatureKill(killer, killed);
+    }
+
+    void OnPlayerCreatureKilledByPet(Player* owner, Creature* killed) override
+    {
+        sGuildLevelMgr->OnCreatureKill(owner, killed);
     }
 
     void OnPlayerLogin(Player* player) override

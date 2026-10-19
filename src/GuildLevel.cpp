@@ -24,6 +24,8 @@
 #include "Config.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
+#include "DynamicLootFamilies.h"
+#include "DynamicLootSource.h"
 #include "Formulas.h"
 #include "Group.h"
 #include "Guild.h"
@@ -31,6 +33,7 @@
 #include "Log.h"
 #include "Player.h"
 #include "QueryResult.h"
+#include "QuestDef.h"
 #include "StringConvert.h"
 #include "StringFormat.h"
 #include "Timer.h"
@@ -49,6 +52,22 @@ namespace
         "20000 30000 45000 60000 80000 100000 125000 150000 180000 210000 "
         "250000 290000 330000 380000 430000 490000 550000 620000 700000 780000 "
         "870000 960000 1060000 1170000 1300000";
+    // The bosses' experience by DynamicLoot family, per guildmate present; a
+    // family missing here gives nothing (GuildLevel.Boss.<family>).
+    struct BossDefault
+    {
+        char const* family;
+        uint64 amount;
+    };
+    constexpr BossDefault BOSS_DEFAULTS[] =
+    {
+        { "VanillaDungeonBoss", 1000 }, { "VanillaRaidBoss", 5000 },
+        { "BcDungeonBoss", 2000 }, { "BcRaidBoss", 10000 },
+        { "WotlkDungeonBoss", 3000 }, { "WotlkHeroicBoss", 5000 },
+        { "WotlkRaidBoss", 15000 }, { "IcecrownRaidBoss", 25000 },
+        { "VanillaWorldBoss", 0 }, { "BcWorldBoss", 0 }, { "WotlkWorldBoss", 0 },
+    };
+
     constexpr char DEFAULT_PARAGON_CURVE[] =
         "1500000 1750000 2000000 2250000 2500000 2750000 3000000 3500000 4000000";
 
@@ -110,6 +129,15 @@ void GuildLevelMgr::LoadConfig()
     c.paragonMax = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Paragon.Max", 99), 1, GUILD_PARAGON_LIMIT));
     c.paragonXp = ReadCurve("GuildLevel.Curve.Paragon", DEFAULT_PARAGON_CURVE, c.paragonMax);
     c.saveInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.SaveInterval", 10), 1);
+    c.questRate = std::max(sConfigMgr->GetOption<float>("GuildLevel.Quest.Rate", 0.1f), 0.0f);
+    c.bossXp.assign(DynamicLootFamilyCount(), 0);
+    for (BossDefault const& boss : BOSS_DEFAULTS)
+    {
+        int32 const index = DynamicLootFamilyIndex(boss.family);
+        if (index < 0)
+            continue;
+        c.bossXp[index] = sConfigMgr->GetOption<uint64>(std::string("GuildLevel.Boss.") + boss.family, boss.amount);
+    }
 
     std::lock_guard<std::mutex> guard(_lock);
     _config = c;
@@ -242,6 +270,52 @@ void GuildLevelMgr::OnKillXP(Player* player, Unit* victim)
     uint64 const amount = uint64(std::llround(double(xp) * _config.rate));
     if (amount)
         AddXP(guildId, amount);
+}
+
+void GuildLevelMgr::OnQuestComplete(Player* player, Quest const* quest)
+{
+    if (!_config.enable || !player || !quest || !player->GetGuildId())
+        return;
+
+    // At the maximum level the quest pays gold instead: its experience is
+    // still what the guild earns.
+    uint64 const amount = uint64(std::llround(double(quest->XPValue(player->GetLevel())) * _config.questRate * _config.rate));
+    if (amount)
+        AddXP(player->GetGuildId(), amount);
+}
+
+void GuildLevelMgr::OnCreatureKill(Player* killer, Creature* creature)
+{
+    if (!_config.enable || !killer || !creature)
+        return;
+
+    DynamicLootContext context;
+    DynamicLootFillCreature(context, killer, creature);
+    if (!context.boss)
+        return;
+    uint32 const family = DynamicLootCreatureFamily(context);
+    uint64 const perMember = family < _config.bossXp.size() ? _config.bossXp[family] : 0;
+    if (!perMember)
+        return;
+
+    // The guildmates present: the killer's group within reward distance,
+    // alive, counted by guild. Every guild with enough of them earns the
+    // boss once per member present.
+    std::unordered_map<uint32, uint32> present;
+    if (Group* group = killer->GetGroup())
+    {
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            if (Player* member = itr->GetSource())
+                if (member->GetGuildId() && member->IsAlive() &&
+                    (member == killer || member->IsAtGroupRewardDistance(creature)))
+                    ++present[member->GetGuildId()];
+    }
+    else if (killer->GetGuildId())
+        present[killer->GetGuildId()] = 1;
+
+    for (auto const& [guildId, count] : present)
+        if (count >= _config.minMembers)
+            AddXP(guildId, uint64(std::llround(double(perMember) * count * _config.rate)));
 }
 
 GuildLevelState GuildLevelMgr::AddXP(uint32 guildId, uint64 amount)

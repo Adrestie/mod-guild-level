@@ -39,7 +39,9 @@
 #include <unordered_set>
 #include <vector>
 
+class Creature;
 class Player;
+class Quest;
 class Unit;
 
 constexpr char GUILD_LEVEL_MODULE[] = "mod-guild-level";
@@ -146,6 +148,13 @@ struct GuildLevelConfig
     std::vector<uint64> paragonXp;          // paragonMax amounts
 
     uint32 saveInterval = 10;               // seconds
+
+    // A quest completed by a member: its experience (at his level, even at
+    // the maximum level, where it is paid in gold) times this.
+    float questRate = 0.1f;
+    // A boss killed: this much per guildmate present, by DynamicLoot family
+    // (DynamicLootFamilyAt); 0 for the families that give nothing.
+    std::vector<uint64> bossXp;
 };
 
 struct GuildLevelState
@@ -175,6 +184,11 @@ public:
     // A member received kill experience (PlayerScript::OnPlayerGiveXP). Runs on
     // the map threads.
     void OnKillXP(Player* player, Unit* victim);
+    // A quest rewarded to a member (PlayerScript::OnPlayerCompleteQuest).
+    void OnQuestComplete(Player* player, Quest const* quest);
+    // A creature killed by a player or his pet: the bonus of a boss, for every
+    // guild with enough members present.
+    void OnCreatureKill(Player* killer, Creature* creature);
 
     // Experience earned by the guild: levels climbed are announced on the next
     // world tick. Returns what the guild became.
