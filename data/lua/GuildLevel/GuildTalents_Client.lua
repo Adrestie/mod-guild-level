@@ -427,13 +427,12 @@ end
 -- the node's number and place under it.
 local function NodeTooltip(button)
     local n = button.node
-    if not n then return end
+    -- the origin has no tooltip (in edit mode, its number and place only)
+    if not n or (n.effect == ORIGIN and not S.edit) then return end
     GameTooltip:SetOwner(button, "ANCHOR_RIGHT")
     local p = Points(n.id)
     GameTooltip:AddLine(EffectName(n.effect), 1, 1, 1)
-    if n.effect == ORIGIN then
-        GameTooltip:AddLine(L.origin, 0.8, 0.8, 0.8, true)
-    else
+    if n.effect ~= ORIGIN then
         if p > 0 then
             GameTooltip:AddLine(NodeText(n, p), 0.2, 1, 0.2, true)
         end
