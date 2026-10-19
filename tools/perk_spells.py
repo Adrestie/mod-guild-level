@@ -149,6 +149,15 @@ for cls, family in FAMILIES:
                       108, misc=10, base=-101, duration=8, charges=1, family=family, every_spell=True))
 
 
+# THE GUILD'S LEVEL-UP: spell 92028, cast by the module on every member online when the guild gains a
+# level; it does nothing but play SpellVisual 92028 once at the member's feet (tools/fx/build_fx.py).
+LEVELUP = {0: 92028, 28: 1, 35: 101, 46: 1, 68: -1, 71: 3, 74: 1, 80: -1, 86: 1, 131: 92028, 133: 1,
+           216: ONE, 217: ONE, 218: ONE, 225: 1, 152: MASK, 169: MASK, 186: MASK, 203: MASK}
+for _loc, _i in LOC.items():
+    LEVELUP[136 + _i] = {'en': 'Guild Level Up', 'fr': 'Niveau de guilde', 'de': 'Gildenstufenaufstieg',
+                         'es': 'Nivel de hermandad', 'mx': 'Nivel de hermandad', 'ru': 'Уровень гильдии'}[_loc]
+
+
 def fields(sp):
     if isinstance(sp, dict) and 0 in sp:
         return sp
@@ -179,11 +188,11 @@ def sql():
     server = core.Server(r'E:\Serveur\bin\RelWithDebInfo')
     dbs = core.open_databases(server, core.find_mysql(server, core.load_settings()))
     cols = [r[0] for r in dbs['world'].run(
-        "SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema = DATABASE() "
+        "SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema = 'acore_world' "
         "AND table_name = 'spell_dbc' ORDER BY ORDINAL_POSITION;")]
     assert len(cols) == 234
     out = []
-    for sp in SPELLS + [TALENT_AURA, PROC_AURA] + BUFFS:
+    for sp in SPELLS + [TALENT_AURA, PROC_AURA, LEVELUP] + BUFFS:
         f = fields(sp)
         names = [cols[i] for i in sorted(f)]
         vals = []
@@ -204,7 +213,7 @@ def sql():
 
 if __name__ == '__main__':
     ids = ', '.join(str(s['id']) for s in SPELLS + [TALENT_AURA]) + ', ' + \
-        ', '.join(str(b[0]) for b in [PROC_AURA] + BUFFS)
+        ', '.join(str(b[0]) for b in [PROC_AURA, LEVELUP] + BUFFS)
     text = """-- mod-guild-level — the active perks as spells, in the General tab of the
 -- spellbook (spells %s, tranche 92 of the WoW-mods registry).
 --
@@ -244,7 +253,7 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 
     p = r'E:\WoW-mods\mod-guild-level\installer.json'
     m = json.load(open(p, encoding='utf-8'))
-    rows = [{str(k): v for k, v in sorted(fields(sp).items())} for sp in SPELLS + [TALENT_AURA] + BUFFS]
+    rows = [{str(k): v for k, v in sorted(fields(sp).items())} for sp in SPELLS + [TALENT_AURA, LEVELUP] + BUFFS]
     m['dbc'] = [d for d in m['dbc'] if d['file'] != 'Spell.dbc'] + [{
         'file': 'Spell.dbc', 'fields': 234, 'text_fields': [[136, 151], [153, 168], [170, 185], [187, 202]],
         'client': True, 'server': False, 'rows': rows}]

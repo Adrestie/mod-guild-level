@@ -149,6 +149,59 @@
       "client": "data/dbc/guild_level_GameObjectDisplayInfo.dbc"
     },
     {
+      "file": "SpellVisualEffectName.dbc",
+      "fields": 7,
+      "text_fields": [
+        1,
+        2
+      ],
+      "client": true,
+      "server": false,
+      "rows": [
+        {
+          "0": 92028,
+          "1": "guild_levelup",
+          "2": "Spells\\GuildLevel\\guild_levelup.mdx",
+          "3": 0,
+          "4": 1065353216,
+          "5": 1008981770,
+          "6": 1120403456
+        }
+      ]
+    },
+    {
+      "file": "SpellVisualKit.dbc",
+      "fields": 38,
+      "client": true,
+      "server": false,
+      "rows": [
+        {
+          "0": 92028,
+          "1": -1,
+          "2": -1,
+          "5": 92028,
+          "17": -1,
+          "18": -1,
+          "19": -1,
+          "20": -1
+        }
+      ]
+    },
+    {
+      "file": "SpellVisual.dbc",
+      "fields": 32,
+      "client": true,
+      "server": false,
+      "rows": [
+        {
+          "0": 92028,
+          "2": 92028,
+          "10": 1,
+          "16": -1
+        }
+      ]
+    },
+    {
       "file": "Spell.dbc",
       "fields": 234,
       "text_fields": [
@@ -392,6 +445,33 @@
           "193": "Los talentos de tu hermandad otorgan:",
           "194": "Los talentos de tu hermandad otorgan:",
           "195": "Таланты вашей гильдии дают:",
+          "203": 16712190,
+          "216": 1065353216,
+          "217": 1065353216,
+          "218": 1065353216,
+          "225": 1
+        },
+        {
+          "0": 92028,
+          "28": 1,
+          "35": 101,
+          "46": 1,
+          "68": -1,
+          "71": 3,
+          "74": 1,
+          "80": -1,
+          "86": 1,
+          "131": 92028,
+          "133": 1,
+          "136": "Guild Level Up",
+          "138": "Niveau de guilde",
+          "139": "Gildenstufenaufstieg",
+          "142": "Nivel de hermandad",
+          "143": "Nivel de hermandad",
+          "144": "Уровень гильдии",
+          "152": 16712190,
+          "169": 16712190,
+          "186": 16712190,
           "203": 16712190,
           "216": 1065353216,
           "217": 1065353216,
@@ -1532,7 +1612,10 @@
       "data/art"
     ],
     "owned_folders": [
-      "World/GuildLevel"
+      "World/GuildLevel",
+      "Spells/GuildLevel",
+      "Sound/GuildLevel",
+      "Interface/GuildLevel"
     ]
   },
   "server_data": {

@@ -34,6 +34,8 @@
 #include "Player.h"
 #include "QueryResult.h"
 #include "QuestDef.h"
+#include "SpellMgr.h"
+#include "WorldPacket.h"
 #include "StringConvert.h"
 #include "StringFormat.h"
 #include "Timer.h"
@@ -444,15 +446,34 @@ void GuildLevelMgr::Announce(Announcement const& announcement) const
     if (!guild)
         return;
 
-    // Each member in his own language, in the green of the guild channel.
-    auto tell = [&announcement](Player* member)
+    // The level-up toast of the members' interface (GuildLevelUp_Client.lua):
+    // "up", the level, the Paragon level.
+    bool const paragon = announcement.text == GUILD_LEVEL_STR_PARAGON_UP || announcement.text == GUILD_LEVEL_STR_PARAGON_MAX;
+    std::string const toast = Acore::StringFormat("GuildLevel	up	{}	{}",
+        paragon ? uint32(GUILD_LEVEL_MAX) : announcement.value, paragon ? announcement.value : 0);
+
+    // Each member in his own language, in the green of the guild channel; the
+    // toast, the sound and the visual (spell 92028) with it.
+    auto tell = [&announcement, &toast](Player* member)
     {
         WorldSession* session = member->GetSession();
-        std::string const* text = session->GetModuleString(GUILD_LEVEL_MODULE, announcement.text);
-        if (!text)
-            return;
-        ChatHandler(session).SendSysMessage(
-            "|cff40ff40" + Acore::StringFormat(*text, announcement.value) + "|r");
+        if (std::string const* text = session->GetModuleString(GUILD_LEVEL_MODULE, announcement.text))
+            ChatHandler(session).SendSysMessage(
+                "|cff40ff40" + Acore::StringFormat(*text, announcement.value) + "|r");
+
+        WorldPacket data(SMSG_MESSAGECHAT, 100);
+        data << uint8(CHAT_MSG_WHISPER);
+        data << int32(LANG_ADDON);
+        data << member->GetGUID();
+        data << uint32(0);
+        data << member->GetGUID();
+        data << uint32(toast.length() + 1);
+        data << toast;
+        data << uint8(0);
+        session->SendPacket(&data);
+
+        if (member->IsInWorld() && sSpellMgr->GetSpellInfo(GUILD_LEVEL_UP_SPELL))
+            member->CastSpell(member, GUILD_LEVEL_UP_SPELL, true);
     };
     guild->BroadcastWorker(tell);
 }

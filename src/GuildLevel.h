@@ -51,6 +51,9 @@ constexpr uint8 GUILD_LEVEL_MAX = 25;
 // The Paragon levels past 25: as many as GuildLevel.Paragon.Max, at most this.
 constexpr uint8 GUILD_PARAGON_LIMIT = 255;
 
+// Cast on every member online when the guild gains a level: its visual only.
+constexpr uint32 GUILD_LEVEL_UP_SPELL = 92028;
+
 // The texts live in `module_string` / `module_string_locale` (data/sql/world).
 // Ids are never reused: an old row could still carry them.
 enum GuildLevelStrings : uint32
