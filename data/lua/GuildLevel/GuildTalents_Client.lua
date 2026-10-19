@@ -1097,6 +1097,14 @@ if FUI then
         build = function(frame)
             Build(frame)
             UI.refit = Refit
+            -- a window closed on this view and opened again shows it without calling show():
+            -- the view takes its size back whenever it reappears
+            UI:SetScript("OnShow", function()
+                if FUI.Guild.current == VIEW then
+                    Refresh()
+                    FitWindow()
+                end
+            end)
             UI:Show()
         end,
         show = function()
