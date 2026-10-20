@@ -198,7 +198,8 @@ public:
     // world tick. Returns what the guild became.
     GuildLevelState AddXP(uint32 guildId, uint64 amount);
 
-    // GM changes: no announcement, saved at once.
+    // GM changes, saved at once. A level up is announced as an earned one
+    // (the members' toast and visual); setting the experience is not.
     GuildLevelState SetLevel(uint32 guildId, uint8 level);
     GuildLevelState SetParagon(uint32 guildId, uint8 paragon);
     GuildLevelState SetXP(uint32 guildId, uint64 xp);

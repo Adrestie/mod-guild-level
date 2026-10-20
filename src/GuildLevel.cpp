@@ -340,9 +340,14 @@ GuildLevelState GuildLevelMgr::SetLevel(uint32 guildId, uint8 level)
 {
     std::lock_guard<std::mutex> guard(_lock);
     GuildLevelState& state = _guilds[guildId];
+    bool const up = std::min(level, GUILD_LEVEL_MAX) > state.level;
     state.level = std::min(level, GUILD_LEVEL_MAX);
     state.paragon = 0;
     _changed.insert(guildId);
+    // Up: announced as an earned level, the members' level-up toast and visual with it.
+    if (up)
+        _announcements.push_back({ guildId,
+            state.level == GUILD_LEVEL_MAX ? GUILD_LEVEL_STR_LEVEL_MAX : GUILD_LEVEL_STR_LEVEL_UP, state.level });
     state.xp = 0;
     SaveNow(guildId, state);
     _dirty.erase(guildId);
@@ -353,9 +358,15 @@ GuildLevelState GuildLevelMgr::SetParagon(uint32 guildId, uint8 paragon)
 {
     std::lock_guard<std::mutex> guard(_lock);
     GuildLevelState& state = _guilds[guildId];
+    uint8 const target = std::min(paragon, _config.paragonMax);
+    bool const up = state.level < GUILD_LEVEL_MAX || target > state.paragon;
     state.level = GUILD_LEVEL_MAX;
-    state.paragon = std::min(paragon, _config.paragonMax);
+    state.paragon = target;
     _changed.insert(guildId);
+    if (up)
+        _announcements.push_back({ guildId, state.paragon == 0 ? GUILD_LEVEL_STR_LEVEL_MAX :
+            (state.paragon == _config.paragonMax ? GUILD_LEVEL_STR_PARAGON_MAX : GUILD_LEVEL_STR_PARAGON_UP),
+            state.paragon == 0 ? uint32(GUILD_LEVEL_MAX) : uint32(state.paragon) });
     state.xp = 0;
     SaveNow(guildId, state);
     _dirty.erase(guildId);
