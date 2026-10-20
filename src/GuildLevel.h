@@ -155,9 +155,10 @@ struct GuildLevelConfig
     // A quest completed by a member: its experience (at his level, even at
     // the maximum level, where it is paid in gold) times this.
     float questRate = 0.1f;
-    // A boss killed: this much per guildmate present, by DynamicLoot family
-    // (DynamicLootFamilyAt); 0 for the families that give nothing.
-    std::vector<uint64> bossXp;
+    // A creature killed: this much more per guildmate present, by content
+    // family (GuildContentFamily, GuildContent.h); 0 for the families that give
+    // nothing more than the kill's own experience.
+    std::vector<uint64> contentXp;
 };
 
 struct GuildLevelState
@@ -189,8 +190,8 @@ public:
     void OnKillXP(Player* player, Unit* victim);
     // A quest rewarded to a member (PlayerScript::OnPlayerCompleteQuest).
     void OnQuestComplete(Player* player, Quest const* quest);
-    // A creature killed by a player or his pet: the bonus of a boss, for every
-    // guild with enough members present.
+    // A creature killed by a player or his pet: the bonus of its content
+    // family, for every guild with enough members present.
     void OnCreatureKill(Player* killer, Creature* creature);
 
     // Experience earned by the guild: levels climbed are announced on the next

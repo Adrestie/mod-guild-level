@@ -46,7 +46,7 @@ GuildLevel.Rate                 = 1.0
 
 ###############################################################################
 #
-#    QUESTS AND BOSSES
+#    QUESTS AND CONTENT
 #
 #    GuildLevel.Quest.Rate
 #        A quest completed by a member brings his guild the quest's experience
@@ -54,25 +54,48 @@ GuildLevel.Rate                 = 1.0
 #        times this, then times GuildLevel.Rate. A level 80 quest is worth
 #        about 20,000 to 30,000: 0.1 brings about 2,500.
 #
-#    GuildLevel.Boss.<family>
-#        A boss killed brings this much per guildmate present (alive, within
-#        reward distance, in the killer's group), then times GuildLevel.Rate,
-#        to every guild with GuildLevel.MinMembers present. The families are
-#        DynamicLoot's; 0 gives nothing. Gray bosses count too.
+#    GuildLevel.Content.<family>
+#        A creature killed brings this much MORE than its own experience, per
+#        guildmate present (alive, within reward distance, in the killer's
+#        group), then times GuildLevel.Rate, to every guild with
+#        GuildLevel.MinMembers present. Gray creatures count too. The families
+#        follow DynamicLoot's (same names, same rules, built into the module):
+#          ...World, ...Rare, ...WorldBoss    outside dungeons and raids (a BC
+#                                             map's creature below level 57 is
+#                                             Vanilla's)
+#          ...DungeonTrash, ...DungeonBoss    dungeons (WotLK: normal mode)
+#          WotlkHeroicTrash, WotlkHeroicBoss  WotLK dungeons in heroic mode
+#          ...RaidTrash, ...RaidBoss          raids (WotLK: outside Icecrown)
+#          IcecrownRaidTrash, IcecrownRaidBoss
+#        A family left out gives nothing more.
 #
 
-GuildLevel.Quest.Rate               = 0.1
-GuildLevel.Boss.VanillaDungeonBoss  = 1000
-GuildLevel.Boss.VanillaRaidBoss     = 5000
-GuildLevel.Boss.BcDungeonBoss       = 2000
-GuildLevel.Boss.BcRaidBoss          = 10000
-GuildLevel.Boss.WotlkDungeonBoss    = 3000
-GuildLevel.Boss.WotlkHeroicBoss     = 5000
-GuildLevel.Boss.WotlkRaidBoss       = 15000
-GuildLevel.Boss.IcecrownRaidBoss    = 25000
-GuildLevel.Boss.VanillaWorldBoss    = 0
-GuildLevel.Boss.BcWorldBoss         = 0
-GuildLevel.Boss.WotlkWorldBoss      = 0
+GuildLevel.Quest.Rate                  = 0.1
+GuildLevel.Content.VanillaWorld        = 0
+GuildLevel.Content.VanillaRare         = 0
+GuildLevel.Content.VanillaWorldBoss    = 0
+GuildLevel.Content.VanillaDungeonTrash = 0
+GuildLevel.Content.VanillaDungeonBoss  = 1000
+GuildLevel.Content.VanillaRaidTrash    = 0
+GuildLevel.Content.VanillaRaidBoss     = 5000
+GuildLevel.Content.BcWorld             = 0
+GuildLevel.Content.BcRare              = 0
+GuildLevel.Content.BcWorldBoss         = 0
+GuildLevel.Content.BcDungeonTrash      = 0
+GuildLevel.Content.BcDungeonBoss       = 2000
+GuildLevel.Content.BcRaidTrash         = 0
+GuildLevel.Content.BcRaidBoss          = 10000
+GuildLevel.Content.WotlkWorld          = 0
+GuildLevel.Content.WotlkRare           = 0
+GuildLevel.Content.WotlkWorldBoss      = 0
+GuildLevel.Content.WotlkDungeonTrash   = 0
+GuildLevel.Content.WotlkDungeonBoss    = 3000
+GuildLevel.Content.WotlkHeroicTrash    = 0
+GuildLevel.Content.WotlkHeroicBoss     = 5000
+GuildLevel.Content.WotlkRaidTrash      = 0
+GuildLevel.Content.WotlkRaidBoss       = 15000
+GuildLevel.Content.IcecrownRaidTrash   = 0
+GuildLevel.Content.IcecrownRaidBoss    = 25000
 
 ###############################################################################
 #

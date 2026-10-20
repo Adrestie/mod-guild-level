@@ -16,6 +16,7 @@
  */
 
 #include "GuildLevel.h"
+#include "GuildContent.h"
 #include "GuildHouse.h"
 #include "GuildPerks.h"
 
@@ -24,8 +25,6 @@
 #include "Config.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
-#include "DynamicLootFamilies.h"
-#include "DynamicLootSource.h"
 #include "Formulas.h"
 #include "Group.h"
 #include "Guild.h"
@@ -54,20 +53,20 @@ namespace
         "20000 30000 45000 60000 80000 100000 125000 150000 180000 210000 "
         "250000 290000 330000 380000 430000 490000 550000 620000 700000 780000 "
         "870000 960000 1060000 1170000 1300000";
-    // The bosses' experience by DynamicLoot family, per guildmate present; a
-    // family missing here gives nothing (GuildLevel.Boss.<family>).
-    struct BossDefault
+    // The experience a kill brings on top of its own, by content family, per
+    // guildmate present (GuildLevel.Content.<family>): the bosses of dungeons
+    // and raids; everything else 0.
+    struct ContentDefault
     {
-        char const* family;
+        GuildContentFamily family;
         uint64 amount;
     };
-    constexpr BossDefault BOSS_DEFAULTS[] =
+    constexpr ContentDefault CONTENT_DEFAULTS[] =
     {
-        { "VanillaDungeonBoss", 1000 }, { "VanillaRaidBoss", 5000 },
-        { "BcDungeonBoss", 2000 }, { "BcRaidBoss", 10000 },
-        { "WotlkDungeonBoss", 3000 }, { "WotlkHeroicBoss", 5000 },
-        { "WotlkRaidBoss", 15000 }, { "IcecrownRaidBoss", 25000 },
-        { "VanillaWorldBoss", 0 }, { "BcWorldBoss", 0 }, { "WotlkWorldBoss", 0 },
+        { GC_VANILLA_DUNGEON_BOSS, 1000 }, { GC_VANILLA_RAID_BOSS, 5000 },
+        { GC_BC_DUNGEON_BOSS, 2000 }, { GC_BC_RAID_BOSS, 10000 },
+        { GC_WOTLK_DUNGEON_BOSS, 3000 }, { GC_WOTLK_HEROIC_BOSS, 5000 },
+        { GC_WOTLK_RAID_BOSS, 15000 }, { GC_ICECROWN_RAID_BOSS, 25000 },
     };
 
     constexpr char DEFAULT_PARAGON_CURVE[] =
@@ -132,14 +131,12 @@ void GuildLevelMgr::LoadConfig()
     c.paragonXp = ReadCurve("GuildLevel.Curve.Paragon", DEFAULT_PARAGON_CURVE, c.paragonMax);
     c.saveInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.SaveInterval", 10), 1);
     c.questRate = std::max(sConfigMgr->GetOption<float>("GuildLevel.Quest.Rate", 0.1f), 0.0f);
-    c.bossXp.assign(DynamicLootFamilyCount(), 0);
-    for (BossDefault const& boss : BOSS_DEFAULTS)
-    {
-        int32 const index = DynamicLootFamilyIndex(boss.family);
-        if (index < 0)
-            continue;
-        c.bossXp[index] = sConfigMgr->GetOption<uint64>(std::string("GuildLevel.Boss.") + boss.family, boss.amount);
-    }
+    c.contentXp.assign(GC_FAMILY_COUNT, 0);
+    for (ContentDefault const& d : CONTENT_DEFAULTS)
+        c.contentXp[d.family] = d.amount;
+    for (uint8 f = 0; f < GC_FAMILY_COUNT; ++f)
+        c.contentXp[f] = sConfigMgr->GetOption<uint64>(
+            std::string("GuildLevel.Content.") + GuildContentName(GuildContentFamily(f)), c.contentXp[f], false);
 
     std::lock_guard<std::mutex> guard(_lock);
     _config = c;
@@ -291,12 +288,8 @@ void GuildLevelMgr::OnCreatureKill(Player* killer, Creature* creature)
     if (!_config.enable || !killer || !creature)
         return;
 
-    DynamicLootContext context;
-    DynamicLootFillCreature(context, killer, creature);
-    if (!context.boss)
-        return;
-    uint32 const family = DynamicLootCreatureFamily(context);
-    uint64 const perMember = family < _config.bossXp.size() ? _config.bossXp[family] : 0;
+    GuildContentFamily const family = GuildContentOf(creature);
+    uint64 const perMember = family < _config.contentXp.size() ? _config.contentXp[family] : 0;
     if (!perMember)
         return;
 
