@@ -266,11 +266,13 @@ local function Show(level, paragon)
     if not T then Build() end
     if paragon > 0 then
         T.RenownLabel:SetText(fmt(L.paragon, paragon))
+        T.RenownLabel:SetTextColor(0.9, 0.7, 1)     -- the Paragon purple of the guild bar
         T.RewardDescription:SetText(L.paragons[paragon] or L.talent)
         SetPortraitToTexture(T.RewardIcon, L.paragons[paragon] and "Interface\\Icons\\INV_Misc_Rune_06"
             or "Interface\\Icons\\Ability_Marksmanship")
     else
         T.RenownLabel:SetText(fmt(L.level, level))
+        T.RenownLabel:SetTextColor(1, 0.82, 0)
         T.RewardDescription:SetText(L.perks[level] or L.talent)
         SetPortraitToTexture(T.RewardIcon, PerkIcon(level))
     end
