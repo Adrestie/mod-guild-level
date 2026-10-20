@@ -275,8 +275,9 @@ local function Show(level, paragon)
         SetPortraitToTexture(T.RewardIcon, PerkIcon(level))
     end
     local faction = UnitFactionGroup("player")
-    SetPortraitToTexture(T.TopIcon, faction == "Horde" and "Interface\\Icons\\INV_BannerPVP_01"
-        or "Interface\\Icons\\INV_BannerPVP_02")
+    -- the faction's crest (tools/fx/bake_crests.py), where the modern client puts the faction's emblem
+    T.TopIcon:SetTexture(faction == "Horde" and "Interface\\GuildLevel\\CrestHorde"
+        or "Interface\\GuildLevel\\CrestAlliance")
     T.t = 0
     T:SetAlpha(1)
     T:Show()
