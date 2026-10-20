@@ -16,6 +16,7 @@
  */
 
 #include "GuildPerks.h"
+#include "GuildTalents.h"
 #include "GuildActivePerks.h"
 #include "GuildLevel.h"
 
@@ -183,7 +184,22 @@ float GuildPerkMgr::Amount(GuildPerk perk, Player const* player) const
     uint32 const guildId = player->GetGuildId();
     if (!guildId)
         return 0.0f;
-    return Amount(perk, sGuildLevelMgr->Get(guildId).level);
+
+    // The guild talents add to some of the perks.
+    float talent = 0.0f;
+    switch (perk)
+    {
+        case GUILD_PERK_XP:          talent = sGuildTalentMgr->Amount(player, GT_XP_PCT); break;
+        case GUILD_PERK_HONOR:       talent = sGuildTalentMgr->Amount(player, GT_HONOR_PCT); break;
+        case GUILD_PERK_REPUTATION:  talent = sGuildTalentMgr->Amount(player, GT_REPUTATION_PCT); break;
+        case GUILD_PERK_MOUNT_SPEED: talent = sGuildTalentMgr->Amount(player, GT_MOUNT_SPEED_PCT); break;
+        case GUILD_PERK_VENDOR:      talent = sGuildTalentMgr->Amount(player, GT_VENDOR_PCT); break;
+        case GUILD_PERK_GOLD_TO_BANK: talent = sGuildTalentMgr->Amount(player, GT_GOLD_TO_BANK_PCT); break;
+        case GUILD_PERK_CONSUMABLES: talent = sGuildTalentMgr->Amount(player, GT_CONSUMABLE_MIN); break;
+        case GUILD_PERK_HEARTHSTONE: talent = sGuildTalentMgr->Amount(player, GT_HEARTHSTONE_MIN); break;
+        default: break;
+    }
+    return Amount(perk, sGuildLevelMgr->Get(guildId).level) + talent;
 }
 
 void GuildPerkMgr::Apply(Player* player)
@@ -191,6 +207,8 @@ void GuildPerkMgr::Apply(Player* player)
     if (!player || !player->IsInWorld())
         return;
 
+    // The guild talents first: some perks read them.
+    sGuildTalentMgr->Apply(player);
     // The spells of the active perks follow the same changes.
     sGuildActivePerkMgr->SyncSpells(player);
     ApplyAura(player);
@@ -325,7 +343,7 @@ void GuildPerkMgr::OnLootItem(Player* player, Item* item, ObjectGuid lootGuid)
         return;
     data->lastGatherLoot = lootGuid;
 
-    if (!roll_chance_f(_config.gatheringChance))
+    if (!roll_chance_f(_config.gatheringChance + sGuildTalentMgr->Amount(player, GT_GATHERING_PCT)))
         return;
 
     uint32 const entry = item->GetEntry();

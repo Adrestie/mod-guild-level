@@ -16,6 +16,7 @@
  */
 
 #include "GuildLevel.h"
+#include "GuildContent.h"
 #include "GuildHouse.h"
 #include "GuildPerks.h"
 
@@ -31,6 +32,9 @@
 #include "Log.h"
 #include "Player.h"
 #include "QueryResult.h"
+#include "QuestDef.h"
+#include "SpellMgr.h"
+#include "WorldPacket.h"
 #include "StringConvert.h"
 #include "StringFormat.h"
 #include "Timer.h"
@@ -49,13 +53,31 @@ namespace
         "20000 30000 45000 60000 80000 100000 125000 150000 180000 210000 "
         "250000 290000 330000 380000 430000 490000 550000 620000 700000 780000 "
         "870000 960000 1060000 1170000 1300000";
+    // The experience a kill brings on top of its own, by content family, per
+    // guildmate present (GuildLevel.Content.<family>): the bosses of dungeons
+    // and raids; everything else 0.
+    struct ContentDefault
+    {
+        GuildContentFamily family;
+        uint64 amount;
+    };
+    constexpr ContentDefault CONTENT_DEFAULTS[] =
+    {
+        { GC_VANILLA_DUNGEON_BOSS, 1000 }, { GC_VANILLA_RAID_BOSS, 5000 },
+        { GC_BC_DUNGEON_BOSS, 2000 }, { GC_BC_RAID_BOSS, 10000 },
+        { GC_WOTLK_DUNGEON_BOSS, 3000 }, { GC_WOTLK_HEROIC_BOSS, 5000 },
+        { GC_WOTLK_RAID_BOSS, 15000 }, { GC_ICECROWN_RAID_BOSS, 25000 },
+    };
+
     constexpr char DEFAULT_PARAGON_CURVE[] =
         "1500000 1750000 2000000 2250000 2500000 2750000 3000000 3500000 4000000";
 
     // A list of amounts, separated by spaces or commas. A short list repeats
     // its last value; a missing or unreadable one keeps the built-in curve.
-    template<std::size_t N>
-    void ReadCurve(std::array<uint64, N>& curve, char const* option, char const* fallback)
+    // A list of amounts, separated by spaces or commas, into `count` steps. A
+    // short list repeats its last value; a missing or unreadable one keeps the
+    // built-in curve.
+    std::vector<uint64> ReadCurve(char const* option, char const* fallback, std::size_t count)
     {
         auto parse = [](std::string text, std::vector<uint64>& out)
         {
@@ -79,11 +101,13 @@ namespace
             values.clear();
             parse(fallback, values);
         }
-        else if (values.size() > N)
-            LOG_ERROR("server.loading", "mod-guild-level: {} holds {} amounts, only the first {} are used.", option, values.size(), N);
+        else if (values.size() > count)
+            LOG_ERROR("server.loading", "mod-guild-level: {} holds {} amounts, only the first {} are used.", option, values.size(), count);
 
-        for (std::size_t i = 0; i < N; ++i)
+        std::vector<uint64> curve(count);
+        for (std::size_t i = 0; i < count; ++i)
             curve[i] = i < values.size() ? values[i] : values.back();
+        return curve;
     }
 }
 
@@ -101,17 +125,32 @@ void GuildLevelMgr::LoadConfig()
     c.minMembers = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.MinMembers", 2), 1);
     c.rate = std::max(sConfigMgr->GetOption<float>("GuildLevel.Rate", 1.0f), 0.0f);
     c.announce = sConfigMgr->GetOption<bool>("GuildLevel.Announce", true);
-    ReadCurve(c.levelXp, "GuildLevel.Curve.Levels", DEFAULT_LEVEL_CURVE);
-    ReadCurve(c.paragonXp, "GuildLevel.Curve.Paragon", DEFAULT_PARAGON_CURVE);
+    std::vector<uint64> const levels = ReadCurve("GuildLevel.Curve.Levels", DEFAULT_LEVEL_CURVE, GUILD_LEVEL_MAX);
+    std::copy(levels.begin(), levels.end(), c.levelXp.begin());
+    c.paragonMax = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Paragon.Max", 99), 1, GUILD_PARAGON_LIMIT));
+    c.paragonXp = ReadCurve("GuildLevel.Curve.Paragon", DEFAULT_PARAGON_CURVE, c.paragonMax);
     c.saveInterval = std::max<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.SaveInterval", 10), 1);
+    c.questRate = std::max(sConfigMgr->GetOption<float>("GuildLevel.Quest.Rate", 0.1f), 0.0f);
+    c.contentXp.assign(GC_FAMILY_COUNT, 0);
+    for (ContentDefault const& d : CONTENT_DEFAULTS)
+        c.contentXp[d.family] = d.amount;
+    for (uint8 f = 0; f < GC_FAMILY_COUNT; ++f)
+        c.contentXp[f] = sConfigMgr->GetOption<uint64>(
+            std::string("GuildLevel.Content.") + GuildContentName(GuildContentFamily(f)), c.contentXp[f], false);
 
     std::lock_guard<std::mutex> guard(_lock);
     _config = c;
 
     // A shorter curve may leave a guild with more than its step needs: it
-    // climbs at once, without announcement (the change is the server's).
+    // climbs at once, without announcement (the change is the server's). A
+    // lower Paragon.Max brings the guilds above it down to it.
     for (auto& [guildId, state] : _guilds)
     {
+        if (state.paragon > c.paragonMax)
+        {
+            state.paragon = c.paragonMax;
+            _changed.insert(guildId);
+        }
         Climb(guildId, state);
         _dirty.insert(guildId);
     }
@@ -140,7 +179,7 @@ void GuildLevelMgr::LoadFromDB()
             Field* fields = result->Fetch();
             GuildLevelState state;
             state.level = std::min<uint8>(fields[1].Get<uint8>(), GUILD_LEVEL_MAX);
-            state.paragon = state.level < GUILD_LEVEL_MAX ? 0 : std::min<uint8>(fields[2].Get<uint8>(), GUILD_PARAGON_MAX);
+            state.paragon = state.level < GUILD_LEVEL_MAX ? 0 : std::min<uint8>(fields[2].Get<uint8>(), _config.paragonMax);
             state.xp = fields[3].Get<uint64>();
             state.totalXp = fields[4].Get<uint64>();
             _guilds[fields[0].Get<uint32>()] = state;
@@ -161,7 +200,7 @@ uint64 GuildLevelMgr::Needed(GuildLevelState const& state) const
 {
     if (state.level < GUILD_LEVEL_MAX)
         return _config.levelXp[state.level];
-    if (state.paragon < GUILD_PARAGON_MAX)
+    if (state.paragon < _config.paragonMax)
         return _config.paragonXp[state.paragon];
     return 0;
 }
@@ -185,11 +224,11 @@ void GuildLevelMgr::Climb(uint32 guildId, GuildLevelState& state)
         {
             ++state.paragon;
             _announcements.push_back({ guildId,
-                state.paragon == GUILD_PARAGON_MAX ? GUILD_LEVEL_STR_PARAGON_MAX : GUILD_LEVEL_STR_PARAGON_UP, state.paragon });
+                state.paragon == _config.paragonMax ? GUILD_LEVEL_STR_PARAGON_MAX : GUILD_LEVEL_STR_PARAGON_UP, state.paragon });
         }
     }
 
-    // Paragon 9: the bar stays empty, only the lifetime total grows.
+    // The last Paragon level: the bar stays empty, only the lifetime total grows.
     state.xp = 0;
 }
 
@@ -230,6 +269,48 @@ void GuildLevelMgr::OnKillXP(Player* player, Unit* victim)
     uint64 const amount = uint64(std::llround(double(xp) * _config.rate));
     if (amount)
         AddXP(guildId, amount);
+}
+
+void GuildLevelMgr::OnQuestComplete(Player* player, Quest const* quest)
+{
+    if (!_config.enable || !player || !quest || !player->GetGuildId())
+        return;
+
+    // At the maximum level the quest pays gold instead: its experience is
+    // still what the guild earns.
+    uint64 const amount = uint64(std::llround(double(quest->XPValue(player->GetLevel())) * _config.questRate * _config.rate));
+    if (amount)
+        AddXP(player->GetGuildId(), amount);
+}
+
+void GuildLevelMgr::OnCreatureKill(Player* killer, Creature* creature)
+{
+    if (!_config.enable || !killer || !creature)
+        return;
+
+    GuildContentFamily const family = GuildContentOf(creature);
+    uint64 const perMember = family < _config.contentXp.size() ? _config.contentXp[family] : 0;
+    if (!perMember)
+        return;
+
+    // The guildmates present: the killer's group within reward distance,
+    // alive, counted by guild. Every guild with enough of them earns the
+    // boss once per member present.
+    std::unordered_map<uint32, uint32> present;
+    if (Group* group = killer->GetGroup())
+    {
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            if (Player* member = itr->GetSource())
+                if (member->GetGuildId() && member->IsAlive() &&
+                    (member == killer || member->IsAtGroupRewardDistance(creature)))
+                    ++present[member->GetGuildId()];
+    }
+    else if (killer->GetGuildId())
+        present[killer->GetGuildId()] = 1;
+
+    for (auto const& [guildId, count] : present)
+        if (count >= _config.minMembers)
+            AddXP(guildId, uint64(std::llround(double(perMember) * count * _config.rate)));
 }
 
 GuildLevelState GuildLevelMgr::AddXP(uint32 guildId, uint64 amount)
@@ -273,7 +354,7 @@ GuildLevelState GuildLevelMgr::SetParagon(uint32 guildId, uint8 paragon)
     std::lock_guard<std::mutex> guard(_lock);
     GuildLevelState& state = _guilds[guildId];
     state.level = GUILD_LEVEL_MAX;
-    state.paragon = std::min(paragon, GUILD_PARAGON_MAX);
+    state.paragon = std::min(paragon, _config.paragonMax);
     _changed.insert(guildId);
     state.xp = 0;
     SaveNow(guildId, state);
@@ -358,15 +439,34 @@ void GuildLevelMgr::Announce(Announcement const& announcement) const
     if (!guild)
         return;
 
-    // Each member in his own language, in the green of the guild channel.
-    auto tell = [&announcement](Player* member)
+    // The level-up toast of the members' interface (GuildLevelUp_Client.lua):
+    // "up", the level, the Paragon level.
+    bool const paragon = announcement.text == GUILD_LEVEL_STR_PARAGON_UP || announcement.text == GUILD_LEVEL_STR_PARAGON_MAX;
+    std::string const toast = Acore::StringFormat("GuildLevel	up	{}	{}",
+        paragon ? uint32(GUILD_LEVEL_MAX) : announcement.value, paragon ? announcement.value : 0);
+
+    // Each member in his own language, in the green of the guild channel; the
+    // toast, the sound and the visual (spell 92028) with it.
+    auto tell = [&announcement, &toast](Player* member)
     {
         WorldSession* session = member->GetSession();
-        std::string const* text = session->GetModuleString(GUILD_LEVEL_MODULE, announcement.text);
-        if (!text)
-            return;
-        ChatHandler(session).SendSysMessage(
-            "|cff40ff40" + Acore::StringFormat(*text, announcement.value) + "|r");
+        if (std::string const* text = session->GetModuleString(GUILD_LEVEL_MODULE, announcement.text))
+            ChatHandler(session).SendSysMessage(
+                "|cff40ff40" + Acore::StringFormat(*text, announcement.value) + "|r");
+
+        WorldPacket data(SMSG_MESSAGECHAT, 100);
+        data << uint8(CHAT_MSG_WHISPER);
+        data << int32(LANG_ADDON);
+        data << member->GetGUID();
+        data << uint32(0);
+        data << member->GetGUID();
+        data << uint32(toast.length() + 1);
+        data << toast;
+        data << uint8(0);
+        session->SendPacket(&data);
+
+        if (member->IsInWorld() && sSpellMgr->GetSpellInfo(GUILD_LEVEL_UP_SPELL))
+            member->CastSpell(member, GUILD_LEVEL_UP_SPELL, true);
     };
     guild->BroadcastWorker(tell);
 }

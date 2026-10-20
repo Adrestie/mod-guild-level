@@ -21,7 +21,7 @@
  * Members of one guild who kill a monster together earn guild experience: each
  * of them brings the experience the kill is worth to him, so the more of the
  * guild in the group, the more the guild earns. The guild climbs 25 levels,
- * then 9 Paragon levels.
+ * then Paragon levels (99 by default, GuildLevel.Paragon.Max).
  *
  * This step holds the experience and the levels only. The perks of the levels,
  * the talents, the guild house and its Customization mode come later and read
@@ -39,14 +39,20 @@
 #include <unordered_set>
 #include <vector>
 
+class Creature;
 class Player;
+class Quest;
 class Unit;
 
 constexpr char GUILD_LEVEL_MODULE[] = "mod-guild-level";
 
 // A new guild is level 0; level N will grant the Nth perk.
 constexpr uint8 GUILD_LEVEL_MAX = 25;
-constexpr uint8 GUILD_PARAGON_MAX = 9;
+// The Paragon levels past 25: as many as GuildLevel.Paragon.Max, at most this.
+constexpr uint8 GUILD_PARAGON_LIMIT = 255;
+
+// Cast on every member online when the guild gains a level: its visual only.
+constexpr uint32 GUILD_LEVEL_UP_SPELL = 92028;
 
 // The texts live in `module_string` / `module_string_locale` (data/sql/world).
 // Ids are never reused: an old row could still carry them.
@@ -56,14 +62,14 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_LEVEL_UP        = 1,    // {} level
     GUILD_LEVEL_STR_PARAGON_UP      = 2,    // {} Paragon level
     GUILD_LEVEL_STR_LEVEL_MAX       = 3,    // level 25 reached
-    GUILD_LEVEL_STR_PARAGON_MAX     = 4,    // Paragon 9 reached
+    GUILD_LEVEL_STR_PARAGON_MAX     = 4,    // the last Paragon level reached
     GUILD_LEVEL_STR_GATHER_BONUS    = 5,    // {} count, {} item: a perk to the member alone
 
     // GM commands.
     GUILD_LEVEL_STR_CMD_NO_GUILD    = 101,  // no guild found
     GUILD_LEVEL_STR_CMD_INFO        = 102,  // {} name, {} id, {} level, {} Paragon
     GUILD_LEVEL_STR_CMD_INFO_XP     = 103,  // {} xp, {} needed
-    GUILD_LEVEL_STR_CMD_INFO_DONE   = 104,  // Paragon 9: nothing more to earn
+    GUILD_LEVEL_STR_CMD_INFO_DONE   = 104,  // the last Paragon level: nothing more to earn
     GUILD_LEVEL_STR_CMD_INFO_TOTAL  = 105,  // {} lifetime experience
     GUILD_LEVEL_STR_CMD_BAD_LEVEL   = 106,  // {} maximum
     GUILD_LEVEL_STR_CMD_DONE        = 107,  // the change is applied
@@ -106,7 +112,26 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_HOUSE_LOCKED    = 145,  // {} Paragon level
     GUILD_LEVEL_STR_HOUSE_FULL      = 146,
     GUILD_LEVEL_STR_HOUSE_NOT_IN    = 147,
-    GUILD_LEVEL_STR_HOUSE_NOT_YOURS = 148
+    GUILD_LEVEL_STR_HOUSE_NOT_YOURS = 148,
+
+    // .gtalent, the guild talents
+    GUILD_LEVEL_STR_TALENT_DISABLED   = 150,
+    GUILD_LEVEL_STR_TALENT_NOT_ALLOWED = 151, // {} highest rank id
+    GUILD_LEVEL_STR_TALENT_NO_NODE    = 152,
+    GUILD_LEVEL_STR_TALENT_FULL       = 153,
+    GUILD_LEVEL_STR_TALENT_NOT_LINKED = 154,
+    GUILD_LEVEL_STR_TALENT_NO_POINTS  = 155,
+    GUILD_LEVEL_STR_TALENT_BOUGHT     = 156,  // {} node, {} points, {} maximum
+    GUILD_LEVEL_STR_TALENT_RESET_ASK  = 157,  // {} gold
+    GUILD_LEVEL_STR_TALENT_RESET_DONE = 158,  // {} gold
+    GUILD_LEVEL_STR_TALENT_NO_MONEY   = 159,  // {} gold
+    GUILD_LEVEL_STR_TALENT_NOTHING    = 160,
+    GUILD_LEVEL_STR_TALENT_SUMMARY    = 161,  // {} earned, {} spent, {} left
+    GUILD_LEVEL_STR_TALENT_LINE       = 162,  // {} node, {} points, {} maximum, {} amount, {} effect
+    GUILD_LEVEL_STR_TALENT_PRICE      = 163,  // {} gold
+    GUILD_LEVEL_STR_TALENT_EDITED     = 164,  // {} node
+    GUILD_LEVEL_STR_TALENT_BAD_EDIT   = 165,
+    GUILD_LEVEL_STR_TALENT_TIER       = 166
 };
 
 struct GuildLevelConfig
@@ -122,9 +147,18 @@ struct GuildLevelConfig
     // Experience from one level to the next: levelXp[0] takes a new guild from
     // 0 to 1, paragonXp[0] takes a level 25 guild to Paragon 1.
     std::array<uint64, GUILD_LEVEL_MAX> levelXp{};
-    std::array<uint64, GUILD_PARAGON_MAX> paragonXp{};
+    uint8 paragonMax = 99;
+    std::vector<uint64> paragonXp;          // paragonMax amounts
 
     uint32 saveInterval = 10;               // seconds
+
+    // A quest completed by a member: its experience (at his level, even at
+    // the maximum level, where it is paid in gold) times this.
+    float questRate = 0.1f;
+    // A creature killed: this much more per guildmate present, by content
+    // family (GuildContentFamily, GuildContent.h); 0 for the families that give
+    // nothing more than the kill's own experience.
+    std::vector<uint64> contentXp;
 };
 
 struct GuildLevelState
@@ -148,12 +182,17 @@ public:
     // never heard of is level 0. Safe from any thread.
     [[nodiscard]] GuildLevelState Get(uint32 guildId) const;
     [[nodiscard]] GuildLevelConfig const& Config() const { return _config; }
-    // Experience the guild needs for its next step; 0 at Paragon 9.
+    // Experience the guild needs for its next step; 0 at the last Paragon level.
     [[nodiscard]] uint64 Needed(GuildLevelState const& state) const;
 
     // A member received kill experience (PlayerScript::OnPlayerGiveXP). Runs on
     // the map threads.
     void OnKillXP(Player* player, Unit* victim);
+    // A quest rewarded to a member (PlayerScript::OnPlayerCompleteQuest).
+    void OnQuestComplete(Player* player, Quest const* quest);
+    // A creature killed by a player or his pet: the bonus of its content
+    // family, for every guild with enough members present.
+    void OnCreatureKill(Player* killer, Creature* creature);
 
     // Experience earned by the guild: levels climbed are announced on the next
     // world tick. Returns what the guild became.

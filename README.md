@@ -278,6 +278,18 @@ is +5 from level 1, +15 from level 11. `""` turns a perk off. After
 experience of a guild, from any thread; a guild the module never heard of is
 level 0. The next steps of this module read the level there.
 
+## Requirements
+
+| What | Why |
+|---|---|
+| AzerothCore WotLK (3.3.5a) | the C++ module is compiled into it |
+| [ALE](https://github.com/azerothcore/mod-ale) (the AzerothCore Lua Engine, formerly mod-eluna) | runs the server side of the windows (`data/lua/GuildLevel` goes into `lua_scripts`) |
+| [AIO](https://github.com/Rochet2/AIO) | server AND client: the windows are sent over it, and every player needs the `AIO_Client` addon |
+
+ALE and AIO carry the interface: the guild talent window, the level bar in the
+guild window and the level-up toast. Without them, experience, levels and perks
+work the same, and the talents stay reachable through the `.gtalent` commands.
+
 ## Installation
 
 With the WoW-mods installer: point it at this folder. By hand:
@@ -289,6 +301,9 @@ With the WoW-mods installer: point it at this folder. By hand:
    again safely.
 3. Copy `conf/mod-guild-level.conf.dist` to the server's `configs/modules`
    folder as `mod-guild-level.conf`.
+4. For the interface: copy `data/lua/GuildLevel` into the ALE scripts folder
+   (`lua_scripts/GuildLevel`), with AIO installed on the server and the
+   `AIO_Client` addon on every client.
 
 ## In-game tests
 

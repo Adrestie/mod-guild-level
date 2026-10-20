@@ -25,6 +25,7 @@
 #include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
+#include "GuildTalents.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -50,6 +51,7 @@ public:
         sGuildPerkMgr->LoadConfig();
         sGuildActivePerkMgr->LoadConfig();
         sGuildHouseMgr->LoadConfig();
+        sGuildTalentMgr->LoadConfig();
 
         // New amounts for the members online at once.
         if (reload)
@@ -62,6 +64,8 @@ public:
     {
         sGuildLevelMgr->LoadFromDB();
         sGuildHouseMgr->LoadFromDB();
+        sGuildTalentMgr->LoadTree();
+        sGuildTalentMgr->LoadGuilds();
     }
 
     void OnUpdate(uint32 diff) override
@@ -84,6 +88,9 @@ public:
             // THIS LIST GATES THE CALLS: an overridden method missing from
             // here compiles and never fires.
             PLAYERHOOK_ON_GIVE_EXP,
+            PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST,
+            PLAYERHOOK_ON_CREATURE_KILL,
+            PLAYERHOOK_ON_CREATURE_KILLED_BY_PET,
             PLAYERHOOK_ON_LOGIN,
             PLAYERHOOK_ON_GIVE_REPUTATION,
             PLAYERHOOK_ON_GET_REPUTATION_PRICE_DISCOUNT,
@@ -105,6 +112,22 @@ public:
         if (xpSource == XPSOURCE_KILL && amount)
             sGuildLevelMgr->OnKillXP(player, victim);
         sGuildPerkMgr->OnGiveXP(player, amount);
+    }
+
+    // Guild experience from quests and bosses.
+    void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
+    {
+        sGuildLevelMgr->OnQuestComplete(player, quest);
+    }
+
+    void OnPlayerCreatureKill(Player* killer, Creature* killed) override
+    {
+        sGuildLevelMgr->OnCreatureKill(killer, killed);
+    }
+
+    void OnPlayerCreatureKilledByPet(Player* owner, Creature* killed) override
+    {
+        sGuildLevelMgr->OnCreatureKill(owner, killed);
     }
 
     void OnPlayerLogin(Player* player) override
@@ -156,7 +179,11 @@ class GuildLevelUnitScript : public UnitScript
 public:
     GuildLevelUnitScript() : UnitScript("GuildLevelUnitScript", true,
         {
-            UNITHOOK_ON_AURA_APPLY
+            UNITHOOK_ON_AURA_APPLY,
+            UNITHOOK_MODIFY_MELEE_DAMAGE,
+            UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
+            UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
+            UNITHOOK_MODIFY_HEAL_RECEIVED
         }) { }
 
     // Flasks, elixirs and food buffs of guild members.
@@ -164,6 +191,31 @@ public:
     {
         if (Player* player = unit->ToPlayer())
             sGuildPerkMgr->OnAuraApply(player, aura);
+    }
+
+    // The talents' damage done and taken, and healing done.
+    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
+    {
+        sGuildTalentMgr->ModifyDamage(target, attacker, damage);
+    }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* /*spellInfo*/) override
+    {
+        if (damage <= 0)
+            return;
+        uint32 amount = uint32(damage);
+        sGuildTalentMgr->ModifyDamage(target, attacker, amount);
+        damage = int32(amount);
+    }
+
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* /*spellInfo*/) override
+    {
+        sGuildTalentMgr->ModifyDamage(target, attacker, damage);
+    }
+
+    void ModifyHealReceived(Unit* /*target*/, Unit* healer, uint32& heal, SpellInfo const* /*spellInfo*/) override
+    {
+        sGuildTalentMgr->ModifyHeal(healer, heal);
     }
 };
 
@@ -211,6 +263,30 @@ class spell_guild_level_perk : public SpellScript
     void Register() override
     {
         OnEffectHit += SpellEffectFn(spell_guild_level_perk::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+// The guild talents' hidden aura (spell_script_names, data/sql/world): the
+// hits, blocks, parries, dodges and spells of a member roll the special effects.
+class spell_guild_talent_procs : public AuraScript
+{
+    PrepareAuraScript(spell_guild_talent_procs);
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        return sGuildTalentMgr->CheckProc(GetTarget()->ToPlayer(), eventInfo);
+    }
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        sGuildTalentMgr->OnProc(GetTarget()->ToPlayer(), eventInfo);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_guild_talent_procs::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_guild_talent_procs::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
 
@@ -263,6 +339,7 @@ public:
     {
         sGuildLevelMgr->DeleteGuild(guild->GetId());
         sGuildHouseMgr->DeleteGuild(guild->GetId());
+        sGuildTalentMgr->DeleteGuild(guild->GetId());
     }
 };
 
@@ -295,6 +372,7 @@ public:
 
 void AddSC_guild_level_commands();
 void AddSC_guild_perk_commands();
+void AddSC_guild_talent_commands();
 
 void AddSC_guild_level_scripts()
 {
@@ -305,7 +383,9 @@ void AddSC_guild_level_scripts()
     new GuildLevelAllMapScript();
     RegisterSpellScript(spell_guild_level_hearthstone);
     RegisterSpellScript(spell_guild_level_perk);
+    RegisterSpellScript(spell_guild_talent_procs);
     new at_guild_level_house_exit();
     AddSC_guild_level_commands();
     AddSC_guild_perk_commands();
+    AddSC_guild_talent_commands();
 }

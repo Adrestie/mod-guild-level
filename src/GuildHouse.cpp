@@ -163,7 +163,7 @@ void GuildHouseMgr::LoadConfig()
 {
     GuildHouseConfig c;
     c.enable = sConfigMgr->GetOption<bool>("GuildLevel.House.Enable", true);
-    c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Paragon", 1), 0, GUILD_PARAGON_MAX));
+    c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Paragon", 1), 0, GUILD_PARAGON_LIMIT));
     c.emptyDelay = sConfigMgr->GetOption<uint32>("GuildLevel.House.EmptyDelay", 60);
     _config = c;
 }

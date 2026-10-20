@@ -67,7 +67,7 @@ namespace
     {
         GuildLevelState const state = sGuildLevelMgr->Get(guild->GetId());
         Say(handler, GUILD_LEVEL_STR_CMD_INFO, guild->GetName(), guild->GetId(),
-            uint32(state.level), uint32(GUILD_LEVEL_MAX), uint32(state.paragon), uint32(GUILD_PARAGON_MAX));
+            uint32(state.level), uint32(GUILD_LEVEL_MAX), uint32(state.paragon), uint32(sGuildLevelMgr->Config().paragonMax));
 
         if (uint64 const need = sGuildLevelMgr->Needed(state))
             Say(handler, GUILD_LEVEL_STR_CMD_INFO_XP, state.xp, need);
@@ -155,9 +155,9 @@ public:
             Say(handler, GUILD_LEVEL_STR_CMD_NO_GUILD);
             return true;
         }
-        if (paragon > GUILD_PARAGON_MAX)
+        if (paragon > sGuildLevelMgr->Config().paragonMax)
         {
-            Say(handler, GUILD_LEVEL_STR_CMD_BAD_LEVEL, uint32(GUILD_PARAGON_MAX));
+            Say(handler, GUILD_LEVEL_STR_CMD_BAD_LEVEL, uint32(sGuildLevelMgr->Config().paragonMax));
             return true;
         }
         sGuildLevelMgr->SetParagon(guild->GetId(), uint8(paragon));
@@ -232,9 +232,9 @@ public:
         Player* player = InHall(handler);
         if (!player)
             return true;
-        if (paragon > GUILD_PARAGON_MAX || (kind != "creature" && kind != "object"))
+        if (paragon > sGuildLevelMgr->Config().paragonMax || (kind != "creature" && kind != "object"))
         {
-            handler->SendSysMessage("Syntax: .guildlevel house add <paragon 0-9> <creature|object> <entry>");
+            handler->SendSysMessage("Syntax: .guildlevel house add <paragon> <creature|object> <entry>");
             return true;
         }
         uint32 const id = sGuildHouseMgr->AddSpawn(player->GetMapId(), uint8(paragon), kind == "object" ? 1 : 0, entry,

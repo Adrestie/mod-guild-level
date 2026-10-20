@@ -2,7 +2,7 @@
 # mod-guild-level — configuration
 #
 # Members of one guild who kill monsters together earn guild experience. The
-# guild climbs 25 levels, then 9 Paragon levels.
+# guild climbs 25 levels, then Paragon levels (GuildLevel.Paragon.Max).
 #
 # Every value below is also the built-in default, so a setting left out changes
 # nothing. Reloaded by `.reload config`.
@@ -46,6 +46,59 @@ GuildLevel.Rate                 = 1.0
 
 ###############################################################################
 #
+#    QUESTS AND CONTENT
+#
+#    GuildLevel.Quest.Rate
+#        A quest completed by a member brings his guild the quest's experience
+#        at his level (also at the maximum level, where the quest pays gold)
+#        times this, then times GuildLevel.Rate. A level 80 quest is worth
+#        about 20,000 to 30,000: 0.1 brings about 2,500.
+#
+#    GuildLevel.Content.<family>
+#        A creature killed brings this much MORE than its own experience, per
+#        guildmate present (alive, within reward distance, in the killer's
+#        group), then times GuildLevel.Rate, to every guild with
+#        GuildLevel.MinMembers present. Gray creatures count too. The families
+#        follow DynamicLoot's (same names, same rules, built into the module):
+#          ...World, ...Rare, ...WorldBoss    outside dungeons and raids (a BC
+#                                             map's creature below level 57 is
+#                                             Vanilla's)
+#          ...DungeonTrash, ...DungeonBoss    dungeons (WotLK: normal mode)
+#          WotlkHeroicTrash, WotlkHeroicBoss  WotLK dungeons in heroic mode
+#          ...RaidTrash, ...RaidBoss          raids (WotLK: outside Icecrown)
+#          IcecrownRaidTrash, IcecrownRaidBoss
+#        A family left out gives nothing more.
+#
+
+GuildLevel.Quest.Rate                  = 0.1
+GuildLevel.Content.VanillaWorld        = 0
+GuildLevel.Content.VanillaRare         = 0
+GuildLevel.Content.VanillaWorldBoss    = 0
+GuildLevel.Content.VanillaDungeonTrash = 0
+GuildLevel.Content.VanillaDungeonBoss  = 1000
+GuildLevel.Content.VanillaRaidTrash    = 0
+GuildLevel.Content.VanillaRaidBoss     = 5000
+GuildLevel.Content.BcWorld             = 0
+GuildLevel.Content.BcRare              = 0
+GuildLevel.Content.BcWorldBoss         = 0
+GuildLevel.Content.BcDungeonTrash      = 0
+GuildLevel.Content.BcDungeonBoss       = 2000
+GuildLevel.Content.BcRaidTrash         = 0
+GuildLevel.Content.BcRaidBoss          = 10000
+GuildLevel.Content.WotlkWorld          = 0
+GuildLevel.Content.WotlkRare           = 0
+GuildLevel.Content.WotlkWorldBoss      = 0
+GuildLevel.Content.WotlkDungeonTrash   = 0
+GuildLevel.Content.WotlkDungeonBoss    = 3000
+GuildLevel.Content.WotlkHeroicTrash    = 0
+GuildLevel.Content.WotlkHeroicBoss     = 5000
+GuildLevel.Content.WotlkRaidTrash      = 0
+GuildLevel.Content.WotlkRaidBoss       = 15000
+GuildLevel.Content.IcecrownRaidTrash   = 0
+GuildLevel.Content.IcecrownRaidBoss    = 25000
+
+###############################################################################
+#
 #    CURVES
 #
 #    The experience each step costs, separated by spaces or commas. The bar
@@ -56,19 +109,24 @@ GuildLevel.Rate                 = 1.0
 #        25 amounts: the first takes a new guild (level 0) to level 1, the last
 #        takes level 24 to level 25.
 #
+#    GuildLevel.Paragon.Max
+#        The last Paragon level, past level 25 (1 to 255). It is the end: the
+#        guild earns nothing more (its lifetime total still counts). A guild
+#        above a lowered maximum comes down to it.
+#
 #    GuildLevel.Curve.Paragon
-#        9 amounts, past level 25: the first takes the guild to Paragon 1, the
-#        last to Paragon 9. Paragon 9 is the end: the guild earns nothing more
-#        (its lifetime total still counts).
+#        One amount per Paragon level: the first takes the guild to Paragon 1,
+#        the next to Paragon 2, and so on.
 #
 #    A shorter list repeats its last amount; extra amounts are ignored. For
 #    scale: a level 80 monster is worth about 500 experience to a level 80
 #    character, so five guildmates bring their guild about 2,500 per kill. With
-#    these curves, level 25 takes about 11 million experience in all, and
-#    Paragon 9 another 23 million.
+#    these curves, level 25 takes about 11 million experience in all,
+#    Paragon 9 another 23 million, and each Paragon level after it 4 million.
 #
 
 GuildLevel.Curve.Levels         = "20000 30000 45000 60000 80000 100000 125000 150000 180000 210000 250000 290000 330000 380000 430000 490000 550000 620000 700000 780000 870000 960000 1060000 1170000 1300000"
+GuildLevel.Paragon.Max          = 99
 GuildLevel.Curve.Paragon        = "1500000 1750000 2000000 2250000 2500000 2750000 3000000 3500000 4000000"
 
 ###############################################################################
@@ -208,3 +266,39 @@ GuildLevel.Active.Home.Cooldown     = 0
 GuildLevel.House.Enable           = 1
 GuildLevel.House.Paragon          = 1
 GuildLevel.House.EmptyDelay       = 60
+
+###############################################################################
+#
+#    THE GUILD TALENTS
+#
+#    From level FromLevel, each level and each Paragon level gives the guild
+#    PointsPerLevel talent points. The guild master and the officers spend
+#    them in the talent tree (the button of the guild window, or .gtalent);
+#    every member of the guild gets the effects.
+#
+#    GuildLevel.Talents.Enable          1: on, 0: no points, no effects.
+#    GuildLevel.Talents.FromLevel       the first guild level that gives
+#                                       points (1 to 25).
+#    GuildLevel.Talents.PointsPerLevel  points per level and Paragon level.
+#    GuildLevel.Talents.Rank            the members of guild rank 0 (the guild
+#                                       master) to this one spend the points
+#                                       and reset them: 1 = the officers.
+#    GuildLevel.Talents.Tier2.Points    points the guild must have spent before
+#    GuildLevel.Talents.Tier3.Points    a talent of tier 2, of tier 3, is bought.
+#
+#    A RESET gives every point back and costs gold from the guild bank:
+#    GuildLevel.Talents.Reset.Cost      gold, the first time.
+#    GuildLevel.Talents.Reset.Increase  % of that cost added by each reset.
+#    GuildLevel.Talents.Reset.Decrease  % of that cost taken off each week
+#                                       since the last reset, down to the cost.
+#
+
+GuildLevel.Talents.Enable          = 1
+GuildLevel.Talents.FromLevel       = 10
+GuildLevel.Talents.PointsPerLevel  = 1
+GuildLevel.Talents.Rank            = 1
+GuildLevel.Talents.Tier2.Points    = 10
+GuildLevel.Talents.Tier3.Points    = 25
+GuildLevel.Talents.Reset.Cost      = 5000
+GuildLevel.Talents.Reset.Increase  = 10
+GuildLevel.Talents.Reset.Decrease  = 10
