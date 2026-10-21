@@ -2,11 +2,15 @@
 
 A Model frame of the 3.3.5 client draws with one of the model's own cameras (SetCamera); without
 one it falls back to a view from above. The objects have none (or a portrait one framed for
-another use): this adds one at the end of the model's camera list, in front of the object and a
-little above it, looking at the middle of its height, at the distance where the whole object --
-turned any way about its vertical axis -- fills the frame's height. The client's projection takes
-the camera's field of view across the frame's diagonal (GxuXformCreateProjection_SG): FOV is
-divided by sqrt(aspect^2 + 1) for the vertical.
+another use): this adds one at the end of the model's camera list. The camera rides with the model
+(turning the model in the frame turns the camera with it), so the turntable is the camera's: it
+orbits the object once every ORBIT milliseconds, a little above it, looking at the middle of its
+height, on a global loop of its own (independent of the model's animations).
+
+Its distance is the least at which the object -- seen from any side -- fits the frame: the circle
+its farthest corner sweeps about the vertical axis in the frame's width, its height in the frame's
+height. The client's projection takes the camera's field of view across the frame's diagonal
+(GxuXformCreateProjection_SG): FOV divided by sqrt(aspect^2 + 1) is the vertical.
 
     add(m2 bytes, aspect) -> (new m2 bytes, the camera's index)
 """
@@ -14,10 +18,13 @@ import math
 import struct
 
 FOV = 1.0                           # radians, across the diagonal
-ELEVATION = math.radians(15)        # the camera's height angle
-MARGIN = 1.04                       # a little room around the object
+ELEVATION = math.radians(12)        # the camera's height angle
+MARGIN = 1.06                       # a little room around the object
+ORBIT = 12000                       # milliseconds a turn
+KEYS = 48                           # keys of the orbit
 
-CAMERAS = 0x110                     # MD20 header: M2Array of cameras
+GLOBAL_LOOPS = 0x14                 # MD20 header: M2Array of global loop durations
+CAMERAS = 0x110                     # M2Array of cameras
 BOUNDS = 0xA0                       # bounding box: min x, y, z, max x, y, z
 CAMERA_SIZE = 116                   # modern layout: the field of view is a track
 
@@ -31,58 +38,79 @@ def _chunks(data):
         i += 8 + size
 
 
+def _distance(x0, y0, z0, x1, y1, z1, aspect):
+    """The camera's distance from the vertical axis."""
+    rho = max(math.hypot(x, y) for x in (x0, x1) for y in (y0, y1))
+    rho = max(rho, 0.05)
+    half_h = max((z1 - z0) / 2, 0.05)
+    vertical = FOV / math.sqrt(aspect * aspect + 1)
+    tv = math.tan(vertical / 2)
+    th = aspect * tv
+    # the object's nearest point is rho closer than its axis; its silhouette is at most rho wide
+    # and its height at most half_h from the middle
+    by_width = rho / th + rho
+    by_height = half_h / tv + rho
+    return max(by_width, by_height) * MARGIN, rho, half_h
+
+
 def add(data, aspect):
     data = bytearray(data)
-    md = next((at, size) for tag, at, size in _chunks(data) if tag == b'MD21')
-    base, size = md
+    base, size = next((at, size) for tag, at, size in _chunks(data) if tag == b'MD21')
     md20 = bytearray(data[base:base + size])
     x0, y0, z0, x1, y1, z1 = struct.unpack_from('<6f', md20, BOUNDS)
-
-    # turned about the vertical axis through the model's origin (SetFacing): the farthest corner
-    # sweeps a cylinder; its height's middle is looked at
-    rho = max(math.hypot(x, y) for x in (x0, x1) for y in (y0, y1))
+    distance, rho, half_h = _distance(x0, y0, z0, x1, y1, z1, aspect)
     zc = (z0 + z1) / 2
-    radius = max(0.05, math.hypot(rho, (z1 - z0) / 2))
-    vertical = FOV / math.sqrt(aspect * aspect + 1)
-    half = min(vertical, vertical * aspect) / 2
-    distance = radius / math.sin(half) * MARGIN
-    eye = (distance * math.cos(ELEVATION), 0.0, zc + distance * math.sin(ELEVATION))
-    target = (0.0, 0.0, zc)
+    height = zc + distance * math.tan(ELEVATION)
+
+    def align():
+        while len(md20) % 16:
+            md20.append(0)
+
+    # the orbit's own loop
+    nloops, oloops = struct.unpack_from('<II', md20, GLOBAL_LOOPS)
+    loops = bytes(md20[oloops:oloops + nloops * 4]) if nloops else b''
+    align()
+    loops_at = len(md20)
+    md20.extend(loops + struct.pack('<I', ORBIT))
+    struct.pack_into('<II', md20, GLOBAL_LOOPS, nloops + 1, loops_at)
+    orbit_loop = nloops
 
     count, offset = struct.unpack_from('<II', md20, CAMERAS)
     old = bytes(md20[offset:offset + count * CAMERA_SIZE]) if count else b''
 
-    def align(buf):
-        while len(buf) % 16:
-            buf.append(0)
-
-    align(md20)
-    # one key at time 0 for each track: its times and values, each behind an array per animation
-    def key_track(value_bytes):
-        align(md20)
+    def track(times, values, interpolation=0, loop=-1):
+        """An M2Track of one animation: its times, its values (spline keys), behind arrays."""
+        align()
         times_at = len(md20)
-        md20.extend(struct.pack('<I', 0))
+        md20.extend(struct.pack('<%dI' % len(times), *times))
+        align()
         values_at = len(md20)
-        md20.extend(value_bytes)
-        align(md20)
+        md20.extend(values)
+        align()
         times_arr = len(md20)
-        md20.extend(struct.pack('<II', 1, times_at))
+        md20.extend(struct.pack('<II', len(times), times_at))
         values_arr = len(md20)
-        md20.extend(struct.pack('<II', 1, values_at))
-        return struct.pack('<hhIIII', 0, -1, 1, times_arr, 1, values_arr)
+        md20.extend(struct.pack('<II', len(times), values_at))
+        return struct.pack('<hhIIII', interpolation, loop, 1, times_arr, 1, values_arr)
 
-    zero_vec = struct.pack('<9f', *([0.0] * 9))      # spline key: value, in and out tangents
-    pos_track = key_track(zero_vec)
-    target_track = key_track(zero_vec)
-    roll_track = key_track(struct.pack('<3f', 0.0, 0.0, 0.0))
-    fov_track = key_track(struct.pack('<3f', FOV, 0.0, 0.0))
-    camera = (struct.pack('<Iff', 0, distance + radius * 3, max(0.05, distance - radius * 2))
-              + pos_track + struct.pack('<3f', *eye)
-              + target_track + struct.pack('<3f', *target)
+    # the orbit: the camera's position around the vertical axis, linear between its keys
+    times, keys = [], b''
+    for k in range(KEYS + 1):
+        a = 2 * math.pi * k / KEYS
+        times.append(int(ORBIT * k / KEYS))
+        keys += struct.pack('<9f', distance * math.cos(a), distance * math.sin(a), height, 0, 0, 0, 0, 0, 0)
+    pos_track = track(times, keys, interpolation=1, loop=orbit_loop)
+    target_track = track([0], struct.pack('<9f', 0.0, 0.0, zc, 0, 0, 0, 0, 0, 0))
+    roll_track = track([0], struct.pack('<3f', 0.0, 0.0, 0.0))
+    fov_track = track([0], struct.pack('<3f', FOV, 0.0, 0.0))
+    reach = distance + max(rho, half_h) * 2
+    camera = (struct.pack('<Iff', 0, reach * 2, max(0.05, (distance - rho) * 0.5))
+              + pos_track + struct.pack('<3f', 0.0, 0.0, 0.0)
+              + target_track + struct.pack('<3f', 0.0, 0.0, 0.0)
               + roll_track + fov_track)
     assert len(camera) == CAMERA_SIZE
 
-    align(md20)
+    align()
     cameras_at = len(md20)
     md20.extend(old + camera)
     struct.pack_into('<II', md20, CAMERAS, count + 1, cameras_at)

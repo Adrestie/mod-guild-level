@@ -198,7 +198,7 @@ if FUI then
     if FUI.Bar then FUI.Bar(_G.GuildHouseUIScrollScrollBar) end
 end
 
--- The object under the cursor in the list, turning slowly, above the list.
+-- The object under the cursor in the list, its camera orbiting it, above the list.
 local Preview = CreateFrame("Frame", nil, UI)
 Preview:SetWidth(300)
 Preview:SetHeight(260)
@@ -214,8 +214,6 @@ Preview:SetScript("OnUpdate", function(self, elapsed)
     -- the object's presentation camera (tools/decor/preview_camera.py): set again every frame, a
     -- model taking its first camera at each load
     if self.camera then self.model:SetCamera(self.camera) end
-    self.facing = (self.facing or 0) + elapsed * 0.6
-    self.model:SetFacing(self.facing)
 end)
 
 function Preview:ShowDecor(decor)
@@ -228,6 +226,9 @@ function Preview:ShowDecor(decor)
     self.model:SetModelScale(1)
     self.model:SetPosition(0, 0, 0)
     self.model:SetCamera(self.camera)
+    -- the camera orbits the object by itself (its own loop); lit from the front and above
+    self.model:SetFacing(0)
+    self.model:SetLight(1, 0, -0.5, -0.6, -0.6, 0.8, 1, 1, 1, 0.8, 1, 0.95, 0.85)
     self.name:SetText(d[4])
     self:Show()
 end
