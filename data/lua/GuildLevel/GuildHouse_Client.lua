@@ -671,6 +671,17 @@ listener:SetScript("OnUpdate", function(_, elapsed)
     end
 end)
 
+-- Out of the mode before the world goes away (logout, loading screen): the interface comes back
+-- first. Hidden at logout, UIParent leaves its frames without a place, and the addons that save
+-- their windows' positions then (AIO's LibWindow) fail on them.
+local leaving = CreateFrame("Frame")
+leaving:RegisterEvent("PLAYER_LEAVING_WORLD")
+leaving:RegisterEvent("PLAYER_LOGOUT")
+leaving:SetScript("OnEvent", function()
+    if S.active then UI:Leave() end
+    UIParent:Show()
+end)
+
 SLASH_GUILDHOUSEDECO1 = "/gdeco"
 SlashCmdList.GUILDHOUSEDECO = function()
     if S.active then UI:Leave() else AIO.Handle("GuildHouse", "Open") end
