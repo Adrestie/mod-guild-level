@@ -374,7 +374,7 @@ namespace wxl_guildhouse
         if (mode_ == GizmoMode::Rotate || mode_ == GizmoMode::Scale)
         {
             // the editor's own handles (ImGuizmo's rings do not follow the game's camera)
-            const bool busy = mode_ == GizmoMode::Rotate ? handles_.Rotate(matrix_)
+            const bool busy = mode_ == GizmoMode::Rotate ? handles_.Rotate(matrix_, local_)
                                                          : handles_.Scale(matrix_, kScaleMin, kScaleMax);
             if (handles_.Dragging()) doodad::SetWorldMatrix(object_, matrix_);
             return busy;

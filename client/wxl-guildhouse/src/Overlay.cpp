@@ -29,7 +29,7 @@ namespace wxl_guildhouse
         bool g_gizmoClick = false;      // a left button the gizmo took: its release is the gizmo's
         bool g_rightClick = false;      // the same for a right button on a placed object
         bool g_worldDown = false;       // a left button the game had, and where
-        int g_downX = 0, g_downY = 0;
+        ULONGLONG g_downAt = 0;           // when it went down: a click is short
 
         BOOL CALLBACK PickWindow(HWND h, LPARAM out)
         {
@@ -87,8 +87,7 @@ namespace wxl_guildhouse
                             // the game's: a click (not a drag of the camera) away from the object
                             // in hand lets it go
                             g_worldDown = true;
-                            g_downX = x;
-                            g_downY = y;
+                            g_downAt = GetTickCount64();
                         }
                     }
                     else if (m == WM_LBUTTONUP)
@@ -101,14 +100,22 @@ namespace wxl_guildhouse
                         else if (g_worldDown)
                         {
                             g_worldDown = false;
-                            const int dx = x - g_downX, dy = y - g_downY;
-                            if (dx * dx + dy * dy <= 16 && editor.Ready() && editor.GizmoShown() &&
-                                !targets.Covers(editor.Model(), editor.Matrix(), x, y))
-                                overlay.ClickedAway();
+                            const bool shortPress = GetTickCount64() - g_downAt < 350;
+                            if (shortPress && editor.Ready() && editor.GizmoShown())
+                            {
+                                // where the cursor is now (the game may have moved it back)
+                                POINT p;
+                                float cx = x, cy = y;
+                                if (GetCursorPos(&p) && ScreenToClient(h, &p)) { cx = float(p.x); cy = float(p.y); }
+                                const bool onIt = targets.Covers(editor.Model(), editor.Matrix(), cx, cy);
+                                WLOG_INFO("click: away=%d at %.0f,%.0f", onIt ? 0 : 1, cx, cy);
+                                if (!onIt) overlay.ClickedAway();
+                            }
                         }
                     }
                     else if (m == WM_RBUTTONDOWN)
                     {
+                        WLOG_INFO("right click: hovered=%d", targets.Hovered() ? 1 : 0);
                         if (targets.Hovered())
                         {
                             targets.RightClick();

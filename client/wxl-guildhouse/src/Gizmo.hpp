@@ -1,7 +1,7 @@
 // The editor's own handles for turning and sizing (the moving arrows are ImGuizmo's): drawn and
 // hit-tested on the screen from the object's world position, with the same view-projection as the
 // outlines, so that they stay on the object whatever the camera does.
-//  * turning: three rings around the object, one per world axis; a ring dragged turns the object
+//  * turning: three rings around the object, one per axis (the world's, or the object's own); a ring dragged turns the object
 //    about its axis by the angle the cursor sweeps around the object's centre;
 //  * sizing: three lines from the centre along the object's own axes, a handle at each end; a
 //    handle dragged sizes the whole object by how much farther from the centre the cursor goes.
@@ -17,7 +17,8 @@ namespace wxl_guildhouse
     public:
         /// Inside the overlay's ImGui frame. matrix: the object's world matrix, changed while a ring
         /// is dragged. Returns true while the cursor is on a handle or drags one.
-        bool Rotate(float matrix[16]);
+        /// local: the rings about the object's own axes, else the world's.
+        bool Rotate(float matrix[16], bool local);
         /// The same for the size; the scale kept within [minScale, maxScale].
         bool Scale(float matrix[16], float minScale, float maxScale);
         /// A drag is going on.

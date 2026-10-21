@@ -67,26 +67,42 @@ namespace wxl_guildhouse
             return (std::max)(0.3f, std::sqrt(dx * dx + dy * dy + dz * dz) * share);
         }
 
-        // A point of a ring: around the axis, at angle a.
-        void RingPoint(const float c[3], int axis, float r, float a, float out[3])
+        // The three axes the rings turn about: the world's, or the object's own (its rows).
+        void Axes(const float m[16], bool local, float out[3][3])
         {
-            const int u = (axis + 1) % 3, v = (axis + 2) % 3;
-            out[0] = c[0]; out[1] = c[1]; out[2] = c[2];
-            out[u] += r * std::cos(a);
-            out[v] += r * std::sin(a);
+            for (int i = 0; i < 3; ++i)
+            {
+                float n = 0.0f;
+                for (int j = 0; j < 3; ++j)
+                {
+                    out[i][j] = local ? m[i * 4 + j] : (i == j ? 1.0f : 0.0f);
+                    n += out[i][j] * out[i][j];
+                }
+                n = std::sqrt(n);
+                for (int j = 0; j < 3; ++j) out[i][j] = n > 1e-6f ? out[i][j] / n : (i == j ? 1.0f : 0.0f);
+            }
         }
 
-        // Turns the matrix's three rows about a world axis by angle a, around its own position.
-        void TurnRows(const float in[16], int axis, float a, float out[16])
+        // A point of a ring about axis i, at angle a: from the next axis towards the one after.
+        void RingPoint(const float c[3], const float ax[3][3], int axis, float r, float a, float out[3])
+        {
+            const float* u = ax[(axis + 1) % 3];
+            const float* v = ax[(axis + 2) % 3];
+            for (int j = 0; j < 3; ++j) out[j] = c[j] + r * (std::cos(a) * u[j] + std::sin(a) * v[j]);
+        }
+
+        // Turns the matrix's three rows about the unit axis n by angle a (Rodrigues), around its
+        // own position.
+        void TurnRows(const float in[16], const float n[3], float a, float out[16])
         {
             std::memcpy(out, in, sizeof(float) * 16);
-            const int u = (axis + 1) % 3, v = (axis + 2) % 3;
             const float c = std::cos(a), s = std::sin(a);
             for (int row = 0; row < 3; ++row)
             {
-                const float pu = in[row * 4 + u], pv = in[row * 4 + v];
-                out[row * 4 + u] = pu * c - pv * s;
-                out[row * 4 + v] = pu * s + pv * c;
+                const float* x = &in[row * 4];
+                const float d = n[0] * x[0] + n[1] * x[1] + n[2] * x[2];
+                const float k[3] = { n[1] * x[2] - n[2] * x[1], n[2] * x[0] - n[0] * x[2], n[0] * x[1] - n[1] * x[0] };
+                for (int j = 0; j < 3; ++j) out[row * 4 + j] = x[j] * c + k[j] * s + n[j] * d * (1.0f - c);
             }
         }
 
@@ -96,7 +112,7 @@ namespace wxl_guildhouse
         }
     }
 
-    bool Gizmo::Rotate(float m[16])
+    bool Gizmo::Rotate(float m[16], bool local)
     {
         const Screen screen;
         const float c[3] = { m[12], m[13], m[14] };
@@ -106,7 +122,10 @@ namespace wxl_guildhouse
         const ImGuiIO& io = ImGui::GetIO();
         ImDrawList* dl = ImGui::GetBackgroundDrawList();
 
-        // the rings on the screen, and the nearest to the cursor
+        // the rings on the screen, and the nearest to the cursor; while dragging, about the axes
+        // the drag began with
+        float ax[3][3];
+        Axes(axis_ >= 0 ? start_ : m, local, ax);
         ImVec2 pts[3][kSegments + 1];
         bool ok[3][kSegments + 1];
         int closest = -1;
@@ -115,7 +134,7 @@ namespace wxl_guildhouse
             for (int k = 0; k <= kSegments; ++k)
             {
                 float p[3];
-                RingPoint(c, axis, r, 2 * kPi * k / kSegments, p);
+                RingPoint(c, ax, axis, r, 2 * kPi * k / kSegments, p);
                 ok[axis][k] = screen.Project(p, pts[axis][k]);
                 if (k && ok[axis][k] && ok[axis][k - 1])
                 {
@@ -131,8 +150,8 @@ namespace wxl_guildhouse
             startAngle_ = AngleAround(centre, io.MousePos);
             // which way the ring's angle runs on the screen: two of its points a little apart
             float p0[3], p1[3];
-            RingPoint(c, axis_, r, 0.0f, p0);
-            RingPoint(c, axis_, r, 0.2f, p1);
+            RingPoint(c, ax, axis_, r, 0.0f, p0);
+            RingPoint(c, ax, axis_, r, 0.2f, p1);
             ImVec2 s0, s1;
             sense_ = 1.0f;
             if (screen.Project(p0, s0) && screen.Project(p1, s1))
@@ -148,7 +167,7 @@ namespace wxl_guildhouse
             else
             {
                 float delta = AngleAround(centre, io.MousePos) - startAngle_;
-                TurnRows(start_, axis_, delta * sense_, m);
+                TurnRows(start_, ax[axis_], delta * sense_, m);
             }
         }
 

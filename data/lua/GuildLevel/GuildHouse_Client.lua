@@ -46,7 +46,7 @@ local floor, min, max, sin, cos = math.floor, math.min, math.max, math.sin, math
 local L = {
     enUS = {
         title = "Guild objects", validate = "Place", cancel = "Cancel", store = "To the stock",
-        move = "Move (1)", rotate = "Turn (2)", scale = "Size (3)", follow = "Follow the mouse",
+        move = "Move (1)", rotate = "Turn (2)", scale = "Size (3)", world = "World", localAxes = "Local", reset = "Reset turn", follow = "Follow the mouse",
         ground = "Set on the floor", camera = "Free camera", exit = "Leave (Esc)",
         noext = "The Customization mode needs WarcraftXL and its guild house editor (Extensions\\wxl-guildhouse).",
         cannot = "You cannot decorate the house: Paragon level %d, guild rank %d or above, in the house.",
@@ -57,7 +57,7 @@ local L = {
     },
     frFR = {
         title = "Objets de guilde", validate = "Valider", cancel = "Annuler", store = "Ranger",
-        move = "Déplacer (1)", rotate = "Pivoter (2)", scale = "Taille (3)", follow = "Suivre la souris",
+        move = "Déplacer (1)", rotate = "Pivoter (2)", scale = "Taille (3)", world = "Monde", localAxes = "Local", reset = "Rotation d'origine", follow = "Suivre la souris",
         ground = "Poser au sol", camera = "Caméra libre", exit = "Quitter (Échap)",
         noext = "Le mode Personnalisation demande WarcraftXL et son éditeur de maison de guilde (Extensions\\wxl-guildhouse).",
         cannot = "Vous ne pouvez pas décorer la maison : Parangon %d, rang de guilde %d ou mieux, dans la maison.",
@@ -241,6 +241,22 @@ for i, b in ipairs(barButtons) do
     Bar.buttons[b[1]] = btn
 end
 
+-- While turning: about the world's axes or the object's own, and back to the rotation it had.
+local Turn = CreateFrame("Frame", nil, Bar)
+Turn:SetWidth(340)
+Turn:SetHeight(30)
+Turn:SetPoint("BOTTOM", Bar, "TOP", 0, 2)
+Turn.world = Button(Turn, L.world, 100)
+Turn.world:SetPoint("LEFT", 0, 0)
+Turn.world:SetScript("OnClick", function() S.localAxes = false; UI:Refresh() end)
+Turn.localAxes = Button(Turn, L.localAxes, 100)
+Turn.localAxes:SetPoint("LEFT", Turn.world, "RIGHT", 4, 0)
+Turn.localAxes:SetScript("OnClick", function() S.localAxes = true; UI:Refresh() end)
+Turn.reset = Button(Turn, L.reset, 130)
+Turn.reset:SetPoint("LEFT", Turn.localAxes, "RIGHT", 4, 0)
+Turn.reset:SetScript("OnClick", function() UI:ResetTurn() end)
+Turn:Hide()
+
 local Exit = Button(UI, L.exit, 130)
 Exit:SetPoint("TOPRIGHT", UI, "TOPRIGHT", -20, -20)
 Exit:SetScript("OnClick", function() UI:Leave() end)
@@ -339,6 +355,17 @@ function UI:Refresh()
             if key == S.mode and editing then btn:LockHighlight() else btn:UnlockHighlight() end
         end
     end
+    if Has("GuildHouse_SetLocal") then GuildHouse_SetLocal(S.localAxes == true) end
+    if editing and S.mode == "rotate" and not S.edit.carry then
+        Turn:Show()
+        if S.localAxes then
+            Turn.localAxes:LockHighlight(); Turn.world:UnlockHighlight()
+        else
+            Turn.world:LockHighlight(); Turn.localAxes:UnlockHighlight()
+        end
+    else
+        Turn:Hide()
+    end
     if S.edit and S.edit.carry then
         Bar.text:SetText(L.carry)
     elseif S.edit then
@@ -402,7 +429,7 @@ function UI:Edit(p)
         AIO.Handle("GuildHouse", "Cancel", p.id)
         return
     end
-    S.edit = { id = p.id, decor = p.decor, started = true, carry = false }
+    S.edit = { id = p.id, decor = p.decor, started = true, carry = false, rot = { p.qx, p.qy, p.qz, p.qw } }
     S.yaw = 2 * math.atan2(p.qz, p.qw)
     GuildHouse_SetMode(S.mode or "move")
     UI:Refresh()
@@ -433,6 +460,15 @@ function UI:Validate()
     S.edit = nil
     Catcher:Hide()
     UI:Refresh()
+end
+
+-- The object in hand turned back as it was when taken (or set down), where it stands now.
+function UI:ResetTurn()
+    if not (S.edit and S.edit.started and S.edit.rot) then return end
+    local x, y, z, _, _, _, _, s = GuildHouse_GetTransform()
+    if not x then return end
+    local r = S.edit.rot
+    GuildHouse_SetTransform(x, y, z, r[1], r[2], r[3], r[4], s)
 end
 
 -- The object in hand goes back to the stock (a new one is only given up).
@@ -480,6 +516,7 @@ UI:SetScript("OnUpdate", function()
                 local qx, qy, qz, qw = Yaw(S.yaw)
                 if d and GuildHouse_BeginEdit(d[3], x, y, z, qx, qy, qz, qw, d[5] or 1) then
                     e.started = true
+                    e.rot = { qx, qy, qz, qw }
                     GuildHouse_SetMode(S.mode or "move")
                 else
                     Say(L.aim)

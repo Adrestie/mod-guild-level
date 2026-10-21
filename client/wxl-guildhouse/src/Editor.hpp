@@ -40,6 +40,8 @@ namespace wxl_guildhouse
         Transform Current() const;
         void Set(const Transform& t);
         void SetMode(GizmoMode mode) { mode_ = mode; }
+        /// Turning about the object's own axes, or the world's.
+        void SetLocal(bool local) { local_ = local; }
         GizmoMode Mode() const { return mode_; }
         /// No gizmo while the object follows the cursor: it would be under the cursor, and take the
         /// click that sets the object down.
@@ -72,6 +74,7 @@ namespace wxl_guildhouse
         float matrix_[16] = {};          // the wanted world matrix (row vectors, translation last)
         GizmoMode mode_ = GizmoMode::Move;
         bool gizmo_ = true;
+        bool local_ = false;
         Gizmo handles_;                  // turning and sizing
     };
 
