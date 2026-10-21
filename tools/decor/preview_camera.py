@@ -104,7 +104,9 @@ def add(data, aspect):
     roll_track = track([0], struct.pack('<3f', 0.0, 0.0, 0.0))
     fov_track = track([0], struct.pack('<3f', FOV, 0.0, 0.0))
     reach = distance + max(rho, half_h) * 2
-    camera = (struct.pack('<Iff', 0, reach * 2, max(0.05, (distance - rho) * 0.5))
+    # the clip planes wide: the frame scales the model (and the camera with it) by the interface's
+    # size, the planes stay as they are
+    camera = (struct.pack('<Iff', 0, reach * 50, 0.01)
               + pos_track + struct.pack('<3f', 0.0, 0.0, 0.0)
               + target_track + struct.pack('<3f', 0.0, 0.0, 0.0)
               + roll_track + fov_track)
