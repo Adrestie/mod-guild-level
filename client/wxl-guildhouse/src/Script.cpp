@@ -12,6 +12,7 @@
 #include "FreeBuildCamera.hpp"
 #include "Overlay.hpp"
 #include "Targets.hpp"
+#include "ViewProj.hpp"
 
 #include "game/Camera.hpp"
 #include "game/Pick.hpp"
@@ -128,7 +129,9 @@ namespace wxl_guildhouse
             if (w <= 0.0f || h <= 0.0f) return false;
             const float nx = p.x / w * 2.0f - 1.0f, ny = 1.0f - p.y / h * 2.0f;
             float inv[16], nearPoint[3], farPoint[3];
-            if (!Invert(camera::GetViewProj(), inv) || !Unproject(inv, nx, ny, 0.0f, nearPoint) ||
+            float vp[16];
+            ViewProj(vp);
+            if (!Invert(vp, inv) || !Unproject(inv, nx, ny, 0.0f, nearPoint) ||
                 !Unproject(inv, nx, ny, 1.0f, farPoint))
                 return false;
             float dir[3] = { farPoint[0] - nearPoint[0], farPoint[1] - nearPoint[1], farPoint[2] - nearPoint[2] };
@@ -228,7 +231,8 @@ namespace wxl_guildhouse
         // when the point is behind the camera
         int WorldToScreen(void* L)
         {
-            const float* vp = camera::GetViewProj();
+            float vp[16];
+            ViewProj(vp);
             const float w[3] = { Num(L, 1), Num(L, 2), Num(L, 3) };
             float clip[4];
             for (int j = 0; j < 4; ++j)

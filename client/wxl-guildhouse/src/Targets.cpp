@@ -4,6 +4,8 @@
 
 #include "Targets.hpp"
 
+#include "ViewProj.hpp"
+
 #include "game/Camera.hpp"
 
 #include <algorithm>
@@ -66,7 +68,8 @@ namespace wxl_guildhouse
     {
         hovered_ = 0;
         if (!shown_) return;
-        const float* vp = camera::GetViewProj();
+        float vp[16];
+        ViewProj(vp);
         const ImGuiIO& io = ImGui::GetIO();
         const float W = io.DisplaySize.x, H = io.DisplaySize.y;
         ImDrawList* dl = ImGui::GetBackgroundDrawList();
