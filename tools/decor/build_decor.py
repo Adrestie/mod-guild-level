@@ -1,10 +1,10 @@
 """The Customization objects' game files, from export_decor.py's export:
   * each model laid out for the client's modern M2 plugin (WarcraftXL's wxl-modern-m2, through
     mod-limit-break's m2port) in data/art/World/GuildLevel/Decor, its textures named by path there
-    and brought down to 512 at most (shrink_blp.py);
+    and brought down to 256 at most (shrink_blp.py);
   * the catalogue the interface reads, data/lua/GuildLevel/GuildHouse_Decor.lua (one row per object:
     its HouseDecor ID, kind, model and English name);
-  * its display (GameObjectDisplayInfo, 92100 + n) for the client, beside the Guild Chest's in
+  * its display (GameObjectDisplayInfo, the n-th number of DISPLAY_BLOCKS) for the client, beside the Guild Chest's in
     data/dbc/guild_level_GameObjectDisplayInfo.dbc;
   * data/sql/world/guild_level_11_decor.sql: the objects (mod_guild_level_decor), the server's
     displays and the gameobjects (920100 + n).
@@ -29,8 +29,10 @@ LUA = os.path.join(ROOT, 'data', 'lua', 'GuildLevel', 'GuildHouse_Decor.lua')
 DBC = os.path.join(ROOT, 'data', 'dbc', 'guild_level_GameObjectDisplayInfo.dbc')
 SQL = os.path.join(ROOT, 'data', 'sql', 'world', 'guild_level_11_decor.sql')
 PREVIEW_ASPECT = 280 / 224         # the interface's preview: its model's width over height
-DISPLAY = 92100                     # GameObjectDisplayInfo of the n-th object: DISPLAY + n
-ENTRY = 920100                      # its gameobject: ENTRY + n (gameobjects at tranche x 10)
+# the module's blocks (WoW-mods ID_RANGES.md) the objects' numbers are taken from, in order: the
+# n-th object's display (and, later, its item) is the n-th number of these
+DISPLAY_BLOCKS = [(92100, 93999), (82200, 82899)]
+ENTRY = 920100                      # its gameobject: ENTRY + n (the blocks' gameobjects, x 10)
 KEEP_DISPLAYS = (92010, 92011)      # the Guild Chest's, in the same file
 BACKSLASH = chr(92)
 
@@ -48,6 +50,15 @@ def bounds(path):
     m = open(path, 'rb').read()
     i = m.find(b'MD20')
     return struct.unpack_from('<6f', m, i + 0xA0)
+
+
+def display_of(n):
+    """The n-th object's number in the module's blocks."""
+    for first, last in DISPLAY_BLOCKS:
+        if n <= last - first:
+            return first + n
+        n -= last - first + 1
+    raise SystemExit('more objects than the blocks of DISPLAY_BLOCKS hold: add a block')
 
 
 def write_dbc(rows):
@@ -75,12 +86,12 @@ def write_dbc(rows):
 
 def write_sql(rows):
     first, last = rows[0][2], rows[-1][2]
-    d0, d1 = rows[0][1], rows[-1][1]
     out = [
         '-- mod-guild-level — the Customization objects (Paragon 9), written by tools/decor/build_decor.py.',
         '--',
         '-- Furniture of the modern housing: each one a gameobject (%d to %d) with its display' % (first, last),
-        "-- (%d to %d; the client's rows are in data/dbc/guild_level_GameObjectDisplayInfo.dbc)." % (d0, d1),
+        "-- (in %s; the client's rows are in data/dbc/guild_level_GameObjectDisplayInfo.dbc)." % ', '.join(
+            '%d-%d' % block for block in DISPLAY_BLOCKS),
         "-- The guilds' stock and placed objects are in the characters database (src/GuildDecor.h).",
         '--',
         '-- Idempotent: the table is created once, its rows are written again.',
@@ -99,7 +110,8 @@ def write_sql(rows):
         ',\n'.join('(%d, %d, %s, %s)' % (e['decor'], entry, sql_string(e['kind']), sql_string(e['name']))
                    for e, display, entry, mdx, box in rows) + ';',
         '',
-        'DELETE FROM `gameobjectdisplayinfo_dbc` WHERE `ID` BETWEEN %d AND %d;' % (d0, d1),
+        'DELETE FROM `gameobjectdisplayinfo_dbc` WHERE %s;' % ' OR '.join(
+            '`ID` BETWEEN %d AND %d' % block for block in DISPLAY_BLOCKS),
         'INSERT INTO `gameobjectdisplayinfo_dbc` (`ID`, `ModelName`, `GeoBoxMinX`, `GeoBoxMinY`, `GeoBoxMinZ`, '
         '`GeoBoxMaxX`, `GeoBoxMaxY`, `GeoBoxMaxZ`) VALUES',
         ',\n'.join('(%d, %s, %s)' % (display, sql_string(mdx), ', '.join('%.4f' % v for v in box))
@@ -136,16 +148,16 @@ def main(export_dir):
         e = dict(e, camera=camera)
         rows.append((e, GAME_DIR + BACKSLASH + name + '.m2'))
 
-    # textures at 512 at most: the levels above are dropped
-    shrink_blp.main(out, 512)
+    # textures at 256 at most: the levels above are dropped
+    shrink_blp.main(out, 256)
 
     dbc_rows, sql_rows = [], []
     for n, (e, path) in enumerate(rows):
         box = bounds(os.path.join(out, path.split(BACKSLASH)[-1]))
         mdx = path[:-3] + '.mdx'
         fbits = [struct.unpack('<I', struct.pack('<f', v))[0] for v in box]
-        dbc_rows.append(([DISPLAY + n, 0] + [0] * 10 + fbits + [0], mdx))
-        sql_rows.append((e, DISPLAY + n, ENTRY + n, mdx, box))
+        dbc_rows.append(([display_of(n), 0] + [0] * 10 + fbits + [0], mdx))
+        sql_rows.append((e, display_of(n), ENTRY + n, mdx, box))
     write_dbc(dbc_rows)
     write_sql(sql_rows)
 

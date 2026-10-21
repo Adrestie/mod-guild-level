@@ -1,6 +1,6 @@
-"""The first catalogue of the Customization mode: about 150 furniture models of the modern housing
-(HouseDecor, Midnight), read through the local wow.export bridge (http://127.0.0.1:9455, retail
-loaded), a share of each kind. Writes catalog.json beside this file, the list to correct by hand
+"""The catalogue of the Customization mode: the furniture models of the modern housing (HouseDecor,
+Midnight), read through the local wow.export bridge (http://127.0.0.1:9455, retail loaded): every
+placeable one (ALL), or a share of each kind (QUOTAS). Writes catalog.json beside this file, the list to correct by hand
 before build_decor.py turns it into game files: one entry per object, its HouseDecor ID first.
 The objects already in catalog.json stay, first and in their order (their gameobjects and displays
 follow the order): a run only adds to them, up to each kind's share.
@@ -29,6 +29,7 @@ QUOTAS = {
     ('Functional', 'Utility'): 10, ('Functional', 'Pet Beds'): 6, ('Functional', 'Misc Functional'): 6,
 }
 M2 = 1      # HouseDecor.ModelType: 0 a WMO, 1 an M2
+ALL = True  # every placeable model of the housing, not a share of each kind (QUOTAS)
 
 
 def table(name):
@@ -48,15 +49,16 @@ def main():
         if d['Name_lang'].startswith('[DNT]') or d['ModelType'] != M2 or not d['ModelFileDataID'] \
                 or not d['ItemID'] or d['ModelFileDataID'] in seen_models:
             continue
-        kind = next((k for k in kind_of[d['ID']] if k in QUOTAS), None)
-        if kind:
+        kind = next((k for k in kind_of[d['ID']] if k and k[0]), None) or ('Miscellaneous', 'Miscellaneous - All')
+        if ALL or kind in QUOTAS:
             seen_models.add(d['ModelFileDataID'])
             pools[kind].append(d)
     path = os.path.join(HERE, 'catalog.json')
     catalog = json.load(open(path, encoding='utf-8')) if os.path.isfile(path) else []
     chosen = {e['decor'] for e in catalog}
     have = collections.Counter((e['category'], e['kind']) for e in catalog)
-    for kind, n in QUOTAS.items():
+    for kind in (sorted(pools) if ALL else QUOTAS):
+        n = len(pools[kind]) if ALL else QUOTAS[kind]
         pool = [d for d in pools[kind] if d['ID'] not in chosen]
         want = n - have[kind]
         if want <= 0:

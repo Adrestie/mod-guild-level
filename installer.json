@@ -130,11 +130,11 @@
         },
         {
           "table": "gameobjectdisplayinfo_dbc",
-          "where": "ID BETWEEN 92100 AND 92599"
+          "where": "ID BETWEEN 92100 AND 93999 OR ID BETWEEN 82200 AND 82899"
         },
         {
           "table": "gameobject_template",
-          "where": "entry BETWEEN 920100 AND 920599"
+          "where": "entry BETWEEN 920100 AND 939999"
         },
         {
           "table": "updates",
