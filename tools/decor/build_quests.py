@@ -1,7 +1,8 @@
-"""The quests that give a Customization object (src/GuildDecor.h, GuildDecorMgr::OnQuestRewarded): every
-object goes to quests both factions can do -- a quest open to both, else one quest of each faction
--- so that the Alliance and the Horde can get the same objects. One object a quest. An object of a
-theme (loot.json) goes first to the quests of the theme's zones.
+"""The quests that give a Customization object (src/GuildDecor.h, GuildDecorMgr::OnQuestRewarded): about one
+eligible quest in fifteen, spread over the expansions and the zones, gives an object: a quest open to
+both factions, or a pair of quests (one of each faction, of the same expansion) giving the same
+object, so that the Alliance and the Horde can get the same objects. One object a quest (or pair); the
+other objects are only looted. A quest's object is one of the theme (loot.json) of its zone if any.
 
 A quest is taken when it can really be done once by anyone: not a test or development quest, not
 disabled, not a raid's, not daily, weekly or repeatable, not a class's, a profession's or a
@@ -37,6 +38,11 @@ QUEST_INFO_RAID = (62, 88, 89)                   # raid, raid (10), raid (25)
 SPECIAL_REPEATABLE = 0x1
 BAD_TITLE = re.compile(r"\b(test|testing|unused|deprecated|nyi|dnd|placeholder|zzold|old)\b|\[|<|^zz|^z ", re.I)
 SEED = 335
+RATIO = 15                                       # one eligible quest in RATIO gives an object
+
+
+def expansion(level):
+    return 0 if level <= 60 else 1 if level <= 70 else 2
 
 
 def faction_groups():
@@ -97,63 +103,61 @@ def main(server_folder):
             alliance = alliance and any(not hostile.get(f, (False, False))[0] for f in giver_factions[qid])
             horde = horde and any(not hostile.get(f, (False, False))[1] for f in giver_factions[qid])
         if alliance or horde:
-            open_to[qid] = (alliance, horde, sort)
+            open_to[qid] = (alliance, horde, sort, level)
 
     catalog = json.load(open(os.path.join(HERE, 'catalog.json'), encoding='utf-8'))
     spec = json.load(open(os.path.join(HERE, 'loot.json'), encoding='utf-8'))
     rng = random.Random(SEED)
     pools = {'both': [], 'alliance': [], 'horde': []}
-    for qid, (a, h, zone) in sorted(open_to.items()):
+    for qid, (a, h, zone, level) in open_to.items():
         pools['both' if a and h else 'alliance' if a else 'horde'].append(qid)
-    for p in pools.values():
-        rng.shuffle(p)
-    zone_of = {qid: z for qid, (a, h, z) in open_to.items()}
 
-    def theme_zones(name):
+    def spread(pool, count):
+        """count quests of the pool, spread over its expansions and zones: sorted by expansion and zone,
+        one every len/count."""
+        pool = sorted(pool, key=lambda q: (expansion(open_to[q][3]), open_to[q][2], rng.random()))
+        if not count:
+            return []
+        step = len(pool) / count
+        start = rng.random() * step
+        return [pool[int(start + k * step)] for k in range(count)]
+
+    # about one eligible quest in RATIO: the open ones, and as many pairs (an Alliance quest and a Horde
+    # one of the same expansion) as the faction quests allow
+    neutral = spread(pools['both'], round(len(pools['both']) / RATIO))
+    pairs_count = round((len(pools['alliance']) + len(pools['horde'])) / 2 / RATIO)
+    side = {f: sorted(spread(pools[f], pairs_count), key=lambda q: (open_to[q][3], q))
+            for f in ('alliance', 'horde')}
+    slots = [(q,) for q in neutral] + list(zip(side['alliance'], side['horde']))
+    rng.shuffle(slots)
+
+    # an object a slot: one of the theme of its zone if any is left, else any one
+    def themes_of(name):
         name = name.lower()
-        zones = set()
-        for t in spec['themes']:
-            if any(re.search(r'(^|[^a-z])' + re.escape(k), name) for k in t['keywords']):
-                zones.update(t.get('zones', []))
-        return zones
-
-    def take(pool, zones):
-        """A quest of the pool, one of the zones if any."""
-        if zones:
-            for i, q in enumerate(pool):
-                if zone_of[q] in zones:
-                    return pool.pop(i)
-        return pool.pop() if pool else None
-
+        return [t for t in spec['themes'] if any(re.search(r'(^|[^a-z])' + re.escape(k), name) for k in t['keywords'])]
+    by_zone = {}
+    objects = [e['decor'] for e in catalog]
+    rng.shuffle(objects)
+    names = {e['decor']: e['name'] for e in catalog}
+    for decor in objects:
+        for t in themes_of(names[decor]):
+            for z in t.get('zones', []):
+                by_zone.setdefault(z, []).append(decor)
+    used = set()
     rows = []
-    short = 0
-    for e in catalog:
-        zones = theme_zones(e['name'])
-        # a quest open to both while there are, else one of each faction
-        q = take(pools['both'], zones) if len(pools['both']) > 0 and (
-            not pools['alliance'] or not pools['horde'] or rng.random() < 0.5) else None
-        if q:
-            rows.append((q, e['decor']))
-            continue
-        qa, qh = take(pools['alliance'], zones), take(pools['horde'], zones)
-        if qa and qh:
-            rows += [(qa, e['decor']), (qh, e['decor'])]
-            continue
-        for q in (qa, qh):
-            if q:
-                pools['alliance' if q == qa else 'horde'].append(q)
-        q = take(pools['both'], zones)
-        if q:
-            rows.append((q, e['decor']))
-        else:
-            short += 1
+    for slot in slots:
+        decor = next((d for q in slot for d in by_zone.get(open_to[q][2], []) if d not in used), None)
+        if decor is None:
+            decor = next(d for d in objects if d not in used)
+        used.add(decor)
+        rows += [(q, decor) for q in slot]
 
     out = [
         '-- mod-guild-level — the quests that give a Customization object (tools/decor/build_quests.py).',
         '--',
         '-- Rewarding one of these quests, a member of a guild also gets the item of its object (by mail',
-        '-- when his bags are full): src/GuildDecor.h. Every object goes to a quest both factions can do,',
-        '-- or to one quest of each faction. No quest of the game is changed.',
+        '-- when his bags are full): src/GuildDecor.h. About one quest in fifteen: one open to both factions,',
+        '-- or a pair (one of each faction) giving the same object. No quest of the game is changed.',
         '--',
         '-- Idempotent: the table is created once, its rows are written again.',
         '',
@@ -176,10 +180,13 @@ def main(server_folder):
         '',
     ]
     open(SQL, 'w', encoding='utf-8', newline='\n').write('\n'.join(out))
-    both = sum(1 for q, d in rows if open_to[q][0] and open_to[q][1])
-    print('%d quests taken (%d open to both, %d of one faction) for %d objects; %d objects without; '
-          'eligible: %s' % (len(rows), both, len(rows) - both, len(catalog) - short, short,
-                            {k: len(v) for k, v in pools.items()}))
+    eligible = {k: len(v) for k, v in pools.items()}
+    taken = [0, 0, 0]
+    for q, d in rows:
+        taken[expansion(open_to[q][3])] += 1
+    print('%d eligible quests %s; %d taken (%d open to both, %d pairs) for %d objects; '
+          'Vanilla %d, Burning Crusade %d, Wrath %d' % (sum(eligible.values()), eligible, len(rows), len(neutral),
+                                                     len(side['alliance']), len(used), *taken))
 
 
 if __name__ == '__main__':

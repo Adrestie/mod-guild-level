@@ -33,6 +33,7 @@ ICON_SIZE = 64
 FALLBACK_DISPLAY = 7913             # INV_Crate_02, for an object without a picture
 ITEM_DBC = os.path.join(ROOT, 'data', 'dbc', 'guild_level_ItemDisplayInfo.dbc')
 SQL = os.path.join(ROOT, 'data', 'sql', 'world', 'guild_level_13_decor_items.sql')
+SELL_PRICE = 5000                               # copper: 50 silver
 COLLECT, MARK = 92080, 92081
 BACKSLASH = chr(92)
 
@@ -184,9 +185,10 @@ def main(export_dir):
     ranges = ' OR '.join('`entry` BETWEEN %d AND %d' % b for b in build_decor.DISPLAY_BLOCKS)
     item_rows = []
     for e, number, display in items:
-        # Miscellaneous (15/4), rare, bound when picked up, in stacks of 20; its use (92080) uses it up
-        item_rows.append('(%d, 15, 4, -1, %s, %d, 3, 0, 1, 0, 0, 1, 20, %d, 0, -1, 0, -1, -1, 1, %s, 4, %s)' % (
-            number, sql_string(e['name']), display, COLLECT,
+        # Miscellaneous (15/4), rare, not bound (it is traded, sold: 50 silver), in stacks of 20; its use
+        # (92080) uses it up
+        item_rows.append('(%d, 15, 4, -1, %s, %d, 3, 0, 1, 0, %d, 1, 20, %d, 0, -1, 0, -1, -1, 0, %s, 4, %s)' % (
+            number, sql_string(e['name']), display, SELL_PRICE, COLLECT,
             sql_string('Customization object of the guild house.'), sql_string('')))
     out = [
         '-- mod-guild-level — the Customization objects as items, and where they drop (tools/decor/build_loot.py).',
