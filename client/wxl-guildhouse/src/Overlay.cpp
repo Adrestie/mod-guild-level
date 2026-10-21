@@ -175,7 +175,7 @@ namespace wxl_guildhouse
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         ImGuizmo::BeginFrame();
-        Targets::Instance().Draw();
+        Targets::Instance().Draw(reinterpret_cast<IDirect3DDevice9*>(device));
         gizmoBusy_ = Editor::Instance().DrawGizmo();
         ImGui::EndFrame();
         ImGui::Render();
