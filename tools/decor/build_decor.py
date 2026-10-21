@@ -19,6 +19,7 @@ import sys
 sys.path.insert(0, 'E:/WoW-mods/mod-limit-break/tools/m2port')
 import pack  # noqa: E402
 
+import preview_camera  # noqa: E402
 import shrink_blp  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -27,6 +28,7 @@ GAME_DIR = 'World\\GuildLevel\\Decor'
 LUA = os.path.join(ROOT, 'data', 'lua', 'GuildLevel', 'GuildHouse_Decor.lua')
 DBC = os.path.join(ROOT, 'data', 'dbc', 'guild_level_GameObjectDisplayInfo.dbc')
 SQL = os.path.join(ROOT, 'data', 'sql', 'world', 'guild_level_11_decor.sql')
+PREVIEW_ASPECT = 280 / 224         # the interface's preview: its model's width over height
 DISPLAY = 92100                     # GameObjectDisplayInfo of the n-th object: DISPLAY + n
 ENTRY = 920100                      # its gameobject: ENTRY + n (gameobjects at tranche x 10)
 KEEP_DISPLAYS = (92010, 92011)      # the Guild Chest's, in the same file
@@ -127,6 +129,11 @@ def main(export_dir):
             print('not exported:', e['decor'], e['name'])
             continue
         pack.pack(os.path.join(export_dir, name, name + '.m2'), out, name, GAME_DIR, {}, None)
+        # a camera of its own for the interface's turntable preview
+        m2 = os.path.join(out, name + '.m2')
+        data, camera = preview_camera.add(open(m2, 'rb').read(), PREVIEW_ASPECT)
+        open(m2, 'wb').write(data)
+        e = dict(e, camera=camera)
         rows.append((e, GAME_DIR + BACKSLASH + name + '.m2'))
 
     # textures at 512 at most: the levels above are dropped
@@ -151,9 +158,9 @@ def main(export_dir):
         'GuildHouseDecor = {',
     ]
     for (e, path), (_, _, _, _, box) in zip(rows, sql_rows):
-        lines.append('    [%d] = { %s, %s, %s, %s, %g, %s },' % (
+        lines.append('    [%d] = { %s, %s, %s, %s, %g, %s, %d },' % (
             e['decor'], lua_string(e['category']), lua_string(e['kind']), lua_string(path), lua_string(e['name']),
-            e.get('scale', 1), ', '.join('%.3f' % v for v in box)))
+            e.get('scale', 1), ', '.join('%.3f' % v for v in box), e['camera']))
     lines.append('}')
     open(LUA, 'w', encoding='utf-8', newline='\n').write('\n'.join(lines) + '\n')
     size = sum(os.path.getsize(os.path.join(out, f)) for f in os.listdir(out))

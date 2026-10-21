@@ -208,9 +208,9 @@ Preview.name = Preview:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 Preview.name:SetPoint("BOTTOM", 0, 14)
 Preview:Hide()
 Preview:SetScript("OnUpdate", function(self, elapsed)
-    -- a camera index the model does not have: an orthographic view, where the scale is a zoom
-    -- and the position moves the model linearly (a model takes its own camera at each load)
-    self.model:SetCamera(99)
+    -- the object's presentation camera (tools/decor/preview_camera.py): set again every frame, a
+    -- model taking its first camera at each load
+    if self.camera then self.model:SetCamera(self.camera) end
     self.facing = (self.facing or 0) + elapsed * 0.6
     self.model:SetFacing(self.facing)
 end)
@@ -220,13 +220,11 @@ function Preview:ShowDecor(decor)
     if not d then return self:Hide() end
     self.model:ClearModel()
     self.model:SetModel((d[3]:gsub("%.m2$", ".mdx")))
-    -- the whole object in sight whichever way it turns: sized from its bounds (the footprint's
-    -- diagonal, and its height), its middle at the frame's
-    local dx, dy = d[9] - d[6], d[10] - d[7]
-    local size = math.max(math.sqrt(dx * dx + dy * dy), d[11] - d[8], 0.1)
-    local scale = 1.4 / size
-    self.model:SetModelScale(scale)
-    self.model:SetPosition(0, 0, -((d[8] + d[11]) / 2) * scale)
+    -- its own camera frames it whole, whichever way it turns
+    self.camera = d[12] or 0
+    self.model:SetModelScale(1)
+    self.model:SetPosition(0, 0, 0)
+    self.model:SetCamera(self.camera)
     self.name:SetText(d[4])
     self:Show()
 end
