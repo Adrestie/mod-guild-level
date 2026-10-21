@@ -23,9 +23,10 @@
     guild's objects (left) and the edit bar (bottom). An object of the stock is
     picked, follows the cursor on the hall's floors and walls (the mouse wheel
     turns it), and is set down with a click; its gizmo then moves, turns and
-    sizes it. Valider places it, Annuler gives it up. Each object already
-    placed has a marker: a left click takes it in hand, a right click puts it
-    back in the stock.
+    sizes it. Valider, or a click away from it, places it; Annuler gives the
+    edit up. The objects already placed are outlined (the extension draws
+    them): a click takes one in hand, a first right click marks one in red and
+    a second puts it back in the stock.
 
     The preview, the gizmo and the cursor's ray are the client extension's
     (WarcraftXL, Extensions/wxl-guildhouse: the GuildHouse_* functions); the
@@ -210,7 +211,7 @@ end
 -- The edit bar, at the bottom.
 local Bar = CreateFrame("Frame", nil, UI)
 Bar:SetHeight(76)
-Bar:SetWidth(920)
+Bar:SetWidth(720)
 Bar:SetPoint("BOTTOM", UI, "BOTTOM", 0, 30)
 Bar:EnableMouse(true)
 Backdrop(Bar)
@@ -228,9 +229,7 @@ local barButtons = {
     { "move", L.move, function() Mode("move") end },
     { "rotate", L.rotate, function() Mode("rotate") end },
     { "scale", L.scale, function() Mode("scale") end },
-    { "follow", L.follow, function() UI:Carry() end },
     { "ground", L.ground, function() UI:Ground() end },
-    { "camera", L.camera, function() if Has("GuildHouse_FreeCamera") then GuildHouse_FreeCamera() end end },
     { "store", L.store, function() UI:Store() end },
     { "validate", L.validate, function() UI:Validate() end },
     { "cancel", L.cancel, function() UI:Cancel() end },
@@ -491,6 +490,17 @@ UI:SetScript("OnUpdate", function()
                 GuildHouse_SetPosition(x, y, z)
             end
         end
+    end
+
+    -- a click away from the object in hand lets it go where it stands
+    if GuildHouse_TakeClickedAway() and S.edit and not S.edit.carry then
+        UI:Validate()
+    end
+
+    -- a placed object right-clicked twice: back to the stock
+    local removed = GuildHouse_TakeRemoved()
+    if removed then
+        AIO.Handle("GuildHouse", "Remove", removed)
     end
 
     -- a placed object clicked: taken in hand

@@ -371,28 +371,25 @@ namespace wxl_guildhouse
     bool Editor::DrawGizmo()
     {
         if (!Ready() || !gizmo_) return false;
+        if (mode_ == GizmoMode::Rotate || mode_ == GizmoMode::Scale)
+        {
+            // the editor's own handles (ImGuizmo's rings do not follow the game's camera)
+            const bool busy = mode_ == GizmoMode::Rotate ? handles_.Rotate(matrix_)
+                                                         : handles_.Scale(matrix_, kScaleMin, kScaleMax);
+            if (handles_.Dragging()) doodad::SetWorldMatrix(object_, matrix_);
+            return busy;
+        }
+        handles_.Reset();
         const ImGuiIO& io = ImGui::GetIO();
         ImGuizmo::SetOrthographic(false);
         ImGuizmo::SetDrawlist(ImGui::GetBackgroundDrawList());
         ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-        const ImGuizmo::OPERATION op = mode_ == GizmoMode::Rotate ? ImGuizmo::ROTATE
-                                     : mode_ == GizmoMode::Scale ? ImGuizmo::SCALEU : ImGuizmo::TRANSLATE;
-        // moved and turned along the world's axes (as wxl-housing does), sized around its own
-        const ImGuizmo::MODE space = mode_ == GizmoMode::Scale ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
         float m[16];
         std::memcpy(m, matrix_, sizeof m);
-        ImGuizmo::Manipulate(camera::GetView(), camera::GetProjection(), op, space, m);
+        ImGuizmo::Manipulate(camera::GetView(), camera::GetProjection(), ImGuizmo::TRANSLATE, ImGuizmo::WORLD, m);
         if (ImGuizmo::IsUsing())
         {
-            if (mode_ == GizmoMode::Scale)
-            {
-                // uniform, and within its bounds
-                Transform t = Decompose(m);
-                t.scale = (std::max)(kScaleMin, (std::min)(t.scale, kScaleMax));
-                Compose(t, matrix_);
-            }
-            else
-                std::memcpy(matrix_, m, sizeof m);
+            std::memcpy(matrix_, m, sizeof m);
             doodad::SetWorldMatrix(object_, matrix_);
         }
         return ImGuizmo::IsOver() || ImGuizmo::IsUsing();

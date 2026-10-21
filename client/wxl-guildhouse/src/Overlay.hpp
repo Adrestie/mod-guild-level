@@ -25,6 +25,9 @@ namespace wxl_guildhouse
         ImGuiContext* Context() const { return context_; }
         /// The cursor is over the gizmo, or drags it.
         bool GizmoBusy() const { return gizmoBusy_; }
+        /// A click away from the object in hand (the interface collects it: TakeClickedAway).
+        void ClickedAway() { clickedAway_ = true; }
+        bool TakeClickedAway() { const bool c = clickedAway_; clickedAway_ = false; return c; }
 
     private:
         Overlay() = default;
@@ -32,6 +35,7 @@ namespace wxl_guildhouse
 
         bool ready_ = false;
         bool gizmoBusy_ = false;
+        bool clickedAway_ = false;
         ImGuiContext* context_ = nullptr;
     };
 }

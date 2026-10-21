@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include "Gizmo.hpp"
+
 namespace wxl_guildhouse
 {
     /// A placement: world position, rotation (unit quaternion x, y, z, w) and uniform scale.
@@ -41,7 +43,11 @@ namespace wxl_guildhouse
         GizmoMode Mode() const { return mode_; }
         /// No gizmo while the object follows the cursor: it would be under the cursor, and take the
         /// click that sets the object down.
-        void ShowGizmo(bool shown) { gizmo_ = shown; }
+        void ShowGizmo(bool shown) { gizmo_ = shown; if (!shown) handles_.Reset(); }
+        bool GizmoShown() const { return gizmo_; }
+        /// The model's path, while editing.
+        const std::string& Model() const { return path_; }
+        const float* Matrix() const { return matrix_; }
 
         /// Out of the way of a ray for a moment (Script.cpp's traces), and back.
         void Stash();
@@ -66,6 +72,7 @@ namespace wxl_guildhouse
         float matrix_[16] = {};          // the wanted world matrix (row vectors, translation last)
         GizmoMode mode_ = GizmoMode::Move;
         bool gizmo_ = true;
+        Gizmo handles_;                  // turning and sizing
     };
 
     /// Row-vector world matrix of a transform, and back.

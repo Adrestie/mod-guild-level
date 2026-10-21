@@ -60,7 +60,7 @@ namespace wxl_guildhouse
         void Clear() { targets_.clear(); hovered_ = 0; }
         /// model: the game path of its .m2 (read once, then kept).
         void Add(Target t, const std::string& model);
-        void SetShown(bool shown) { shown_ = shown; if (!shown) hovered_ = 0; }
+        void SetShown(bool shown) { shown_ = shown; if (!shown) { hovered_ = 0; armed_ = 0; } }
         bool Shown() const { return shown_ && !targets_.empty(); }
 
         /// Inside the overlay's ImGui frame: the outlines, and which one the cursor is on.
@@ -70,6 +70,13 @@ namespace wxl_guildhouse
         /// The window's click on the hovered one; the interface collects it (TakePicked).
         void Pick() { if (Hovered()) picked_ = hovered_; }
         uint32_t TakePicked() { const uint32_t p = picked_; picked_ = 0; return p; }
+        /// A right click on the hovered one: the first marks it (red), the second on the same one
+        /// gives it back to the stock (the interface collects it: TakeRemoved). Elsewhere: unmarked.
+        void RightClick();
+        void Disarm() { armed_ = 0; }
+        uint32_t TakeRemoved() { const uint32_t r = removed_; removed_ = 0; return r; }
+        /// The model at that world matrix covers that point of the screen (its triangles).
+        bool Covers(const std::string& model, const float matrix[16], float x, float y);
 
         /// The device is going away (D3D reset): the overlay's textures with it.
         void ReleaseTextures();
@@ -88,5 +95,7 @@ namespace wxl_guildhouse
         bool shown_ = false;
         uint32_t hovered_ = 0;
         uint32_t picked_ = 0;
+        uint32_t armed_ = 0;
+        uint32_t removed_ = 0;
     };
 }

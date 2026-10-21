@@ -38,6 +38,8 @@ namespace wxl_guildhouse
         const uint32_t kOutline = 0xFF2882FF;       // ARGB
         const uint32_t kHoverOutline = 0xFF96D7FF;
         const uint32_t kHoverFill = 0x5A8CD2FF;
+        const uint32_t kArmedOutline = 0xFFFF3C3C;
+        const uint32_t kArmedFill = 0x64FF3C3C;
 
         bool ReadFile(const std::string& path, std::vector<uint8_t>& out)
         {
@@ -474,13 +476,14 @@ namespace wxl_guildhouse
         }
         if (hover) hovered_ = hover->t->id;
 
-        // each mask's outline (and the hovered one's fill) into a texture, drawn over the game
+        // each mask's outline (and the hovered or marked one's fill) into a texture, drawn over the game
         ImDrawList* dl = ImGui::GetBackgroundDrawList();
         size_t slot = 0;
         std::vector<uint8_t> ring, grown;
         for (const Shown& s : shown)
         {
             const bool hot = &s == hover;
+            const bool armed = s.t->id == armed_;
             IDirect3DTexture9* tex = Texture(device, slot, s.gw, s.gh);
             if (!tex) continue;
             const int tw = slots_[slot].w, th = slots_[slot].h;
@@ -516,8 +519,8 @@ namespace wxl_guildhouse
                     if (x < s.gw && y < s.gh)
                     {
                         const size_t i = size_t(y) * s.gw + x;
-                        if (s.mask[i]) c = hot ? kHoverFill : 0;
-                        else if (ring[i]) c = hot ? kHoverOutline : kOutline;
+                        if (s.mask[i]) c = armed ? kArmedFill : hot ? kHoverFill : 0;
+                        else if (ring[i]) c = armed ? kArmedOutline : hot ? kHoverOutline : kOutline;
                     }
                     row[x] = c;
                 }
@@ -528,5 +531,55 @@ namespace wxl_guildhouse
             const ImVec2 uv1(float(s.gw) / tw, float(s.gh) / th);
             dl->AddImage(reinterpret_cast<ImTextureID>(tex), p0, p1, ImVec2(0, 0), uv1);
         }
+    }
+
+    void Targets::RightClick()
+    {
+        if (!Hovered())
+        {
+            armed_ = 0;
+            return;
+        }
+        if (armed_ == hovered_)
+        {
+            removed_ = hovered_;
+            armed_ = 0;
+        }
+        else
+            armed_ = hovered_;
+    }
+
+    bool Targets::Covers(const std::string& model, const float m[16], float x, float y)
+    {
+        const Mesh* mesh = model.empty() ? nullptr : MeshOf(model);
+        if (!mesh) return false;
+        float vp[16];
+        ViewProj(vp);
+        const ImGuiIO& io = ImGui::GetIO();
+        const float W = io.DisplaySize.x, H = io.DisplaySize.y;
+        const size_t n = mesh->pos.size() / 3;
+        std::vector<ImVec2> sp(n);
+        for (size_t v = 0; v < n; ++v)
+        {
+            float w[3];
+            ToWorld(m, &mesh->pos[v * 3], w);
+            float clip[4];
+            for (int j = 0; j < 4; ++j)
+                clip[j] = w[0] * vp[j] + w[1] * vp[4 + j] + w[2] * vp[8 + j] + vp[12 + j];
+            if (clip[3] <= 0.05f) return false;
+            sp[v] = ImVec2((clip[0] / clip[3] * 0.5f + 0.5f) * W, (0.5f - clip[1] / clip[3] * 0.5f) * H);
+        }
+        for (size_t f = 0; f * 3 < mesh->tris.size(); ++f)
+        {
+            const ImVec2& a = sp[mesh->tris[f * 3]];
+            const ImVec2& b = sp[mesh->tris[f * 3 + 1]];
+            const ImVec2& c = sp[mesh->tris[f * 3 + 2]];
+            const float d1 = (b.x - a.x) * (y - a.y) - (b.y - a.y) * (x - a.x);
+            const float d2 = (c.x - b.x) * (y - b.y) - (c.y - b.y) * (x - b.x);
+            const float d3 = (a.x - c.x) * (y - c.y) - (a.y - c.y) * (x - c.x);
+            const bool neg = d1 < 0 || d2 < 0 || d3 < 0, pos = d1 > 0 || d2 > 0 || d3 > 0;
+            if (!(neg && pos)) return true;
+        }
+        return false;
     }
 }

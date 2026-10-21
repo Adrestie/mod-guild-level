@@ -27,6 +27,9 @@ namespace wxl_guildhouse
         HWND g_hwnd = nullptr;
         WNDPROC g_origWndProc = nullptr;
         bool g_gizmoClick = false;      // a left button the gizmo took: its release is the gizmo's
+        bool g_rightClick = false;      // the same for a right button on a placed object
+        bool g_worldDown = false;       // a left button the game had, and where
+        int g_downX = 0, g_downY = 0;
 
         BOOL CALLBACK PickWindow(HWND h, LPARAM out)
         {
@@ -61,26 +64,68 @@ namespace wxl_guildhouse
                 bool handled = FreeBuildCamera::Instance().HandleWindowMessage(h, m, w, l, false, false);
                 if (!handled)
                 {
-                    if (m == WM_LBUTTONDOWN && Editor::Instance().Ready() && overlay.GizmoBusy())
+                    auto& editor = Editor::Instance();
+                    auto& targets = Targets::Instance();
+                    const short x = static_cast<short>(LOWORD(l)), y = static_cast<short>(HIWORD(l));
+                    if (m == WM_LBUTTONDOWN)
                     {
-                        g_gizmoClick = true;
-                        handled = true;
+                        targets.Disarm();
+                        if (editor.Ready() && overlay.GizmoBusy())
+                        {
+                            g_gizmoClick = true;
+                            handled = true;
+                        }
+                        else if (targets.Hovered())
+                        {
+                            // a placed object picked: the interface takes it in hand
+                            targets.Pick();
+                            g_gizmoClick = true;
+                            handled = true;
+                        }
+                        else
+                        {
+                            // the game's: a click (not a drag of the camera) away from the object
+                            // in hand lets it go
+                            g_worldDown = true;
+                            g_downX = x;
+                            g_downY = y;
+                        }
                     }
-                    else if (m == WM_LBUTTONDOWN && Targets::Instance().Hovered())
+                    else if (m == WM_LBUTTONUP)
                     {
-                        // a placed object picked: the interface takes it in hand
-                        Targets::Instance().Pick();
-                        g_gizmoClick = true;
-                        handled = true;
+                        if (g_gizmoClick)
+                        {
+                            g_gizmoClick = false;
+                            handled = true;
+                        }
+                        else if (g_worldDown)
+                        {
+                            g_worldDown = false;
+                            const int dx = x - g_downX, dy = y - g_downY;
+                            if (dx * dx + dy * dy <= 16 && editor.Ready() && editor.GizmoShown() &&
+                                !targets.Covers(editor.Model(), editor.Matrix(), x, y))
+                                overlay.ClickedAway();
+                        }
                     }
-                    else if (m == WM_LBUTTONUP && g_gizmoClick)
+                    else if (m == WM_RBUTTONDOWN)
                     {
-                        g_gizmoClick = false;
+                        if (targets.Hovered())
+                        {
+                            targets.RightClick();
+                            g_rightClick = true;
+                            handled = true;
+                        }
+                        else
+                            targets.Disarm();
+                    }
+                    else if (m == WM_RBUTTONUP && g_rightClick)
+                    {
+                        g_rightClick = false;
                         handled = true;
                     }
                 }
                 if (m == WM_CAPTURECHANGED || m == WM_CANCELMODE)
-                    g_gizmoClick = false;
+                    g_gizmoClick = g_rightClick = g_worldDown = false;
                 ImGui::SetCurrentContext(previous);
                 if (handled) return 0;
             }

@@ -308,6 +308,22 @@ namespace wxl_guildhouse
             return 1;
         }
 
+        // GuildHouse_TakeRemoved() -> the id of the placed object right-clicked twice, or nothing
+        int TakeRemoved(void* L)
+        {
+            const uint32_t id = Targets::Instance().TakeRemoved();
+            if (!id) return 0;
+            script::PushNumber(L, id);
+            return 1;
+        }
+
+        // GuildHouse_TakeClickedAway() -> true once after a click away from the object in hand
+        int TakeClickedAway(void* L)
+        {
+            script::PushBoolean(L, Overlay::Instance().TakeClickedAway());
+            return 1;
+        }
+
         struct Entry { const char* name; script::Function fn; };
         const Entry kFunctions[] = {
             { "GuildHouse_BeginEdit", &BeginEdit },
@@ -327,6 +343,8 @@ namespace wxl_guildhouse
             { "GuildHouse_ClearTargets", &ClearTargets },
             { "GuildHouse_AddTarget", &AddTarget },
             { "GuildHouse_TakePicked", &TakePicked },
+            { "GuildHouse_TakeRemoved", &TakeRemoved },
+            { "GuildHouse_TakeClickedAway", &TakeClickedAway },
         };
 
         bool Ours(uintptr_t fn)
