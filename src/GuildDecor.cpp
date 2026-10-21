@@ -17,12 +17,16 @@
 
 #include "GuildDecor.h"
 
+#include "Chat.h"
+
 #include "Config.h"
 #include "ConditionMgr.h"
 #include "Creature.h"
 #include "Group.h"
 #include "GuildContent.h"
+#include "Item.h"
 #include "LootMgr.h"
+#include "Mail.h"
 #include "Map.h"
 #include "ObjectMgr.h"
 #include "Random.h"
@@ -142,6 +146,15 @@ void GuildDecorMgr::LoadFromDB()
     for (auto const& [decor, item] : _decorItem)
         if (!themed.count(decor))
             _anywhere.push_back(decor);
+
+    _questDecor.clear();
+    if (QueryResult result = WorldDatabase.Query("SELECT `quest`, `decor` FROM `mod_guild_level_decor_quest`"))
+        do
+        {
+            Field* f = result->Fetch();
+            if (_decorItem.count(f[1].Get<uint32>()))
+                _questDecor[f[0].Get<uint32>()] = f[1].Get<uint32>();
+        } while (result->NextRow());
 
     if (QueryResult result = CharacterDatabase.Query("SELECT `guildid`, `decor`, `owned` FROM `mod_guild_level_decor_stock`"))
         do
@@ -565,4 +578,37 @@ void GuildDecorMgr::OnCreatureKill(Player* killer, Creature* creature)
         LOG_DEBUG("module", "mod-guild-level: {} dropped Customization object {} for guild {}", creature->GetEntry(),
             decor, guildId);
     }
+}
+
+void GuildDecorMgr::OnQuestRewarded(Player* player, uint32 questId)
+{
+    if (!_config.enable || !player || !player->GetGuildId())
+        return;
+    uint32 decor = 0, item = 0;
+    {
+        std::lock_guard<std::mutex> guard(_lock);
+        auto q = _questDecor.find(questId);
+        if (q == _questDecor.end())
+            return;
+        decor = q->second;
+        item = _decorItem[decor];
+    }
+
+    // in his bags, else by mail
+    ItemPosCountVec dest;
+    if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item, 1) == EQUIP_ERR_OK)
+    {
+        if (Item* stored = player->StoreNewItem(dest, item, true))
+            player->SendNewItem(stored, 1, true, false);
+    }
+    else if (Item* mailed = Item::CreateItem(item, 1, player))
+    {
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        mailed->SaveToDB(trans);
+        MailDraft(NameOf(decor), "").AddItem(mailed).SendMailTo(trans, MailReceiver(player),
+            MailSender(MAIL_NORMAL, player->GetGUID().GetCounter(), MAIL_STATIONERY_GM));
+        CharacterDatabase.CommitTransaction(trans);
+    }
+    ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_DECOR_QUEST,
+        NameOf(decor));
 }

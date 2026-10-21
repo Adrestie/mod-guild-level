@@ -121,6 +121,7 @@ public:
     // Guild experience from quests and bosses.
     void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
     {
+        sGuildDecorMgr->OnQuestRewarded(player, quest->GetQuestId());
         sGuildLevelMgr->OnQuestComplete(player, quest);
     }
 

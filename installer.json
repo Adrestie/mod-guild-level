@@ -159,7 +159,8 @@
         "mod_guild_level_talent_link",
         "mod_guild_level_decor",
         "mod_guild_level_decor_item",
-        "mod_guild_level_decor_loot"
+        "mod_guild_level_decor_loot",
+        "mod_guild_level_decor_quest"
       ],
       "kept_on_update": [
         "mod_guild_level_talent_node",

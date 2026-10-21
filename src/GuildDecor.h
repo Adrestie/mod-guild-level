@@ -39,7 +39,10 @@
  * the instance's theme, else one of no theme (`mod_guild_level_decor_loot`,
  * tools/decor/loot.json). Only that guild's members see it in the loot: they
  * carry a hidden mark from the kill (GUILD_DECOR_LOOT_MARK), the item's loot
- * condition. Used, the item adds its object to the guild's stock (spell
+ * condition. Quests give some too (`mod_guild_level_decor_quest`,
+ * tools/decor/build_quests.py): to a member of a guild who rewards one, its
+ * object's item, by mail when his bags are full. Used, the item adds its
+ * object to the guild's stock (spell
  * GUILD_DECOR_COLLECT_SPELL, spell_guild_decor_collect).
  *
  * WHO: the members of the guild whose rank is allowed (GuildLevel.House.Decor.Rank),
@@ -153,6 +156,8 @@ public:
 
     // A creature killed by the player (or his pet): a boss of an eligible kill may drop an object.
     void OnCreatureKill(Player* killer, Creature* creature);
+    // A quest rewarded: a member of a guild gets its object's item, if it gives one.
+    void OnQuestRewarded(Player* player, uint32 questId);
 
     // GM: count more (or fewer) of an object kind in the guild's stock; 0 decor: every kind.
     bool Give(uint32 guildId, uint32 decor, int32 count);
@@ -179,6 +184,7 @@ private:
     std::map<uint32, std::vector<uint32>> _bossLoot;                        // creature entry: decor
     std::map<uint32, std::vector<uint32>> _mapLoot;                         // map: decor of its theme
     std::vector<uint32> _anywhere;                                          // decor of no theme
+    std::map<uint32, uint32> _questDecor;                                   // quest: decor
     std::map<uint32, std::map<uint32, uint32>> _stock;                      // guild: decor: owned
     std::map<uint32, std::map<uint32, GuildDecorPlaced>> _placed;           // guild: id: object
     uint32 _nextId = 1;
