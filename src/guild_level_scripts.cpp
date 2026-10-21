@@ -27,6 +27,7 @@
 #include "GuildLevel.h"
 #include "GuildPerks.h"
 #include "GuildTalents.h"
+#include "Item.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -126,11 +127,13 @@ public:
     void OnPlayerCreatureKill(Player* killer, Creature* killed) override
     {
         sGuildLevelMgr->OnCreatureKill(killer, killed);
+        sGuildDecorMgr->OnCreatureKill(killer, killed);
     }
 
     void OnPlayerCreatureKilledByPet(Player* owner, Creature* killed) override
     {
         sGuildLevelMgr->OnCreatureKill(owner, killed);
+        sGuildDecorMgr->OnCreatureKill(owner, killed);
     }
 
     void OnPlayerLogin(Player* player) override
@@ -374,6 +377,48 @@ public:
     }
 };
 
+// A Customization object's item, used: its object into the guild's stock (GuildDecor.h).
+class spell_guild_decor_collect : public SpellScript
+{
+    PrepareSpellScript(spell_guild_decor_collect);
+
+    SpellCastResult CheckCast()
+    {
+        Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+        Item* item = GetCastItem();
+        if (!player || !item)
+            return SPELL_FAILED_BAD_TARGETS;
+        GuildDecorResult const r = sGuildDecorMgr->CheckCollect(player, item->GetEntry());
+        if (r == GuildDecorResult::Ok)
+            return SPELL_CAST_OK;
+        // told why, the item kept
+        ChatHandler handler(player->GetSession());
+        if (r == GuildDecorResult::Locked)
+            handler.PSendModuleSysMessage(GUILD_LEVEL_MODULE, GuildDecorMgr::TextOf(r), uint32(sGuildDecorMgr->Config().paragon));
+        else if (uint32 text = GuildDecorMgr::TextOf(r))
+            handler.PSendModuleSysMessage(GUILD_LEVEL_MODULE, text);
+        return SPELL_FAILED_DONT_REPORT;
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+        Item* item = GetCastItem();
+        if (!player || !item)
+            return;
+        uint32 decor = 0, owned = 0;
+        if (sGuildDecorMgr->Collect(player, item->GetEntry(), decor, owned) == GuildDecorResult::Ok)
+            ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_DECOR_COLLECTED,
+                sGuildDecorMgr->NameOf(decor), owned);
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_guild_decor_collect::CheckCast);
+        OnEffectHitTarget += SpellEffectFn(spell_guild_decor_collect::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_guild_level_commands();
 void AddSC_guild_perk_commands();
 void AddSC_guild_talent_commands();
@@ -389,6 +434,7 @@ void AddSC_guild_level_scripts()
     RegisterSpellScript(spell_guild_level_hearthstone);
     RegisterSpellScript(spell_guild_level_perk);
     RegisterSpellScript(spell_guild_talent_procs);
+    RegisterSpellScript(spell_guild_decor_collect);
     new at_guild_level_house_exit();
     AddSC_guild_level_commands();
     AddSC_guild_perk_commands();

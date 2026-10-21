@@ -281,11 +281,21 @@ GuildLevel.House.EmptyDelay       = 60
 #    GuildLevel.House.Decor.Rank      the highest guild rank id allowed to
 #                                     decorate: 0 the guild master only, 1
 #                                     the officers too, and so on.
+#    GuildLevel.House.Decor.DropChance  % for a dungeon or raid boss to drop
+#                                     an object for a guild there in numbers
+#                                     (only its members see it in the loot).
+#    GuildLevel.House.Decor.Members.Dungeon  guildmates needed at the kill in
+#    GuildLevel.House.Decor.Members.Raid10   a dungeon, a 10-player raid and a
+#    GuildLevel.House.Decor.Members.Raid25   25-player raid.
 #
 
 GuildLevel.House.Decor.Enable     = 1
 GuildLevel.House.Decor.Paragon    = 9
 GuildLevel.House.Decor.Rank       = 1
+GuildLevel.House.Decor.DropChance = 10
+GuildLevel.House.Decor.Members.Dungeon = 4
+GuildLevel.House.Decor.Members.Raid10  = 8
+GuildLevel.House.Decor.Members.Raid25  = 20
 
 ###############################################################################
 #

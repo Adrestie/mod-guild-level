@@ -141,7 +141,8 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_DECOR_BUSY        = 174,
     GUILD_LEVEL_STR_DECOR_NO_PLACED   = 175,
     GUILD_LEVEL_STR_DECOR_BAD         = 176,
-    GUILD_LEVEL_STR_DECOR_GIVEN       = 177   // {} count, {} object (0: every one), {} guild
+    GUILD_LEVEL_STR_DECOR_GIVEN       = 177,  // {} count, {} object (0: every one), {} guild
+    GUILD_LEVEL_STR_DECOR_COLLECTED   = 178   // {} object, {} owned
 };
 
 struct GuildLevelConfig

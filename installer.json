@@ -137,6 +137,18 @@
           "where": "entry BETWEEN 920100 AND 939999"
         },
         {
+          "table": "item_template",
+          "where": "entry BETWEEN 92100 AND 93999 OR entry BETWEEN 82200 AND 82899"
+        },
+        {
+          "table": "spell_dbc",
+          "where": "ID IN (92080, 92081)"
+        },
+        {
+          "table": "spell_script_names",
+          "where": "ScriptName = 'spell_guild_decor_collect'"
+        },
+        {
           "table": "updates",
           "where": "name IN ({sql_files:world})"
         }
@@ -145,7 +157,9 @@
         "mod_guild_level_house_spawn",
         "mod_guild_level_talent_node",
         "mod_guild_level_talent_link",
-        "mod_guild_level_decor"
+        "mod_guild_level_decor",
+        "mod_guild_level_decor_item",
+        "mod_guild_level_decor_loot"
       ],
       "kept_on_update": [
         "mod_guild_level_talent_node",
@@ -1617,6 +1631,40 @@
           "217": 1065353216,
           "218": 1065353216,
           "225": 1
+        },
+        {
+          "0": 92080,
+          "28": 1,
+          "31": 0,
+          "46": 1,
+          "68": -1,
+          "71": 3,
+          "74": 1,
+          "86": 1,
+          "131": 0,
+          "133": 3708,
+          "136": "Guild Object",
+          "138": "Objet de guilde",
+          "139": "Gildengegenstand",
+          "142": "Objeto de hermandad",
+          "143": "Objeto de hermandad",
+          "144": "Предмет гильдии",
+          "152": 16712190,
+          "169": 16712190,
+          "170": "Adds this object to your guild's Customization stock.",
+          "172": "Ajoute cet objet au stock de Personnalisation de votre guilde.",
+          "173": "Fügt diesen Gegenstand dem Gestaltungsvorrat Eurer Gilde hinzu.",
+          "176": "Añade este objeto a las existencias de Personalización de tu hermandad.",
+          "177": "Añade este objeto a las existencias de Personalización de tu hermandad.",
+          "178": "Добавляет этот предмет в запас оформления вашей гильдии.",
+          "186": 16712190,
+          "203": 16712190,
+          "205": 133,
+          "206": 1500,
+          "216": 1065353216,
+          "217": 1065353216,
+          "218": 1065353216,
+          "225": 1
         }
       ]
     },
@@ -1824,6 +1872,28 @@
           "18": 1065353216
         }
       ]
+    },
+    {
+      "file": "ItemDisplayInfo.dbc",
+      "fields": 25,
+      "text_fields": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "client": "data/dbc/guild_level_ItemDisplayInfo.dbc",
+      "server": false
     }
   ],
   "game_files": {

@@ -18,6 +18,14 @@
 #include "GuildDecor.h"
 
 #include "Config.h"
+#include "ConditionMgr.h"
+#include "Creature.h"
+#include "Group.h"
+#include "GuildContent.h"
+#include "LootMgr.h"
+#include "Map.h"
+#include "ObjectMgr.h"
+#include "Random.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
 #include "Guild.h"
@@ -31,6 +39,7 @@
 #include "WorldSession.h"
 #include <algorithm>
 #include <cmath>
+#include <set>
 
 namespace
 {
@@ -77,6 +86,10 @@ void GuildDecorMgr::LoadConfig()
     c.enable = sConfigMgr->GetOption<bool>("GuildLevel.House.Decor.Enable", true);
     c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Paragon", 9), 0, GUILD_PARAGON_LIMIT));
     c.rank = uint8(std::min<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Rank", 1), 9));
+    c.dropChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.House.Decor.DropChance", 10.0f), 0.0f, 100.0f);
+    c.dungeonMembers = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Dungeon", 4), 1, 5));
+    c.raid10Members = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Raid10", 8), 1, 10));
+    c.raid25Members = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Raid25", 20), 1, 25));
     _config = c;
 }
 
@@ -95,6 +108,40 @@ void GuildDecorMgr::LoadFromDB()
             GuildDecorKind k{ f[0].Get<uint32>(), f[1].Get<uint32>(), f[2].Get<std::string>() };
             _kinds[k.decor] = k;
         } while (result->NextRow());
+
+    _itemDecor.clear();
+    _decorItem.clear();
+    if (QueryResult result = WorldDatabase.Query("SELECT `decor`, `item` FROM `mod_guild_level_decor_item`"))
+        do
+        {
+            Field* f = result->Fetch();
+            _itemDecor[f[1].Get<uint32>()] = f[0].Get<uint32>();
+            _decorItem[f[0].Get<uint32>()] = f[1].Get<uint32>();
+        } while (result->NextRow());
+
+    // where they drop: a boss's own, a map's theme, and what has no theme (anywhere)
+    _bossLoot.clear();
+    _mapLoot.clear();
+    _anywhere.clear();
+    std::set<uint32> themed;
+    if (QueryResult result = WorldDatabase.Query("SELECT `decor`, `map`, `creature` FROM `mod_guild_level_decor_loot`"))
+        do
+        {
+            Field* f = result->Fetch();
+            uint32 const decor = f[0].Get<uint32>();
+            if (!_decorItem.count(decor))
+                continue;
+            if (uint32 creature = f[2].Get<uint32>())
+                _bossLoot[creature].push_back(decor);
+            else if (uint32 map = f[1].Get<uint32>())
+            {
+                _mapLoot[map].push_back(decor);
+                themed.insert(decor);
+            }
+        } while (result->NextRow());
+    for (auto const& [decor, item] : _decorItem)
+        if (!themed.count(decor))
+            _anywhere.push_back(decor);
 
     if (QueryResult result = CharacterDatabase.Query("SELECT `guildid`, `decor`, `owned` FROM `mod_guild_level_decor_stock`"))
         do
@@ -138,6 +185,7 @@ uint32 GuildDecorMgr::TextOf(GuildDecorResult result)
         case GuildDecorResult::Busy:        return GUILD_LEVEL_STR_DECOR_BUSY;
         case GuildDecorResult::NoPlaced:    return GUILD_LEVEL_STR_DECOR_NO_PLACED;
         case GuildDecorResult::BadPosition: return GUILD_LEVEL_STR_DECOR_BAD;
+        case GuildDecorResult::NotAnObject: return GUILD_LEVEL_STR_DECOR_UNKNOWN;
         default:                            return 0;
     }
 }
@@ -392,4 +440,129 @@ std::vector<GuildDecorShown> GuildDecorMgr::Snapshot(uint32 guildId, uint32 mapI
         shown.push_back({ id, k->second.entry, p.version, p.pos, p.rot, p.scale });
     }
     return shown;
+}
+
+// ---------------------------------------------------------------- the items, and their drops
+
+std::string GuildDecorMgr::NameOf(uint32 decor) const
+{
+    std::lock_guard<std::mutex> guard(_lock);
+    auto k = _kinds.find(decor);
+    return k == _kinds.end() ? std::string() : k->second.name;
+}
+
+GuildDecorResult GuildDecorMgr::CheckCollect(Player* player, uint32 item) const
+{
+    if (!_config.enable)
+        return GuildDecorResult::Disabled;
+    {
+        std::lock_guard<std::mutex> guard(_lock);
+        if (!_itemDecor.count(item))
+            return GuildDecorResult::NotAnObject;
+    }
+    uint32 const guildId = player->GetGuildId();
+    if (!guildId)
+        return GuildDecorResult::NoGuild;
+    GuildLevelState const state = sGuildLevelMgr->Get(guildId);
+    if (state.level < GUILD_LEVEL_MAX || state.paragon < _config.paragon)
+        return GuildDecorResult::Locked;
+    return GuildDecorResult::Ok;
+}
+
+GuildDecorResult GuildDecorMgr::Collect(Player* player, uint32 item, uint32& decor, uint32& owned)
+{
+    GuildDecorResult const r = CheckCollect(player, item);
+    if (r != GuildDecorResult::Ok)
+        return r;
+    uint32 const guildId = player->GetGuildId();
+    {
+        std::lock_guard<std::mutex> guard(_lock);
+        decor = _itemDecor[item];
+        owned = ++_stock[guildId][decor];
+    }
+    CharacterDatabase.DirectExecute("REPLACE INTO `mod_guild_level_decor_stock` (`guildid`, `decor`, `owned`) "
+        "VALUES ({}, {}, {})", guildId, decor, owned);
+    TellChanged(guildId);
+    return GuildDecorResult::Ok;
+}
+
+void GuildDecorMgr::OnCreatureKill(Player* killer, Creature* creature)
+{
+    if (!_config.enable || !killer || !creature || _config.dropChance <= 0.0f)
+        return;
+    Map* map = creature->GetMap();
+    if (!map || !map->IsDungeon())
+        return;
+    // a dungeon or raid boss
+    switch (GuildContentOf(creature))
+    {
+        case GC_VANILLA_DUNGEON_BOSS: case GC_VANILLA_RAID_BOSS: case GC_BC_DUNGEON_BOSS: case GC_BC_RAID_BOSS:
+        case GC_WOTLK_DUNGEON_BOSS: case GC_WOTLK_HEROIC_BOSS: case GC_WOTLK_RAID_BOSS: case GC_ICECROWN_RAID_BOSS:
+            break;
+        default:
+            return;
+    }
+    uint32 const needed = !map->IsRaid() ? _config.dungeonMembers
+        : (map->Is25ManRaid() ? _config.raid25Members : _config.raid10Members);
+
+    // the guildmates at the kill: the killer's group within reward distance, alive
+    std::map<uint32, std::vector<Player*>> present;
+    if (Group* group = killer->GetGroup())
+    {
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            if (Player* member = itr->GetSource())
+                if (member->GetGuildId() && member->IsAlive() &&
+                    (member == killer || member->IsAtGroupRewardDistance(creature)))
+                    present[member->GetGuildId()].push_back(member);
+    }
+    else if (killer->GetGuildId())
+        present[killer->GetGuildId()].push_back(killer);
+
+    for (auto const& [guildId, members] : present)
+    {
+        if (members.size() < needed)
+            continue;
+        GuildLevelState const state = sGuildLevelMgr->Get(guildId);
+        if (state.level < GUILD_LEVEL_MAX || state.paragon < _config.paragon)
+            continue;
+        if (!roll_chance_f(_config.dropChance))
+            continue;
+
+        // which: the boss's own, else the instance's theme, else one of no theme
+        uint32 decor = 0, item = 0;
+        {
+            std::lock_guard<std::mutex> guard(_lock);
+            std::vector<uint32> const* pool = nullptr;
+            auto b = _bossLoot.find(creature->GetEntry());
+            auto m = _mapLoot.find(map->GetId());
+            if (b != _bossLoot.end() && !b->second.empty())
+                pool = &b->second;
+            else if (m != _mapLoot.end() && !m->second.empty())
+                pool = &m->second;
+            else if (!_anywhere.empty())
+                pool = &_anywhere;
+            if (!pool)
+                continue;
+            decor = Acore::Containers::SelectRandomContainerElement(*pool);
+            item = _decorItem[decor];
+        }
+
+        // seen and looted by that guild's members only: their mark, the item's condition
+        for (Player* member : members)
+            member->CastSpell(member, GUILD_DECOR_LOOT_MARK, true);
+        static Condition* mark = []
+        {
+            Condition* c = new Condition();
+            c->ConditionType = CONDITION_AURA;
+            c->ConditionValue1 = GUILD_DECOR_LOOT_MARK;
+            c->ConditionValue2 = 0;
+            c->ConditionTarget = 0;
+            return c;
+        }();
+        LootStoreItem drop(item, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, 1, 1);
+        drop.conditions.push_back(mark);
+        creature->loot.AddItem(drop);
+        LOG_DEBUG("module", "mod-guild-level: {} dropped Customization object {} for guild {}", creature->GetEntry(),
+            decor, guildId);
+    }
 }
