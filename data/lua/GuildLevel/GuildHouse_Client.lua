@@ -54,7 +54,8 @@ local L = {
         aim = "Point at the hall's floor to place the object.",
         carry = "Left click: set it down. Wheel: turn it. Right click: give up.",
         hint = "Click an outlined object to take it in hand.",
-        categories = { Furnishings = "Furniture", Lighting = "Lights", Accents = "Decoration", Nature = "Plants" },
+        categories = { Furnishings = "Furniture", Lighting = "Lights", Accents = "Decoration", Nature = "Plants",
+            Structural = "Structure", Functional = "Utility" },
     },
     frFR = {
         button = "Personnalisation",
@@ -66,12 +67,13 @@ local L = {
         aim = "Visez le sol du hall pour poser l'objet.",
         carry = "Clic gauche : poser. Molette : tourner. Clic droit : abandonner.",
         hint = "Cliquez sur un objet entouré pour le prendre en main.",
-        categories = { Furnishings = "Mobilier", Lighting = "Lumières", Accents = "Décoration", Nature = "Plantes" },
+        categories = { Furnishings = "Mobilier", Lighting = "Lumières", Accents = "Décoration", Nature = "Plantes",
+            Structural = "Structure", Functional = "Utilitaire" },
     },
 }
 L = L[GetLocale()] or L.enUS
 
-local CATEGORIES = { "Furnishings", "Lighting", "Accents", "Nature" }
+local CATEGORIES = { "Furnishings", "Lighting", "Accents", "Nature", "Structural", "Functional" }
 local ROWS = 16
 local ROW_HEIGHT = 22
 
@@ -168,15 +170,16 @@ end
 -- The guild's objects, on the left.
 local Panel = CreateFrame("Frame", nil, UI)
 Panel:SetWidth(300)
-Panel:SetHeight(ROWS * ROW_HEIGHT + 110)
+Panel:SetHeight(ROWS * ROW_HEIGHT + 136)
 Panel:SetPoint("LEFT", UI, "LEFT", 20, 40)
 Panel:EnableMouse(true)
 Panel.title = Backdrop(Panel, L.title)
 
 Panel.tabs = {}
 for i, cat in ipairs(CATEGORIES) do
-    local t = Button(Panel, L.categories[cat], 66)
-    t:SetPoint("TOPLEFT", 14 + (i - 1) * 68, -40)
+    -- two rows of three
+    local t = Button(Panel, L.categories[cat], 88)
+    t:SetPoint("TOPLEFT", 14 + ((i - 1) % 3) * 91, -36 - math.floor((i - 1) / 3) * 26)
     t:SetScript("OnClick", function()
         S.category = cat
         UI:Refresh()
@@ -185,7 +188,7 @@ for i, cat in ipairs(CATEGORIES) do
 end
 
 Panel.scroll = CreateFrame("ScrollFrame", "GuildHouseUIScroll", Panel, "FauxScrollFrameTemplate")
-Panel.scroll:SetPoint("TOPLEFT", 14, -72)
+Panel.scroll:SetPoint("TOPLEFT", 14, -98)
 Panel.scroll:SetPoint("BOTTOMRIGHT", -34, 16)
 Panel.scroll:SetScript("OnVerticalScroll", function(self, offset)
     FauxScrollFrame_OnVerticalScroll(self, offset, ROW_HEIGHT, function() UI:Refresh() end)
@@ -233,7 +236,7 @@ Panel.rows = {}
 for i = 1, ROWS do
     local r = CreateFrame("Button", nil, Panel)
     r:SetHeight(ROW_HEIGHT)
-    r:SetPoint("TOPLEFT", 16, -72 - (i - 1) * ROW_HEIGHT)
+    r:SetPoint("TOPLEFT", 16, -98 - (i - 1) * ROW_HEIGHT)
     r:SetPoint("RIGHT", Panel, "RIGHT", -36, 0)
     r:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
     r.name = r:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")

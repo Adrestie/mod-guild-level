@@ -1498,5 +1498,3315 @@
   "item": 282667,
   "thumbnail": 0,
   "scale": 0.07500000298023224
+ },
+ {
+  "decor": 518,
+  "name": "Studded Wooden Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 198115,
+  "item": 245507,
+  "thumbnail": 7266394,
+  "scale": 1
+ },
+ {
+  "decor": 828,
+  "name": "Well-Lit Incontinental Loveseat",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 5929345,
+  "item": 239213,
+  "thumbnail": 7467860,
+  "scale": 1
+ },
+ {
+  "decor": 1172,
+  "name": "Pandaren Cradle Stool",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 555960,
+  "item": 245512,
+  "thumbnail": 7416645,
+  "scale": 1
+ },
+ {
+  "decor": 1275,
+  "name": "Undermine Bean Bag Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 5793097,
+  "item": 245305,
+  "thumbnail": 7416941,
+  "scale": 1
+ },
+ {
+  "decor": 1446,
+  "name": "Silvermoon Painter's Cushion",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 4239029,
+  "item": 244656,
+  "thumbnail": 7417273,
+  "scale": 1
+ },
+ {
+  "decor": 1464,
+  "name": "Teal Suramar Seat Cushion",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 1361698,
+  "item": 244676,
+  "thumbnail": 7421825,
+  "scale": 1
+ },
+ {
+  "decor": 1699,
+  "name": "Stitched Pillow Roll",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 6379078,
+  "item": 245265,
+  "thumbnail": 7421897,
+  "scale": 1
+ },
+ {
+  "decor": 1834,
+  "name": "Bel'ameth Bench",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 4690348,
+  "item": 245625,
+  "thumbnail": 7422085,
+  "scale": 1
+ },
+ {
+  "decor": 2087,
+  "name": "Short Orgrimmar Bench",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 6379060,
+  "item": 246217,
+  "thumbnail": 7422341,
+  "scale": 1
+ },
+ {
+  "decor": 2433,
+  "name": "Bolt Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 1842737,
+  "item": 246601,
+  "thumbnail": 7422709,
+  "scale": 1
+ },
+ {
+  "decor": 2592,
+  "name": "Small Orgrimmar Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 6379089,
+  "item": 247221,
+  "thumbnail": 7423090,
+  "scale": 1
+ },
+ {
+  "decor": 4844,
+  "name": "Rough Wooden Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 7151868,
+  "item": 248810,
+  "thumbnail": 7423963,
+  "scale": 1
+ },
+ {
+  "decor": 4479,
+  "name": "Valdrakken Stone Stool",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 7141933,
+  "item": 248653,
+  "thumbnail": 7423839,
+  "scale": 1
+ },
+ {
+  "decor": 985,
+  "name": "Elegant Padded Footstool",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 6435018,
+  "item": 241618,
+  "thumbnail": 7416441,
+  "scale": 1
+ },
+ {
+  "decor": 5851,
+  "name": "Small Wooden Footstool",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 6794418,
+  "item": 250092,
+  "thumbnail": 7424175,
+  "scale": 1
+ },
+ {
+  "decor": 9053,
+  "name": "Hull'n'Home Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 1907403,
+  "item": 252404,
+  "thumbnail": 7424927,
+  "scale": 1
+ },
+ {
+  "decor": 9263,
+  "name": "Horde Warlord's Throne",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 6905426,
+  "item": 253242,
+  "thumbnail": 7425195,
+  "scale": 1
+ },
+ {
+  "decor": 11160,
+  "name": "Shadowforge Stone Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 7385422,
+  "item": 256425,
+  "thumbnail": 7425867,
+  "scale": 1
+ },
+ {
+  "decor": 11930,
+  "name": "Kobold Digger's Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 5169937,
+  "item": 258262,
+  "thumbnail": 7434273,
+  "scale": 1
+ },
+ {
+  "decor": 14731,
+  "name": "Restful Bronze Bench",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 5915398,
+  "item": 262790,
+  "thumbnail": 7483334,
+  "scale": 1
+ },
+ {
+  "decor": 17750,
+  "name": "Auspicious Wooden Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 7509681,
+  "item": 266071,
+  "thumbnail": 7552574,
+  "scale": 1
+ },
+ {
+  "decor": 22895,
+  "name": "Seaside Cushioned Chair",
+  "category": "Furnishings",
+  "kind": "Seating",
+  "model": 7831531,
+  "item": 274901,
+  "thumbnail": 7833786,
+  "scale": 1
+ },
+ {
+  "decor": 497,
+  "name": "Sturdy Wooden Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 6373544,
+  "item": 245374,
+  "thumbnail": 7416021,
+  "scale": 1
+ },
+ {
+  "decor": 1169,
+  "name": "Square Pandaren Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 538547,
+  "item": 245513,
+  "thumbnail": 7416631,
+  "scale": 1
+ },
+ {
+  "decor": 1258,
+  "name": "Undermine Rectangular Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 5689815,
+  "item": 243312,
+  "thumbnail": 7416875,
+  "scale": 1
+ },
+ {
+  "decor": 1694,
+  "name": "Kaldorei Chef's Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 1240419,
+  "item": 245260,
+  "thumbnail": 7421881,
+  "scale": 1
+ },
+ {
+  "decor": 1987,
+  "name": "Bel'ameth Wooden Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 4690346,
+  "item": 246089,
+  "thumbnail": 7422269,
+  "scale": 1
+ },
+ {
+  "decor": 2241,
+  "name": "Square Stormpike Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 197557,
+  "item": 246424,
+  "thumbnail": 7422545,
+  "scale": 1
+ },
+ {
+  "decor": 2446,
+  "name": "Razorwind Bar Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 7009610,
+  "item": 246614,
+  "thumbnail": 7422761,
+  "scale": 1
+ },
+ {
+  "decor": 4486,
+  "name": "Northshire Scribe's Desk",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 949629,
+  "item": 248661,
+  "thumbnail": 7423867,
+  "scale": 1
+ },
+ {
+  "decor": 4028,
+  "name": "Covered Ornate Suramar Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 1361709,
+  "item": 247914,
+  "thumbnail": 7423467,
+  "scale": 1
+ },
+ {
+  "decor": 4029,
+  "name": "Square Suramar Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 1361710,
+  "item": 247915,
+  "thumbnail": 7423471,
+  "scale": 1
+ },
+ {
+  "decor": 1162,
+  "name": "Elegant Elven Desk",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 6435024,
+  "item": 253490,
+  "thumbnail": 7416619,
+  "scale": 1
+ },
+ {
+  "decor": 5132,
+  "name": "Cosmic Void Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 6885568,
+  "item": 248964,
+  "thumbnail": 7183612,
+  "scale": 1
+ },
+ {
+  "decor": 8186,
+  "name": "Draenic Wooden Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 875146,
+  "item": 251477,
+  "thumbnail": 7424595,
+  "scale": 1
+ },
+ {
+  "decor": 9168,
+  "name": "Stonelight Countertop",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 5335168,
+  "item": 252756,
+  "thumbnail": 7425031,
+  "scale": 1
+ },
+ {
+  "decor": 7836,
+  "name": "Small Razorwind Bar Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 7080308,
+  "item": 250913,
+  "thumbnail": 7424515,
+  "scale": 1
+ },
+ {
+  "decor": 11899,
+  "name": "Kirin Tor Glass Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 243189,
+  "item": 258211,
+  "thumbnail": 7433588,
+  "scale": 1
+ },
+ {
+  "decor": 15060,
+  "name": "Ornate Lightwood Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 6005268,
+  "item": 263229,
+  "thumbnail": 7494545,
+  "scale": 1
+ },
+ {
+  "decor": 16235,
+  "name": "Underdecorated Underground Table",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 5051824,
+  "item": 264923,
+  "thumbnail": 7521656,
+  "scale": 1
+ },
+ {
+  "decor": 27046,
+  "name": "Tuskarr Fishing Gear Rack",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 8117128,
+  "item": 280527,
+  "thumbnail": 8123884,
+  "scale": 1
+ },
+ {
+  "decor": 28428,
+  "name": "Gilded Stonework Altar",
+  "category": "Furnishings",
+  "kind": "Tables and Desks",
+  "model": 1608202,
+  "item": 282122,
+  "thumbnail": 8174668,
+  "scale": 1
+ },
+ {
+  "decor": 676,
+  "name": "Deluxe Val'sharah Bed",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 1108751,
+  "item": 238860,
+  "thumbnail": 7416073,
+  "scale": 1
+ },
+ {
+  "decor": 860,
+  "name": "Gilnean Wooden Bed",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 322817,
+  "item": 245515,
+  "thumbnail": 7416297,
+  "scale": 1
+ },
+ {
+  "decor": 1415,
+  "name": "Orcish Sleeping Cot",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 1013304,
+  "item": 244323,
+  "thumbnail": 7417169,
+  "scale": 1
+ },
+ {
+  "decor": 2465,
+  "name": "Gnomish Steam-Powered Bed",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 197653,
+  "item": 246700,
+  "thumbnail": 7422809,
+  "scale": 1
+ },
+ {
+  "decor": 3982,
+  "name": "Deluxe Suramar Sleeper",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 1361683,
+  "item": 247843,
+  "thumbnail": 7423407,
+  "scale": 1
+ },
+ {
+  "decor": 9052,
+  "name": "Admiral's Bed",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 1852975,
+  "item": 252403,
+  "thumbnail": 7424923,
+  "scale": 1
+ },
+ {
+  "decor": 10324,
+  "name": "Small Orgrimmar Tusked Bed",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 7080287,
+  "item": 254316,
+  "thumbnail": 7425531,
+  "scale": 1
+ },
+ {
+  "decor": 11130,
+  "name": "Kharanos Stone Bed",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 7385421,
+  "item": 256330,
+  "thumbnail": 7425841,
+  "scale": 1
+ },
+ {
+  "decor": 15487,
+  "name": "Zul'Aman Forest Hammock",
+  "category": "Furnishings",
+  "kind": "Beds",
+  "model": 6195748,
+  "item": 264252,
+  "thumbnail": 7507182,
+  "scale": 1
+ },
+ {
+  "decor": 374,
+  "name": "Sturdy Wooden Shelf",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6008929,
+  "item": 245384,
+  "thumbnail": 7415895,
+  "scale": 1
+ },
+ {
+  "decor": 837,
+  "name": "Lordaeron Banded Crate",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 2341251,
+  "item": 245467,
+  "thumbnail": 7416257,
+  "scale": 1
+ },
+ {
+  "decor": 933,
+  "name": "Lordaeron Spiked Weapon Rack",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 2351848,
+  "item": 245483,
+  "thumbnail": 7416369,
+  "scale": 1
+ },
+ {
+  "decor": 1244,
+  "name": "Empty Wicker Basket",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6712067,
+  "item": 245335,
+  "thumbnail": 7416845,
+  "scale": 1
+ },
+ {
+  "decor": 1318,
+  "name": "Frostwolf Bookcase",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 971699,
+  "item": 245438,
+  "thumbnail": 7417049,
+  "scale": 1
+ },
+ {
+  "decor": 1692,
+  "name": "Val'sharah Bookcase",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 1096759,
+  "item": 245258,
+  "thumbnail": 7421873,
+  "scale": 1
+ },
+ {
+  "decor": 1995,
+  "name": "Sturdy Weapon Rack",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6390448,
+  "item": 246105,
+  "thumbnail": 7422301,
+  "scale": 1
+ },
+ {
+  "decor": 2430,
+  "name": "Screw-Sealed Stembarrel",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 1842466,
+  "item": 246598,
+  "thumbnail": 7422697,
+  "scale": 1
+ },
+ {
+  "decor": 2547,
+  "name": "Open Horned Banded Barrel",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 7080285,
+  "item": 246881,
+  "thumbnail": 7423030,
+  "scale": 1
+ },
+ {
+  "decor": 4162,
+  "name": "Valdrakken Banded Barrel",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 3917374,
+  "item": 248106,
+  "thumbnail": 7423551,
+  "scale": 1
+ },
+ {
+  "decor": 4482,
+  "name": "Dragon's Hoard Chest",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 7141936,
+  "item": 248656,
+  "thumbnail": 7423851,
+  "scale": 1
+ },
+ {
+  "decor": 987,
+  "name": "Elegant Wooden Dresser",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6435025,
+  "item": 241620,
+  "thumbnail": 7416445,
+  "scale": 1
+ },
+ {
+  "decor": 8769,
+  "name": "Tusked Weapon Stand",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6435773,
+  "item": 251637,
+  "thumbnail": 7424675,
+  "scale": 1
+ },
+ {
+  "decor": 9043,
+  "name": "Bowhull Bookcase",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 1602487,
+  "item": 252394,
+  "thumbnail": 7424887,
+  "scale": 1
+ },
+ {
+  "decor": 9255,
+  "name": "Gemmed Elven Chest",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6435027,
+  "item": 253181,
+  "thumbnail": 7425171,
+  "scale": 1
+ },
+ {
+  "decor": 11127,
+  "name": "Open Rust-Plated Storage Crate",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 5689833,
+  "item": 256327,
+  "thumbnail": 7425823,
+  "scale": 1
+ },
+ {
+  "decor": 11901,
+  "name": "Icecrown Plague Canister",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 243545,
+  "item": 258213,
+  "thumbnail": 7433578,
+  "scale": 1
+ },
+ {
+  "decor": 11943,
+  "name": "Sparse Razorwind Fisher's Rack",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 7266541,
+  "item": 258300,
+  "thumbnail": 7435575,
+  "scale": 0.699999988079071
+ },
+ {
+  "decor": 14360,
+  "name": "Arathi Bartender's Shelves",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 4892782,
+  "item": 260583,
+  "thumbnail": 7474403,
+  "scale": 1
+ },
+ {
+  "decor": 14970,
+  "name": "Rack of Silvermoon Arms",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6005301,
+  "item": 263203,
+  "thumbnail": 7493728,
+  "scale": 1
+ },
+ {
+  "decor": 15158,
+  "name": "Simple Amani Basket",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6075565,
+  "item": 263318,
+  "thumbnail": 7497493,
+  "scale": 1
+ },
+ {
+  "decor": 15460,
+  "name": "Amani Strongbox",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 6195763,
+  "item": 264175,
+  "thumbnail": 7504942,
+  "scale": 1
+ },
+ {
+  "decor": 16015,
+  "name": "Valdrakken Wall Shelf",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 4286997,
+  "item": 264679,
+  "thumbnail": 7517766,
+  "scale": 1
+ },
+ {
+  "decor": 26389,
+  "name": "Apothecary's Tortollan Display Rack",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 1663982,
+  "item": 280227,
+  "thumbnail": 8033703,
+  "scale": 1
+ },
+ {
+  "decor": 23178,
+  "name": "Maruukai Storage Basket",
+  "category": "Furnishings",
+  "kind": "Storage",
+  "model": 4207254,
+  "item": 276669,
+  "thumbnail": 7836003,
+  "scale": 1
+ },
+ {
+  "decor": 1277,
+  "name": "Rusty Patchwork Tub",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 5793104,
+  "item": 245309,
+  "thumbnail": 7416949,
+  "scale": 1
+ },
+ {
+  "decor": 4478,
+  "name": "Dragon's Grand Mirror",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 7141931,
+  "item": 248652,
+  "thumbnail": 7423835,
+  "scale": 1
+ },
+ {
+  "decor": 1427,
+  "name": "Griftah's Mystical Polter-Urn",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 6870561,
+  "item": 244344,
+  "thumbnail": 7417203,
+  "scale": 1
+ },
+ {
+  "decor": 9046,
+  "name": "Brennadam Grinder",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 1733921,
+  "item": 252397,
+  "thumbnail": 7424899,
+  "scale": 1
+ },
+ {
+  "decor": 10537,
+  "name": "Ineffective Mechanical Privacy Screen",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 2958572,
+  "item": 254766,
+  "thumbnail": 7425649,
+  "scale": 1
+ },
+ {
+  "decor": 12199,
+  "name": "Empty Wooden Bathtub",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 7387380,
+  "item": 258670,
+  "thumbnail": 7443283,
+  "scale": 1
+ },
+ {
+  "decor": 15605,
+  "name": "Golden Pandaren Privacy Screen",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 576300,
+  "item": 264362,
+  "thumbnail": 7509620,
+  "scale": 1
+ },
+ {
+  "decor": 21947,
+  "name": "Orchestrion of Echoing Atonement",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 7804770,
+  "item": 272355,
+  "thumbnail": 7808281,
+  "scale": 1.25
+ },
+ {
+  "decor": 27982,
+  "name": "Vulpera War Banner",
+  "category": "Furnishings",
+  "kind": "Misc Furnishings",
+  "model": 3154166,
+  "item": 283269,
+  "thumbnail": 8186775,
+  "scale": 1
+ },
+ {
+  "decor": 945,
+  "name": "Lordaeron Torch",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 2622608,
+  "item": 245480,
+  "thumbnail": 7416419,
+  "scale": 1
+ },
+ {
+  "decor": 1236,
+  "name": "Enchanted Blood Elven Candelabra",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 6431404,
+  "item": 245330,
+  "thumbnail": 7416827,
+  "scale": 1
+ },
+ {
+  "decor": 1889,
+  "name": "Crescent Moon Lamppost",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 1096777,
+  "item": 245739,
+  "thumbnail": 7422169,
+  "scale": 1
+ },
+ {
+  "decor": 2541,
+  "name": "Founder's Point Street Light",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 6794422,
+  "item": 246875,
+  "thumbnail": 7423016,
+  "scale": 1
+ },
+ {
+  "decor": 5689,
+  "name": "Devastator's Brazier",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 7209758,
+  "item": 249824,
+  "thumbnail": 7424159,
+  "scale": 1
+ },
+ {
+  "decor": 8785,
+  "name": "Draenethyst Lamppost",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 7273283,
+  "item": 251653,
+  "thumbnail": 7424691,
+  "scale": 1
+ },
+ {
+  "decor": 9430,
+  "name": "Iskaaran Standing Lantern",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 3857143,
+  "item": 253533,
+  "thumbnail": 7425339,
+  "scale": 1
+ },
+ {
+  "decor": 11484,
+  "name": "Zandalari War Torch",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 668858,
+  "item": 257394,
+  "thumbnail": 7426190,
+  "scale": 1
+ },
+ {
+  "decor": 14558,
+  "name": "Entropic Illuminant",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 6701005,
+  "item": 262355,
+  "thumbnail": 7478346,
+  "scale": 1
+ },
+ {
+  "decor": 26203,
+  "name": "Twilight Brazier",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 5975164,
+  "item": 278691,
+  "thumbnail": 8030607,
+  "scale": 1
+ },
+ {
+  "decor": 16316,
+  "name": "Zul'Aman Brazier Post",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 6163862,
+  "item": 265033,
+  "thumbnail": 7524456,
+  "scale": 0.800000011920929
+ },
+ {
+  "decor": 26621,
+  "name": "Medium Warrens Candle",
+  "category": "Lighting",
+  "kind": "Large Lights",
+  "model": 5169940,
+  "item": 280257,
+  "thumbnail": 8068706,
+  "scale": 1
+ },
+ {
+  "decor": 726,
+  "name": "Wrought Iron Chandelier",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 6712076,
+  "item": 239075,
+  "thumbnail": 7416133,
+  "scale": 1
+ },
+ {
+  "decor": 1459,
+  "name": "Tiny String of Schmancy Goblin Lights",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 6914978,
+  "item": 244669,
+  "thumbnail": 7417478,
+  "scale": 1
+ },
+ {
+  "decor": 2091,
+  "name": "Boralus String Lights",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 2026170,
+  "item": 246222,
+  "thumbnail": 7422357,
+  "scale": 1
+ },
+ {
+  "decor": 4172,
+  "name": "Valdrakken Chandelier",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 4290181,
+  "item": 248116,
+  "thumbnail": 7423591,
+  "scale": 0.699999988079071
+ },
+ {
+  "decor": 8910,
+  "name": "Tusked Chandelier",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 7048164,
+  "item": 251974,
+  "thumbnail": 7426688,
+  "scale": 1
+ },
+ {
+  "decor": 10890,
+  "name": "Razorwind Iron Chandelier",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 6938171,
+  "item": 255706,
+  "thumbnail": 7425753,
+  "scale": 1
+ },
+ {
+  "decor": 14553,
+  "name": "Draenei Crystal Chandelier",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 538415,
+  "item": 262347,
+  "thumbnail": 7433586,
+  "scale": 0.4000000059604645
+ },
+ {
+  "decor": 16101,
+  "name": "Auspicious Golden Carp Lantern",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 7509685,
+  "item": 264724,
+  "thumbnail": 7519066,
+  "scale": 1
+ },
+ {
+  "decor": 17880,
+  "name": "Long Hanging Tavern Lantern",
+  "category": "Lighting",
+  "kind": "Ceiling Lights",
+  "model": 7205471,
+  "item": 266250,
+  "thumbnail": 7554392,
+  "scale": 0.699999988079071
+ },
+ {
+  "decor": 939,
+  "name": "Blightfire Lantern",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 2493893,
+  "item": 245471,
+  "thumbnail": 7416393,
+  "scale": 1
+ },
+ {
+  "decor": 1861,
+  "name": "Filigree Moon Lamp",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 1114215,
+  "item": 245655,
+  "thumbnail": 7422097,
+  "scale": 1
+ },
+ {
+  "decor": 5115,
+  "name": "Hooded Iron Lantern",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 960094,
+  "item": 248938,
+  "thumbnail": 7423987,
+  "scale": 1
+ },
+ {
+  "decor": 8192,
+  "name": "Draenethyst Lantern",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 942495,
+  "item": 251483,
+  "thumbnail": 7424619,
+  "scale": 1
+ },
+ {
+  "decor": 10349,
+  "name": "Blue-Glo Lantern",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 2765485,
+  "item": 254410,
+  "thumbnail": 7425603,
+  "scale": 1
+ },
+ {
+  "decor": 11386,
+  "name": "Sintallow Candles",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 3184576,
+  "item": 257051,
+  "thumbnail": 7426081,
+  "scale": 1
+ },
+ {
+  "decor": 14634,
+  "name": "Void Elf Floating Lantern",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 6701006,
+  "item": 262609,
+  "thumbnail": 7483257,
+  "scale": 1
+ },
+ {
+  "decor": 17795,
+  "name": "Spring Blossom Lantern",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 7297708,
+  "item": 266165,
+  "thumbnail": 7553510,
+  "scale": 1
+ },
+ {
+  "decor": 21949,
+  "name": "Seaside Firefly Jar",
+  "category": "Lighting",
+  "kind": "Small Lights",
+  "model": 7793022,
+  "item": 272358,
+  "thumbnail": 7808345,
+  "scale": 1
+ },
+ {
+  "decor": 940,
+  "name": "Blightfire Hanging Lantern",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 2493894,
+  "item": 245472,
+  "thumbnail": 7416397,
+  "scale": 1
+ },
+ {
+  "decor": 947,
+  "name": "Dark Ship's Lantern",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 6431407,
+  "item": 245411,
+  "thumbnail": 7416425,
+  "scale": 1
+ },
+ {
+  "decor": 2000,
+  "name": "Filigree Moon Sconce",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 6980565,
+  "item": 246110,
+  "thumbnail": 7422321,
+  "scale": 1
+ },
+ {
+  "decor": 4024,
+  "name": "Suramar Sconce",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 1360655,
+  "item": 247910,
+  "thumbnail": 7423451,
+  "scale": 1
+ },
+ {
+  "decor": 7842,
+  "name": "Horned Hanging Sconce",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 7048159,
+  "item": 250920,
+  "thumbnail": 7426682,
+  "scale": 1
+ },
+ {
+  "decor": 9187,
+  "name": "Dornogal Hanging Sconce",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 5149702,
+  "item": 253039,
+  "thumbnail": 7425087,
+  "scale": 1
+ },
+ {
+  "decor": 11499,
+  "name": "Ornate Sin'dorei Sconce",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 6210870,
+  "item": 257418,
+  "thumbnail": 7416809,
+  "scale": 1
+ },
+ {
+  "decor": 16087,
+  "name": "Dalaran Sun Sconce",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 243135,
+  "item": 264710,
+  "thumbnail": 7518976,
+  "scale": 1
+ },
+ {
+  "decor": 25128,
+  "name": "Griftah's Torch of Rotation",
+  "category": "Lighting",
+  "kind": "Wall Lights",
+  "model": 7914427,
+  "item": 276312,
+  "thumbnail": 7934911,
+  "scale": 1
+ },
+ {
+  "decor": 81,
+  "name": "Tusked Fireplace",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 6033664,
+  "item": 245398,
+  "thumbnail": 7415913,
+  "scale": 1
+ },
+ {
+  "decor": 1435,
+  "name": "Sturdy Fireplace",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 6390441,
+  "item": 244531,
+  "thumbnail": 7417223,
+  "scale": 1
+ },
+ {
+  "decor": 1704,
+  "name": "Old Salt's Fireplace",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 6905476,
+  "item": 245271,
+  "thumbnail": 7421917,
+  "scale": 1
+ },
+ {
+  "decor": 3892,
+  "name": "Pandaren Fireplace",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 6431405,
+  "item": 247752,
+  "thumbnail": 7423303,
+  "scale": 1
+ },
+ {
+  "decor": 11451,
+  "name": "Naaru Crystal Icon",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 903885,
+  "item": 257349,
+  "thumbnail": 7426134,
+  "scale": 1
+ },
+ {
+  "decor": 14825,
+  "name": "Harandar Flowering Lamp",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 4905308,
+  "item": 263039,
+  "thumbnail": 7491976,
+  "scale": 1
+ },
+ {
+  "decor": 15569,
+  "name": "Amani Wayfarer's Torch",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 6075581,
+  "item": 264331,
+  "thumbnail": 7509038,
+  "scale": 1
+ },
+ {
+  "decor": 26371,
+  "name": "Sea Glass Bauble",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 1667789,
+  "item": 280234,
+  "thumbnail": 8033181,
+  "scale": 1
+ },
+ {
+  "decor": 26785,
+  "name": "Large Warrens Candle",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 5169943,
+  "item": 280259,
+  "thumbnail": 8116382,
+  "scale": 1
+ },
+ {
+  "decor": 25296,
+  "name": "Zul'Aman Burning Pinecone",
+  "category": "Lighting",
+  "kind": "Misc Lighting",
+  "model": 6684643,
+  "item": 275853,
+  "thumbnail": 7940046,
+  "scale": 1
+ },
+ {
+  "decor": 752,
+  "name": "\"Night on the Jeweled Estate\" Painting",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 1399648,
+  "item": 245448,
+  "thumbnail": 7416149,
+  "scale": 1
+ },
+ {
+  "decor": 1161,
+  "name": "Small Mask of Bwonsamdi, Loa of Graves",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 1929218,
+  "item": 245496,
+  "thumbnail": 7416609,
+  "scale": 1
+ },
+ {
+  "decor": 1355,
+  "name": "Frostwolf Axe-Dart Board",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 996162,
+  "item": 245445,
+  "thumbnail": 7417121,
+  "scale": 1
+ },
+ {
+  "decor": 2452,
+  "name": "Dwarven District Banner",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 197968,
+  "item": 246685,
+  "thumbnail": 7422773,
+  "scale": 1
+ },
+ {
+  "decor": 2521,
+  "name": "\"Through the Portal\" Painting",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 1469345,
+  "item": 246855,
+  "thumbnail": 7422937,
+  "scale": 1
+ },
+ {
+  "decor": 4841,
+  "name": "Nesingwary Mounted Elk Head",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 6924248,
+  "item": 248808,
+  "thumbnail": 7423955,
+  "scale": 1
+ },
+ {
+  "decor": 5129,
+  "name": "Furious Tiki Mask",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 6163852,
+  "item": 279362,
+  "thumbnail": 7164291,
+  "scale": 1
+ },
+ {
+  "decor": 5897,
+  "name": "Dreamweaver Banner",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 7233614,
+  "item": 250133,
+  "thumbnail": 7424271,
+  "scale": 1
+ },
+ {
+  "decor": 7821,
+  "name": "Netherlight Conclave Banner",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 7240005,
+  "item": 250789,
+  "thumbnail": 7424479,
+  "scale": 1
+ },
+ {
+  "decor": 9151,
+  "name": "\"The Harbinger\" Painting",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 7301968,
+  "item": 252668,
+  "thumbnail": 7425011,
+  "scale": 1
+ },
+ {
+  "decor": 9480,
+  "name": "\"The Last Day of the Semester\" Painting",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 6033626,
+  "item": 253603,
+  "thumbnail": 7340538,
+  "scale": 1
+ },
+ {
+  "decor": 9489,
+  "name": "\"Autumnal Eversong\" Unframed Painting",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 7241248,
+  "item": 253612,
+  "thumbnail": 7340491,
+  "scale": 1
+ },
+ {
+  "decor": 9497,
+  "name": "\"River's Protectors\" Painting",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 7241259,
+  "item": 253620,
+  "thumbnail": 7341497,
+  "scale": 1
+ },
+ {
+  "decor": 11322,
+  "name": "Pentagonal Valdrakken Tapestry",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 4495940,
+  "item": 256922,
+  "thumbnail": 7478336,
+  "scale": 1
+ },
+ {
+  "decor": 11754,
+  "name": "Bloodtotem Banner",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 1313472,
+  "item": 257724,
+  "thumbnail": 7421611,
+  "scale": 0.20000000298023224
+ },
+ {
+  "decor": 14586,
+  "name": "Ornamental Silvermoon Hanger",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 6209622,
+  "item": 262456,
+  "thumbnail": 7479452,
+  "scale": 1
+ },
+ {
+  "decor": 15402,
+  "name": "Midnight Alchemist's Shop Sign",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 6049331,
+  "item": 263997,
+  "thumbnail": 7504842,
+  "scale": 0.6000000238418579
+ },
+ {
+  "decor": 15457,
+  "name": "Midnight Miner's Shop Sign",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 6049355,
+  "item": 264172,
+  "thumbnail": 7504924,
+  "scale": 0.6000000238418579
+ },
+ {
+  "decor": 15744,
+  "name": "Greenvine Amani Tapestry",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 6212407,
+  "item": 264480,
+  "thumbnail": 7514968,
+  "scale": 1
+ },
+ {
+  "decor": 16088,
+  "name": "Joybuzz's Joyful Wall of Trains",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 244205,
+  "item": 264711,
+  "thumbnail": 7428098,
+  "scale": 1
+ },
+ {
+  "decor": 24194,
+  "name": "Framed Alliance Pride",
+  "category": "Accents",
+  "kind": "Wall Hangings",
+  "model": 7845477,
+  "item": 274736,
+  "thumbnail": 7875080,
+  "scale": 1
+ },
+ {
+  "decor": 721,
+  "name": "Ceiling Cobweb",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 6709919,
+  "item": 245400,
+  "thumbnail": 7416113,
+  "scale": 1
+ },
+ {
+  "decor": 1179,
+  "name": "Bwonsamdi's Golden Gong",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 1661034,
+  "item": 245491,
+  "thumbnail": 7416669,
+  "scale": 1
+ },
+ {
+  "decor": 1998,
+  "name": "Embellished Dwarven Tome",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 6436349,
+  "item": 246108,
+  "thumbnail": 7422313,
+  "scale": 1
+ },
+ {
+  "decor": 3898,
+  "name": "Uncontested Battlefield Banner",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 200283,
+  "item": 247761,
+  "thumbnail": 7423327,
+  "scale": 1
+ },
+ {
+  "decor": 4423,
+  "name": "Ornamental Kaldorei Glaive",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7146887,
+  "item": 248401,
+  "thumbnail": 7423671,
+  "scale": 1
+ },
+ {
+  "decor": 3884,
+  "name": "Alliance Dueling Flag",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 2353834,
+  "item": 247744,
+  "thumbnail": 7423271,
+  "scale": 1
+ },
+ {
+  "decor": 1428,
+  "name": "Forgotten Amani Urn",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 6870562,
+  "item": 244345,
+  "thumbnail": 7417205,
+  "scale": 1
+ },
+ {
+  "decor": 5563,
+  "name": "Elven Standing Mirror",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 6435031,
+  "item": 249558,
+  "thumbnail": 7424123,
+  "scale": 1
+ },
+ {
+  "decor": 7700,
+  "name": "War Creche Teaching Crystal",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 4563732,
+  "item": 250703,
+  "thumbnail": 7250153,
+  "scale": 0.5
+ },
+ {
+  "decor": 7875,
+  "name": "Maelstrom Chimes",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7262795,
+  "item": 251015,
+  "thumbnail": 7424555,
+  "scale": 1
+ },
+ {
+  "decor": 10339,
+  "name": "Triple-Tested Steam Valve",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 2261833,
+  "item": 254400,
+  "thumbnail": 7425563,
+  "scale": 1
+ },
+ {
+  "decor": 11280,
+  "name": "Replica Chronicle of Ages",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 1324675,
+  "item": 256679,
+  "thumbnail": 7425915,
+  "scale": 0.699999988079071
+ },
+ {
+  "decor": 11436,
+  "name": "Venthyr Anima Bottle",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 3641039,
+  "item": 257098,
+  "thumbnail": 7426115,
+  "scale": 1.7000000476837158
+ },
+ {
+  "decor": 11946,
+  "name": "Beloved Elekk Plushie",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 903883,
+  "item": 258303,
+  "thumbnail": 7435571,
+  "scale": 1
+ },
+ {
+  "decor": 14361,
+  "name": "Replica Libram of the Dead",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7474233,
+  "item": 260584,
+  "thumbnail": 7474387,
+  "scale": 1
+ },
+ {
+  "decor": 14619,
+  "name": "Chic Silvermoon Pillow",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 6050855,
+  "item": 262593,
+  "thumbnail": 7483241,
+  "scale": 1
+ },
+ {
+  "decor": 14827,
+  "name": "Replica Root of the World",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 6252867,
+  "item": 263041,
+  "thumbnail": 7491968,
+  "scale": 1
+ },
+ {
+  "decor": 15149,
+  "name": "Cuddly Horde Red Grrgle",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7493568,
+  "item": 263299,
+  "thumbnail": 7496708,
+  "scale": 1
+ },
+ {
+  "decor": 15582,
+  "name": "Cosmic Void Cache",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7136759,
+  "item": 264342,
+  "thumbnail": 7509065,
+  "scale": 1
+ },
+ {
+  "decor": 16037,
+  "name": "Cuddly Clover Grrgle",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7516150,
+  "item": 264690,
+  "thumbnail": 7517902,
+  "scale": 1
+ },
+ {
+  "decor": 16817,
+  "name": "Cuddly Mauve Grrgle",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7525416,
+  "item": 265393,
+  "thumbnail": 7531445,
+  "scale": 1
+ },
+ {
+  "decor": 16973,
+  "name": "Cuddly Ochre Grrgle",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7525487,
+  "item": 265553,
+  "thumbnail": 7537079,
+  "scale": 1
+ },
+ {
+  "decor": 18398,
+  "name": "Voidspire Vanquisher's Gleaming Trophy",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7556294,
+  "item": 266887,
+  "thumbnail": 7562202,
+  "scale": 1
+ },
+ {
+  "decor": 26382,
+  "name": "Amani Forgemaster's Rack",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 6212431,
+  "item": 279329,
+  "thumbnail": 8033230,
+  "scale": 1
+ },
+ {
+  "decor": 22182,
+  "name": "Runic Parchment",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 7815448,
+  "item": 273142,
+  "thumbnail": 7815544,
+  "scale": 1
+ },
+ {
+  "decor": 25274,
+  "name": "Gilded Silvermoon Compass",
+  "category": "Accents",
+  "kind": "Ornamental",
+  "model": 4496833,
+  "item": 278130,
+  "thumbnail": 7939323,
+  "scale": 1
+ },
+ {
+  "decor": 677,
+  "name": "Cenarion Rectangular Rug",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 1108813,
+  "item": 238861,
+  "thumbnail": 7416077,
+  "scale": 1
+ },
+ {
+  "decor": 1119,
+  "name": "Loch Modan Bearskin Rug",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 4871092,
+  "item": 242948,
+  "thumbnail": 7416487,
+  "scale": 1
+ },
+ {
+  "decor": 1445,
+  "name": "Gilnean Circular Rug",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 1379266,
+  "item": 244655,
+  "thumbnail": 7417269,
+  "scale": 1
+ },
+ {
+  "decor": 4033,
+  "name": "Traditional Shal'dorei Rug",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 1378306,
+  "item": 247919,
+  "thumbnail": 7423487,
+  "scale": 1
+ },
+ {
+  "decor": 5558,
+  "name": "Evoker's Elegant Rug",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 4248068,
+  "item": 249547,
+  "thumbnail": 7424103,
+  "scale": 1
+ },
+ {
+  "decor": 11461,
+  "name": "Slate Cobblestone Pair",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 7291386,
+  "item": 257359,
+  "thumbnail": 7426158,
+  "scale": 1
+ },
+ {
+  "decor": 11755,
+  "name": "Camp Narache Rug",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 6711676,
+  "item": 257725,
+  "thumbnail": 7421612,
+  "scale": 1
+ },
+ {
+  "decor": 14433,
+  "name": "Horde Doormat",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 7476388,
+  "item": 260728,
+  "thumbnail": 7476413,
+  "scale": 1
+ },
+ {
+  "decor": 15453,
+  "name": "Cenarion Round Rug",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 7504767,
+  "item": 264168,
+  "thumbnail": 7506144,
+  "scale": 1
+ },
+ {
+  "decor": 16976,
+  "name": "Spring Blossom Stepping Stone Duo",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 7484800,
+  "item": 265557,
+  "thumbnail": 7537547,
+  "scale": 1
+ },
+ {
+  "decor": 17919,
+  "name": "Granite Cobblestone Path",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 7557399,
+  "item": 266444,
+  "thumbnail": 7557752,
+  "scale": 1
+ },
+ {
+  "decor": 23182,
+  "name": "Bakar's Napping Rug",
+  "category": "Accents",
+  "kind": "Floor",
+  "model": 4291399,
+  "item": 276663,
+  "thumbnail": 7836007,
+  "scale": 1
+ },
+ {
+  "decor": 749,
+  "name": "Hungry Human's Platter",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 960868,
+  "item": 245428,
+  "thumbnail": 7416137,
+  "scale": 1
+ },
+ {
+  "decor": 1314,
+  "name": "Tauren Soup Pot",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 6877807,
+  "item": 245408,
+  "thumbnail": 7417037,
+  "scale": 1
+ },
+ {
+  "decor": 2472,
+  "name": "Earthen Hospitality Cheese-Like Brick",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 5203794,
+  "item": 246709,
+  "thumbnail": 7422837,
+  "scale": 1
+ },
+ {
+  "decor": 1247,
+  "name": "Rootbound Vat",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 6865595,
+  "item": 253506,
+  "thumbnail": 7416857,
+  "scale": 1
+ },
+ {
+  "decor": 7697,
+  "name": "Roasted Ram Leg",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 4500571,
+  "item": 250700,
+  "thumbnail": 7250150,
+  "scale": 0.5
+ },
+ {
+  "decor": 8988,
+  "name": "Sealed Sack of Roasted Kafa",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 1305115,
+  "item": 252040,
+  "thumbnail": 7424831,
+  "scale": 1
+ },
+ {
+  "decor": 9421,
+  "name": "590 Quel'Lithien Red Display Bottle",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 6025946,
+  "item": 253524,
+  "thumbnail": 7425303,
+  "scale": 1
+ },
+ {
+  "decor": 11137,
+  "name": "Qalashi Goulash",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 4420033,
+  "item": 256354,
+  "thumbnail": 7425851,
+  "scale": 0.800000011920929
+ },
+ {
+  "decor": 15229,
+  "name": "Corked Bottle of Liquid Mystery",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 7483958,
+  "item": 263383,
+  "thumbnail": 7498738,
+  "scale": 1
+ },
+ {
+  "decor": 16315,
+  "name": "Hearty Niffen Grub",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 4884004,
+  "item": 265032,
+  "thumbnail": 7521266,
+  "scale": 1
+ },
+ {
+  "decor": 26879,
+  "name": "Tuskarr Hanging Grill",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 8117127,
+  "item": 280525,
+  "thumbnail": 8117498,
+  "scale": 1
+ },
+ {
+  "decor": 28473,
+  "name": "Nomad's Mortar and Pestle",
+  "category": "Accents",
+  "kind": "Food and Drink",
+  "model": 1674794,
+  "item": 283307,
+  "thumbnail": 8174593,
+  "scale": 1
+ },
+ {
+  "decor": 720,
+  "name": "Reliquary Telescope",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 4496829,
+  "item": 238975,
+  "thumbnail": 7416109,
+  "scale": 1
+ },
+ {
+  "decor": 4178,
+  "name": "Non-Fatal One-Armed Bandit",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 5933735,
+  "item": 248122,
+  "thumbnail": 7423615,
+  "scale": 1
+ },
+ {
+  "decor": 9065,
+  "name": "Lush Garden Fungal Basin",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 7096209,
+  "item": 252419,
+  "thumbnail": 7424975,
+  "scale": 1
+ },
+ {
+  "decor": 9275,
+  "name": "Lunar Celebrant's Compact",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 7319689,
+  "item": 253291,
+  "thumbnail": 7425243,
+  "scale": 2
+ },
+ {
+  "decor": 11379,
+  "name": "Orcish Felblood Cauldron",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 984595,
+  "item": 257044,
+  "thumbnail": 7426059,
+  "scale": 1
+ },
+ {
+  "decor": 12192,
+  "name": "Razorwind River Paddle",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 6938173,
+  "item": 258663,
+  "thumbnail": 7443295,
+  "scale": 1
+ },
+ {
+  "decor": 12257,
+  "name": "Sanctuary Chess Light Bishop",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 7433399,
+  "item": 259065,
+  "thumbnail": 7433617,
+  "scale": 1
+ },
+ {
+  "decor": 12457,
+  "name": "Plain Hanging Razorwind Ropes",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 6938205,
+  "item": 259468,
+  "thumbnail": 7455186,
+  "scale": 1
+ },
+ {
+  "decor": 14635,
+  "name": "Swirling Ritual Pedestal",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 6701008,
+  "item": 262610,
+  "thumbnail": 7483258,
+  "scale": 1
+ },
+ {
+  "decor": 16097,
+  "name": "Void Elf Bedroll",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 6701002,
+  "item": 264720,
+  "thumbnail": 7517857,
+  "scale": 1
+ },
+ {
+  "decor": 21616,
+  "name": "Feathered Ula'tek Talisman",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 7277162,
+  "item": 271176,
+  "thumbnail": 7746467,
+  "scale": 1
+ },
+ {
+  "decor": 27045,
+  "name": "Torquewrench Tractor",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 7967689,
+  "item": 280637,
+  "thumbnail": 8123877,
+  "scale": 1
+ },
+ {
+  "decor": 25302,
+  "name": "Nourished Brood Egg Cluster",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 3022828,
+  "item": 275867,
+  "thumbnail": 7940329,
+  "scale": 1
+ },
+ {
+  "decor": 28436,
+  "name": "Carved Argunite Supply",
+  "category": "Accents",
+  "kind": "Misc Accents",
+  "model": 1616778,
+  "item": 282138,
+  "thumbnail": 8179428,
+  "scale": 1
+ },
+ {
+  "decor": 562,
+  "name": "Winter Veil Tree",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 4913588,
+  "item": 245292,
+  "thumbnail": 7416041,
+  "scale": 1
+ },
+ {
+  "decor": 4452,
+  "name": "Razorwind Fighting Cactus",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 5930373,
+  "item": 248626,
+  "thumbnail": 7423731,
+  "scale": 1
+ },
+ {
+  "decor": 3916,
+  "name": "Purple Zangarmarsh Tree",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 193988,
+  "item": 247779,
+  "thumbnail": 7116675,
+  "scale": 1
+ },
+ {
+  "decor": 15140,
+  "name": "Spring Blossom Tree",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 7469298,
+  "item": 263290,
+  "thumbnail": 7497431,
+  "scale": 1
+ },
+ {
+  "decor": 28577,
+  "name": "Fae Animashroom",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 3543723,
+  "item": 282327,
+  "thumbnail": 8179743,
+  "scale": 0.30000001192092896
+ },
+ {
+  "decor": 25324,
+  "name": "Overgrown Valuun Shrub",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 894399,
+  "item": 283222,
+  "thumbnail": 7949047,
+  "scale": 0.4000000059604645
+ },
+ {
+  "decor": 28325,
+  "name": "Verdant Shadowmoon Willow",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 925255,
+  "item": 283246,
+  "thumbnail": 8179539,
+  "scale": 0.75
+ },
+ {
+  "decor": 28328,
+  "name": "Young Sentinel Tree",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 948111,
+  "item": 284110,
+  "thumbnail": 8179846,
+  "scale": 0.4000000059604645
+ },
+ {
+  "decor": 28490,
+  "name": "Twisted Crimson Root",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 1728708,
+  "item": 284464,
+  "thumbnail": 8179780,
+  "scale": 0.4000000059604645
+ },
+ {
+  "decor": 28488,
+  "name": "Scarlet Drustvar Oak",
+  "category": "Nature",
+  "kind": "Large Foliage",
+  "model": 1723796,
+  "item": 284482,
+  "thumbnail": 8179814,
+  "scale": 0.30000001192092896
+ },
+ {
+  "decor": 582,
+  "name": "Wild Violet Bellflowers",
+  "category": "Nature",
+  "kind": "Small Foliage",
+  "model": 4684656,
+  "item": 245298,
+  "thumbnail": 7416045,
+  "scale": 1
+ },
+ {
+  "decor": 771,
+  "name": "Small Poppy Cluster",
+  "category": "Nature",
+  "kind": "Small Foliage",
+  "model": 6242990,
+  "item": 245329,
+  "thumbnail": 7416225,
+  "scale": 1
+ },
+ {
+  "decor": 3919,
+  "name": "Pulsing Zangarshroom",
+  "category": "Nature",
+  "kind": "Small Foliage",
+  "model": 201124,
+  "item": 247782,
+  "thumbnail": 7116681,
+  "scale": 1
+ },
+ {
+  "decor": 28552,
+  "name": "Pale Nathrian Rose",
+  "category": "Nature",
+  "kind": "Small Foliage",
+  "model": 3045415,
+  "item": 282693,
+  "thumbnail": 8179704,
+  "scale": 0.25
+ },
+ {
+  "decor": 28634,
+  "name": "Blooming Celestial Dreamleaf",
+  "category": "Nature",
+  "kind": "Small Foliage",
+  "model": 3095233,
+  "item": 283271,
+  "thumbnail": 8179735,
+  "scale": 0.3499999940395355
+ },
+ {
+  "decor": 28573,
+  "name": "Elysian Heart-Lotus",
+  "category": "Nature",
+  "kind": "Small Foliage",
+  "model": 3230280,
+  "item": 284510,
+  "thumbnail": 8179602,
+  "scale": 0.10000000149011612
+ },
+ {
+  "decor": 927,
+  "name": "Spherical Draenic Topiary",
+  "category": "Nature",
+  "kind": "Bushes",
+  "model": 904942,
+  "item": 245423,
+  "thumbnail": 7416345,
+  "scale": 1
+ },
+ {
+  "decor": 4461,
+  "name": "Elwynn Whitebrush",
+  "category": "Nature",
+  "kind": "Bushes",
+  "model": 6382414,
+  "item": 248635,
+  "thumbnail": 7423767,
+  "scale": 0.5
+ },
+ {
+  "decor": 4466,
+  "name": "Duskberry Bush",
+  "category": "Nature",
+  "kind": "Bushes",
+  "model": 6717239,
+  "item": 248640,
+  "thumbnail": 7423787,
+  "scale": 1
+ },
+ {
+  "decor": 17865,
+  "name": "Razorwind Blooms Large Garden Cluster",
+  "category": "Nature",
+  "kind": "Bushes",
+  "model": 7552286,
+  "item": 266236,
+  "thumbnail": 7554224,
+  "scale": 1
+ },
+ {
+  "decor": 17869,
+  "name": "Founder's Point Large Garden Cluster",
+  "category": "Nature",
+  "kind": "Bushes",
+  "model": 7552290,
+  "item": 266240,
+  "thumbnail": 7554080,
+  "scale": 1
+ },
+ {
+  "decor": 28514,
+  "name": "Nathrian Sinstain Bush",
+  "category": "Nature",
+  "kind": "Bushes",
+  "model": 2565491,
+  "item": 282679,
+  "thumbnail": 8179676,
+  "scale": 0.699999988079071
+ },
+ {
+  "decor": 28555,
+  "name": "Celestial Grovebush",
+  "category": "Nature",
+  "kind": "Bushes",
+  "model": 3053180,
+  "item": 283267,
+  "thumbnail": 8179719,
+  "scale": 1
+ },
+ {
+  "decor": 4845,
+  "name": "Elwynn Small Grass Patch",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 7154457,
+  "item": 248811,
+  "thumbnail": 7423967,
+  "scale": 1
+ },
+ {
+  "decor": 4822,
+  "name": "Elwynn Grass Patch",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 6225391,
+  "item": 248802,
+  "thumbnail": 7423931,
+  "scale": 1
+ },
+ {
+  "decor": 4458,
+  "name": "Hardy Razorwind Grass Patch",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 6067030,
+  "item": 248632,
+  "thumbnail": 7423755,
+  "scale": 0.6000000238418579
+ },
+ {
+  "decor": 3909,
+  "name": "Small Zangarshroom Patch",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 193917,
+  "item": 247772,
+  "thumbnail": 7116665,
+  "scale": 1
+ },
+ {
+  "decor": 14811,
+  "name": "Brumewood Hollow Grassy Spread",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 6717244,
+  "item": 263022,
+  "thumbnail": 7491904,
+  "scale": 1
+ },
+ {
+  "decor": 14813,
+  "name": "Founder's Point Grassy Spread",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 6799069,
+  "item": 263024,
+  "thumbnail": 7491906,
+  "scale": 1
+ },
+ {
+  "decor": 17864,
+  "name": "Razorwind Cactus Large Garden Cluster",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 7552285,
+  "item": 266235,
+  "thumbnail": 7554096,
+  "scale": 1
+ },
+ {
+  "decor": 28562,
+  "name": "Fae Animashroom Circle",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 3067212,
+  "item": 283385,
+  "thumbnail": 8179747,
+  "scale": 0.20000000298023224
+ },
+ {
+  "decor": 28693,
+  "name": "Incineratus Grass Patch",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 1036822,
+  "item": 284134,
+  "thumbnail": 8179886,
+  "scale": 0.6499999761581421
+ },
+ {
+  "decor": 28458,
+  "name": "Drustvar Leaf Clump",
+  "category": "Nature",
+  "kind": "Ground Cover",
+  "model": 1630453,
+  "item": 284490,
+  "thumbnail": 8179830,
+  "scale": 1
+ },
+ {
+  "decor": 4468,
+  "name": "Creeping Lattice Ivy",
+  "category": "Nature",
+  "kind": "Vines and Hanging Plants",
+  "model": 6717278,
+  "item": 248642,
+  "thumbnail": 7423795,
+  "scale": 1
+ },
+ {
+  "decor": 26707,
+  "name": "Old Moonbrook Creeping Ivy",
+  "category": "Nature",
+  "kind": "Vines and Hanging Plants",
+  "model": 7967701,
+  "item": 280646,
+  "thumbnail": 8106822,
+  "scale": 1
+ },
+ {
+  "decor": 28510,
+  "name": "Nathrian Forked Briar",
+  "category": "Nature",
+  "kind": "Vines and Hanging Plants",
+  "model": 2529716,
+  "item": 282663,
+  "thumbnail": 0,
+  "scale": 0.25
+ },
+ {
+  "decor": 28515,
+  "name": "Nathrian Sinstain Ivy Cluster",
+  "category": "Nature",
+  "kind": "Vines and Hanging Plants",
+  "model": 2565498,
+  "item": 282685,
+  "thumbnail": 8179688,
+  "scale": 0.699999988079071
+ },
+ {
+  "decor": 28565,
+  "name": "Small Shimmering Moonvine",
+  "category": "Nature",
+  "kind": "Vines and Hanging Plants",
+  "model": 3113681,
+  "item": 283275,
+  "thumbnail": 8179762,
+  "scale": 0.5
+ },
+ {
+  "decor": 28338,
+  "name": "Nagrand Heart Ivy",
+  "category": "Nature",
+  "kind": "Vines and Hanging Plants",
+  "model": 971433,
+  "item": 284130,
+  "thumbnail": 8179854,
+  "scale": 0.25
+ },
+ {
+  "decor": 1794,
+  "name": "Gilnean Noble's Trellis",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 6930895,
+  "item": 245603,
+  "thumbnail": 7422049,
+  "scale": 1
+ },
+ {
+  "decor": 4407,
+  "name": "Flat Boulder",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 7142958,
+  "item": 248338,
+  "thumbnail": 7423659,
+  "scale": 1
+ },
+ {
+  "decor": 1137,
+  "name": "Veilroot Fountain",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 6839738,
+  "item": 253451,
+  "thumbnail": 7416519,
+  "scale": 1
+ },
+ {
+  "decor": 8993,
+  "name": "Fungal Pergola",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 6225718,
+  "item": 252045,
+  "thumbnail": 7424851,
+  "scale": 1
+ },
+ {
+  "decor": 12223,
+  "name": "Lush Garden Fungal Fountain",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 7096216,
+  "item": 258888,
+  "thumbnail": 7439721,
+  "scale": 1
+ },
+ {
+  "decor": 15263,
+  "name": "Tiny Clump of Hay",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 6938199,
+  "item": 263583,
+  "thumbnail": 7466524,
+  "scale": 1
+ },
+ {
+  "decor": 15504,
+  "name": "Rutaani Bird Perch",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 6780545,
+  "item": 264269,
+  "thumbnail": 7507158,
+  "scale": 1
+ },
+ {
+  "decor": 17797,
+  "name": "Spring Blossom Pond",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 7484798,
+  "item": 266167,
+  "thumbnail": 7553517,
+  "scale": 1
+ },
+ {
+  "decor": 19216,
+  "name": "Windblown Wisps of Hay",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 7583304,
+  "item": 268027,
+  "thumbnail": 7634899,
+  "scale": 1
+ },
+ {
+  "decor": 21725,
+  "name": "Destroyed Clutch of Ula'tek",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 7277186,
+  "item": 271609,
+  "thumbnail": 7759656,
+  "scale": 1
+ },
+ {
+  "decor": 28530,
+  "name": "Brightburned Nathrian Root",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 2976104,
+  "item": 282683,
+  "thumbnail": 8179684,
+  "scale": 0.3499999940395355
+ },
+ {
+  "decor": 28539,
+  "name": "Hanging Wildseed",
+  "category": "Nature",
+  "kind": "Misc Nature",
+  "model": 3033637,
+  "item": 283345,
+  "thumbnail": 8179741,
+  "scale": 0.5
+ },
+ {
+  "decor": 378,
+  "name": "Sturdy Wooden Interior Door",
+  "category": "Structural",
+  "kind": "Doors",
+  "model": 6008934,
+  "item": 245355,
+  "thumbnail": 7415919,
+  "scale": 1
+ },
+ {
+  "decor": 1438,
+  "name": "Iron-Reinforced Door",
+  "category": "Structural",
+  "kind": "Doors",
+  "model": 6379088,
+  "item": 244534,
+  "thumbnail": 7417241,
+  "scale": 1
+ },
+ {
+  "decor": 3867,
+  "name": "Iron Dragonmaw Gate",
+  "category": "Structural",
+  "kind": "Doors",
+  "model": 414219,
+  "item": 247727,
+  "thumbnail": 7423202,
+  "scale": 1
+ },
+ {
+  "decor": 3826,
+  "name": "Elegant Carved Door",
+  "category": "Structural",
+  "kind": "Doors",
+  "model": 6435840,
+  "item": 247501,
+  "thumbnail": 7423154,
+  "scale": 1
+ },
+ {
+  "decor": 9264,
+  "name": "Bel'ameth Front Door",
+  "category": "Structural",
+  "kind": "Doors",
+  "model": 7302331,
+  "item": 253243,
+  "thumbnail": 7425199,
+  "scale": 1
+ },
+ {
+  "decor": 10327,
+  "name": "Root-Woven Door",
+  "category": "Structural",
+  "kind": "Doors",
+  "model": 6225721,
+  "item": 254319,
+  "thumbnail": 7426698,
+  "scale": 1
+ },
+ {
+  "decor": 10952,
+  "name": "Razorwind Shores Front Door",
+  "category": "Structural",
+  "kind": "Doors",
+  "model": 7302332,
+  "item": 256050,
+  "thumbnail": 7425799,
+  "scale": 1
+ },
+ {
+  "decor": 10967,
+  "name": "Silvermoon Front Door",
+  "category": "Structural",
+  "kind": "Doors",
+  "model": 7302334,
+  "item": 256173,
+  "thumbnail": 7425825,
+  "scale": 1
+ },
+ {
+  "decor": 389,
+  "name": "Goldshire Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 6008945,
+  "item": 245356,
+  "thumbnail": 7415937,
+  "scale": 1
+ },
+ {
+  "decor": 1700,
+  "name": "Iron-Studded Wooden Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 6379084,
+  "item": 245266,
+  "thumbnail": 7421901,
+  "scale": 1
+ },
+ {
+  "decor": 1747,
+  "name": "Elaborate Suramar Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 6924250,
+  "item": 245558,
+  "thumbnail": 7422001,
+  "scale": 1
+ },
+ {
+  "decor": 1749,
+  "name": "Meadery Ochre Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 6924252,
+  "item": 245560,
+  "thumbnail": 7422009,
+  "scale": 1
+ },
+ {
+  "decor": 1900,
+  "name": "Sagehold Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 6988296,
+  "item": 245984,
+  "thumbnail": 7422189,
+  "scale": 1
+ },
+ {
+  "decor": 1488,
+  "name": "Elven Floral Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 6435041,
+  "item": 244782,
+  "thumbnail": 7421857,
+  "scale": 1
+ },
+ {
+  "decor": 11480,
+  "name": "Iron-Reinforced Wooden Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 7080315,
+  "item": 257389,
+  "thumbnail": 7426174,
+  "scale": 1
+ },
+ {
+  "decor": 12210,
+  "name": "Hull'n'Home Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 1668010,
+  "item": 258765,
+  "thumbnail": 7446457,
+  "scale": 1
+ },
+ {
+  "decor": 26877,
+  "name": "Old Moonbrook Daylight Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 8035585,
+  "item": 280654,
+  "thumbnail": 8117480,
+  "scale": 1
+ },
+ {
+  "decor": 28343,
+  "name": "Nathrian Window",
+  "category": "Structural",
+  "kind": "Windows",
+  "model": 3257686,
+  "item": 284562,
+  "thumbnail": 8179910,
+  "scale": 0.5
+ },
+ {
+  "decor": 858,
+  "name": "Worgen's Chicken Coop",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 305584,
+  "item": 245518,
+  "thumbnail": 7416289,
+  "scale": 1
+ },
+ {
+  "decor": 1262,
+  "name": "Undermine Fencepost",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 5689824,
+  "item": 245319,
+  "thumbnail": 7416889,
+  "scale": 1
+ },
+ {
+  "decor": 1882,
+  "name": "Kaldorei Stone Fence",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 1096764,
+  "item": 245698,
+  "thumbnail": 7422141,
+  "scale": 1
+ },
+ {
+  "decor": 2428,
+  "name": "Gnomish Fence",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 1841734,
+  "item": 246596,
+  "thumbnail": 7422689,
+  "scale": 1
+ },
+ {
+  "decor": 4023,
+  "name": "Suramar Fencepost",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 1360361,
+  "item": 247909,
+  "thumbnail": 7423447,
+  "scale": 1
+ },
+ {
+  "decor": 7606,
+  "name": "Netherlight Conclave Voidwell",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 1321771,
+  "item": 250302,
+  "thumbnail": 7424327,
+  "scale": 1
+ },
+ {
+  "decor": 8177,
+  "name": "Draenic Fencepost",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 916603,
+  "item": 251330,
+  "thumbnail": 7424573,
+  "scale": 1
+ },
+ {
+  "decor": 9060,
+  "name": "Old Founder's Point Fencepost",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 6794431,
+  "item": 252412,
+  "thumbnail": 7424955,
+  "scale": 0.8999999761581421
+ },
+ {
+  "decor": 8239,
+  "name": "Draenic Fence",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 916279,
+  "item": 251548,
+  "thumbnail": 7424655,
+  "scale": 1
+ },
+ {
+  "decor": 11869,
+  "name": "Nazjatar Framing Post",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 7277020,
+  "item": 258142,
+  "thumbnail": 7433609,
+  "scale": 1
+ },
+ {
+  "decor": 14644,
+  "name": "Replica Forge of the Roaring Mountain",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 7483166,
+  "item": 262619,
+  "thumbnail": 7483358,
+  "scale": 1
+ },
+ {
+  "decor": 16231,
+  "name": "Loamm Archway",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 4913563,
+  "item": 264919,
+  "thumbnail": 7521652,
+  "scale": 1
+ },
+ {
+  "decor": 26871,
+  "name": "Tortollan Tarp Tent",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 1659640,
+  "item": 280215,
+  "thumbnail": 8117453,
+  "scale": 1
+ },
+ {
+  "decor": 21951,
+  "name": "Ula'tek Ritual Stone",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 7277153,
+  "item": 272360,
+  "thumbnail": 7808355,
+  "scale": 1
+ },
+ {
+  "decor": 28465,
+  "name": "Fortified Nomad's Makeshift Barricade",
+  "category": "Structural",
+  "kind": "Misc Structural",
+  "model": 1674725,
+  "item": 283305,
+  "thumbnail": 8174651,
+  "scale": 1
+ },
+ {
+  "decor": 2099,
+  "name": "Stormwind Beam Platform",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7000933,
+  "item": 246243,
+  "thumbnail": 7422377,
+  "scale": 1
+ },
+ {
+  "decor": 2102,
+  "name": "Stormwind Small Platform",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7000936,
+  "item": 246247,
+  "thumbnail": 7422389,
+  "scale": 1
+ },
+ {
+  "decor": 2106,
+  "name": "Silvermoon Small Platform",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7000940,
+  "item": 246251,
+  "thumbnail": 7422405,
+  "scale": 1
+ },
+ {
+  "decor": 2110,
+  "name": "Bel'ameth Large Platform",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7000944,
+  "item": 246255,
+  "thumbnail": 7422411,
+  "scale": 1
+ },
+ {
+  "decor": 2114,
+  "name": "Orgrimmar Beam Platform",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7000948,
+  "item": 246259,
+  "thumbnail": 7422437,
+  "scale": 1
+ },
+ {
+  "decor": 2118,
+  "name": "Orgrimmar Angled Platform",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7000952,
+  "item": 246263,
+  "thumbnail": 7422453,
+  "scale": 1
+ },
+ {
+  "decor": 23554,
+  "name": "Large Wooden Floor Tile",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7834746,
+  "item": 280144,
+  "thumbnail": 7845195,
+  "scale": 1.7999999523162842
+ },
+ {
+  "decor": 23558,
+  "name": "Short Round Wooden Column",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7834750,
+  "item": 280152,
+  "thumbnail": 7845210,
+  "scale": 1.7999999523162842
+ },
+ {
+  "decor": 23708,
+  "name": "Large Wooden Wall Tile",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 7834754,
+  "item": 280160,
+  "thumbnail": 7852022,
+  "scale": 1.7999999523162842
+ },
+ {
+  "decor": 23177,
+  "name": "Wide Maruukai Barricade",
+  "category": "Structural",
+  "kind": "Construction",
+  "model": 4182509,
+  "item": 276626,
+  "thumbnail": 7836002,
+  "scale": 1
+ },
+ {
+  "decor": 3873,
+  "name": "Halfhill Cookpot",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 526861,
+  "item": 247733,
+  "thumbnail": 7423226,
+  "scale": 1
+ },
+ {
+  "decor": 4450,
+  "name": "Cookout Campfire",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 1525053,
+  "item": 248624,
+  "thumbnail": 7423723,
+  "scale": 1
+ },
+ {
+  "decor": 9472,
+  "name": "Coal-Fired Stovetop",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 7151264,
+  "item": 253590,
+  "thumbnail": 7425403,
+  "scale": 1
+ },
+ {
+  "decor": 11439,
+  "name": "Stampwhistle's Postal Portal",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 242720,
+  "item": 257101,
+  "thumbnail": 7426128,
+  "scale": 1
+ },
+ {
+  "decor": 11724,
+  "name": "Gilnean Postbox",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 305385,
+  "item": 257695,
+  "thumbnail": 7417488,
+  "scale": 1
+ },
+ {
+  "decor": 11893,
+  "name": "Wolvar Postbag",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 200015,
+  "item": 258205,
+  "thumbnail": 7434081,
+  "scale": 1
+ },
+ {
+  "decor": 14598,
+  "name": "Ren'dorei Postal Repository",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 6861008,
+  "item": 262468,
+  "thumbnail": 7479484,
+  "scale": 1
+ },
+ {
+  "decor": 15741,
+  "name": "Thunder Totem Mailbox",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 1253823,
+  "item": 264477,
+  "thumbnail": 7509648,
+  "scale": 1
+ },
+ {
+  "decor": 28508,
+  "name": "Vulpera Postbox",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 2012204,
+  "item": 283297,
+  "thumbnail": 8174591,
+  "scale": 0.6000000238418579
+ },
+ {
+  "decor": 29117,
+  "name": "Amani Open Fire Grill",
+  "category": "Functional",
+  "kind": "Utility",
+  "model": 6125170,
+  "item": 284353,
+  "thumbnail": 8218935,
+  "scale": 1
+ },
+ {
+  "decor": 12245,
+  "name": "Paw Pal Bed and Blanket",
+  "category": "Functional",
+  "kind": "Pet Beds",
+  "model": 7410980,
+  "item": 259045,
+  "thumbnail": 7448875,
+  "scale": 1
+ },
+ {
+  "decor": 12246,
+  "name": "Paw Pal Bed",
+  "category": "Functional",
+  "kind": "Pet Beds",
+  "model": 7413969,
+  "item": 259046,
+  "thumbnail": 7448876,
+  "scale": 1
+ },
+ {
+  "decor": 25105,
+  "name": "Silvermoon Dragonhawk Incubator",
+  "category": "Functional",
+  "kind": "Pet Beds",
+  "model": 6323400,
+  "item": 277138,
+  "thumbnail": 7930681,
+  "scale": 1
+ },
+ {
+  "decor": 25101,
+  "name": "Westfall Pet Cage",
+  "category": "Functional",
+  "kind": "Pet Beds",
+  "model": 970227,
+  "item": 277142,
+  "thumbnail": 7930685,
+  "scale": 1
+ },
+ {
+  "decor": 25103,
+  "name": "Crude Pet Cage",
+  "category": "Functional",
+  "kind": "Pet Beds",
+  "model": 876116,
+  "item": 277149,
+  "thumbnail": 7930695,
+  "scale": 1
+ },
+ {
+  "decor": 25106,
+  "name": "Cozy Lightbloom Lilypad",
+  "category": "Functional",
+  "kind": "Pet Beds",
+  "model": 6080227,
+  "item": 277160,
+  "thumbnail": 7930701,
+  "scale": 1
+ },
+ {
+  "decor": 24888,
+  "name": "Tune-O-Tron 6000",
+  "category": "Functional",
+  "kind": "Misc Functional",
+  "model": 1066978,
+  "item": 275343,
+  "thumbnail": 7928355,
+  "scale": 1
+ },
+ {
+  "decor": 25546,
+  "name": "Pepe",
+  "category": "Functional",
+  "kind": "Misc Functional",
+  "model": 7959391,
+  "item": 276230,
+  "thumbnail": 7959956,
+  "scale": 1
  }
 ]
