@@ -8,6 +8,8 @@
 #include "ViewProj.hpp"
 
 #include "game/Io.hpp"
+#include "game/Pick.hpp"
+#include "game/World.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -21,6 +23,42 @@ namespace wxl_guildhouse
     namespace
     {
         namespace io = wxl::game::io;
+        namespace world = wxl::game::world;
+
+        constexpr float kReach = 15.0f;             // yards from the character
+        constexpr float kEye = 1.6f;                // the height his eyes look from
+        constexpr uint32_t kWalls = 0x01000120;     // terrain and map objects, never a model
+
+        // The character's position, false out of the world.
+        bool PlayerPosition(float out[3])
+        {
+            const unsigned long long guid = world::ActivePlayerGuid();
+            void* player = guid ? world::ResolveObject(guid, world::kTypeMaskPlayer) : nullptr;
+            if (!player) return false;
+            world::UnitPosition(player, out);
+            return true;
+        }
+
+        // In his room: near enough, and no wall of the hall between his eyes and the object (its
+        // middle, or its top).
+        bool InHisRoom(const float eye[3], const Target& t)
+        {
+            const float* m = t.matrix;
+            const float mid[3] = { (t.lo[0] + t.hi[0]) / 2, (t.lo[1] + t.hi[1]) / 2, (t.lo[2] + t.hi[2]) / 2 };
+            const float top[3] = { mid[0], mid[1], t.hi[2] * 0.9f };
+            for (const float* l : { mid, top })
+            {
+                const float w[3] = { l[0] * m[0] + l[1] * m[4] + l[2] * m[8] + m[12],
+                                     l[0] * m[1] + l[1] * m[5] + l[2] * m[9] + m[13],
+                                     l[0] * m[2] + l[1] * m[6] + l[2] * m[10] + m[14] };
+                const float dx = w[0] - eye[0], dy = w[1] - eye[1], dz = w[2] - eye[2];
+                if (dx * dx + dy * dy + dz * dz > kReach * kReach) continue;
+                world::WorldHit hit;
+                if (!world::TraceLine(eye, w, hit, kWalls) || hit.t > 0.97f)
+                    return true;
+            }
+            return false;
+        }
 
         const ImU32 kOutline = IM_COL32(40, 130, 255, 255);
         const ImU32 kHoverFill = IM_COL32(140, 210, 255, 90);
@@ -192,10 +230,15 @@ namespace wxl_guildhouse
             std::vector<uint8_t> front;          // per triangle
             float depth;
         };
+        float eye[3];
+        if (!PlayerPosition(eye)) return;
+        eye[2] += kEye;
+
         std::vector<Seen> seen;
         seen.reserve(targets_.size());
         for (const Target& t : targets_)
         {
+            if (!InHisRoom(eye, t)) continue;
             Seen s{ &t, {}, {}, 1e18f };
             bool behind = false;
             if (t.mesh)

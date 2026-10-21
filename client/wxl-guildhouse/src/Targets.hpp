@@ -1,4 +1,5 @@
-// The placed objects the member can take in hand: their silhouette outlined in blue while the
+// The placed objects the member can take in hand -- those within 15 yards of his character, in his
+// room (no wall of the hall between them) -- their silhouette outlined in blue while the
 // Customization mode is on, the faces of the one under the cursor filled in a lighter blue, and the
 // click that picks it. The interface hands them over (GuildHouse_AddTarget, from the server's list)
 // with their model; the model's geometry (its .m2 and first .skin) is read from the game's files once.
