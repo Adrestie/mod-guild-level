@@ -370,7 +370,7 @@ namespace wxl_guildhouse
 
     bool Editor::DrawGizmo()
     {
-        if (!Ready()) return false;
+        if (!Ready() || !gizmo_) return false;
         const ImGuiIO& io = ImGui::GetIO();
         ImGuizmo::SetOrthographic(false);
         ImGuizmo::SetDrawlist(ImGui::GetBackgroundDrawList());

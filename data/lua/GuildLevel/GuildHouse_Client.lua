@@ -299,6 +299,9 @@ end
 
 function UI:Refresh()
     Targets()
+    if Has("GuildHouse_ShowGizmo") then
+        GuildHouse_ShowGizmo(not (S.edit and S.edit.carry))
+    end
     local list = Kinds()
     for cat, t in pairs(Panel.tabs) do
         if cat == S.category then t:LockHighlight() else t:UnlockHighlight() end

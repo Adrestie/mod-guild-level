@@ -39,6 +39,9 @@ namespace wxl_guildhouse
         void Set(const Transform& t);
         void SetMode(GizmoMode mode) { mode_ = mode; }
         GizmoMode Mode() const { return mode_; }
+        /// No gizmo while the object follows the cursor: it would be under the cursor, and take the
+        /// click that sets the object down.
+        void ShowGizmo(bool shown) { gizmo_ = shown; }
 
         /// Out of the way of a ray for a moment (Script.cpp's traces), and back.
         void Stash();
@@ -62,6 +65,7 @@ namespace wxl_guildhouse
         unsigned frames_ = 0;
         float matrix_[16] = {};          // the wanted world matrix (row vectors, translation last)
         GizmoMode mode_ = GizmoMode::Move;
+        bool gizmo_ = true;
     };
 
     /// Row-vector world matrix of a transform, and back.

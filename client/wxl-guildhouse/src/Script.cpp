@@ -200,6 +200,13 @@ namespace wxl_guildhouse
             return 0;
         }
 
+        // GuildHouse_ShowGizmo(shown)
+        int ShowGizmo(void* L)
+        {
+            Editor::Instance().ShowGizmo(script::ToBoolean(L, 1));
+            return 0;
+        }
+
         // GuildHouse_IsGizmoBusy() -> the cursor is over the gizmo or drags it
         int IsGizmoBusy(void* L)
         {
@@ -306,6 +313,7 @@ namespace wxl_guildhouse
             { "GuildHouse_SetTransform", &SetTransform },
             { "GuildHouse_SetPosition", &SetPosition },
             { "GuildHouse_SetMode", &SetMode },
+            { "GuildHouse_ShowGizmo", &ShowGizmo },
             { "GuildHouse_IsGizmoBusy", &IsGizmoBusy },
             { "GuildHouse_CursorWorld", &CursorWorldFn },
             { "GuildHouse_GroundZ", &GroundZ },
