@@ -286,7 +286,7 @@ local function Targets()
         local d = GuildHouseDecor[p.decor]
         if d and p.map == s.map and not (S.edit and S.edit.id == p.id) then
             GuildHouse_AddTarget(p.id, p.x, p.y, p.z, p.qx, p.qy, p.qz, p.qw, p.scale,
-                d[6], d[7], d[8], d[9], d[10], d[11])
+                d[6], d[7], d[8], d[9], d[10], d[11], d[3])
         end
     end
     -- shown in the mode, while nothing is in hand

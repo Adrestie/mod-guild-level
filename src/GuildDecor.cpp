@@ -371,6 +371,8 @@ void GuildDecorMgr::DeleteGuild(uint32 guildId)
     }
     CharacterDatabase.Execute("DELETE FROM `mod_guild_level_decor_stock` WHERE `guildid` = {}", guildId);
     CharacterDatabase.Execute("DELETE FROM `mod_guild_level_decor_placed` WHERE `guildid` = {}", guildId);
+    // what still stands in its house goes at once
+    sGuildHouseMgr->OnDecorChanged(guildId);
 }
 
 std::vector<GuildDecorShown> GuildDecorMgr::Snapshot(uint32 guildId, uint32 mapId)

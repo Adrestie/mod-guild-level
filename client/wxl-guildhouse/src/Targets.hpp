@@ -1,23 +1,36 @@
-// The placed objects the member can take in hand: their outline (blue) while the Customization mode
-// is on, a lighter overlay on the one under the cursor, and the click that picks it. The interface
-// hands them over (GuildHouse_SetTargets, from the server's list) with their model's bounds; the
-// outline is their box as the screen sees it.
+// The placed objects the member can take in hand: their silhouette outlined in blue while the
+// Customization mode is on, the faces of the one under the cursor filled in a lighter blue, and the
+// click that picks it. The interface hands them over (GuildHouse_AddTarget, from the server's list)
+// with their model; the model's geometry (its .m2 and first .skin) is read from the game's files once.
 // Copyright (C) 2026 mod-guild-level
 // GPL-3.0-or-later.
 
 #pragma once
 
 #include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
 #include <vector>
 
 namespace wxl_guildhouse
 {
+    /// A model's geometry: its vertices, its triangles, and each edge's two triangles (-1: none).
+    struct Mesh
+    {
+        std::vector<float> pos;          // x, y, z per vertex
+        std::vector<uint32_t> tris;      // three vertex indices per triangle
+        struct Edge { uint32_t a, b; int32_t f0, f1; };
+        std::vector<Edge> edges;
+    };
+
     struct Target
     {
         uint32_t id = 0;
         float matrix[16] = {};           // world matrix (row vectors)
-        float lo[3] = {};                // the model's bounds
+        float lo[3] = {};                // the model's bounds: its outline when its geometry is missing
         float hi[3] = {};
+        const Mesh* mesh = nullptr;
     };
 
     class Targets
@@ -26,7 +39,8 @@ namespace wxl_guildhouse
         static Targets& Instance();
 
         void Clear() { targets_.clear(); hovered_ = 0; }
-        void Add(const Target& t) { targets_.push_back(t); }
+        /// model: the game path of its .m2 (its geometry is read once, then kept).
+        void Add(Target t, const std::string& model);
         void SetShown(bool shown) { shown_ = shown; if (!shown) hovered_ = 0; }
         bool Shown() const { return shown_ && !targets_.empty(); }
 
@@ -40,7 +54,10 @@ namespace wxl_guildhouse
 
     private:
         Targets() = default;
+        const Mesh* MeshOf(const std::string& model);
+
         std::vector<Target> targets_;
+        std::map<std::string, std::unique_ptr<Mesh>> meshes_;   // null: could not be read
         bool shown_ = false;
         uint32_t hovered_ = 0;
         uint32_t picked_ = 0;

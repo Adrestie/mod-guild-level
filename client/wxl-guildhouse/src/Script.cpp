@@ -21,6 +21,7 @@
 
 #include <windows.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <string>
@@ -280,7 +281,7 @@ namespace wxl_guildhouse
             return 0;
         }
 
-        // GuildHouse_AddTarget(id, x, y, z, qx, qy, qz, qw, scale, minX, minY, minZ, maxX, maxY, maxZ)
+        // GuildHouse_AddTarget(id, x, y, z, qx, qy, qz, qw, scale, minX, minY, minZ, maxX, maxY, maxZ, model)
         int AddTarget(void* L)
         {
             Target t;
@@ -291,7 +292,10 @@ namespace wxl_guildhouse
                 t.lo[k] = Num(L, 10 + k, -0.5f);
                 t.hi[k] = Num(L, 13 + k, 0.5f);
             }
-            if (t.id) Targets::Instance().Add(t);
+            const char* model = script::IsString(L, 16) ? script::ToString(L, 16) : "";
+            std::string path = model;
+            std::replace(path.begin(), path.end(), '/', '\\');
+            if (t.id) Targets::Instance().Add(t, path);
             return 0;
         }
 
