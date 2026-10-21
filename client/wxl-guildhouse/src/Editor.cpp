@@ -46,6 +46,8 @@ namespace wxl_guildhouse
         constexpr size_t kDoodadVisibilityScale = 0x8C;
 
         constexpr unsigned kLoadFrames = 900;    // frames a model has to load in
+        constexpr float kScaleMin = 0.1f;        // the sizes an object may take
+        constexpr float kScaleMax = 2.0f;
 
         uint32_t g_uniqueId = 0x5A000000u;        // synthetic unique ids, session-local
 
@@ -221,8 +223,22 @@ namespace wxl_guildhouse
             WLOG_WARN("edit: the game has no %s", path.c_str());
             return false;
         }
+        Transform clamped = t;
+        clamped.scale = (std::max)(kScaleMin, (std::min)(t.scale, kScaleMax));
+        Compose(clamped, matrix_);
+        path_ = path;
+        if (!Spawn())
+        {
+            path_.clear();
+            return false;
+        }
+        WLOG_INFO("edit: %s at (%.2f %.2f %.2f) scale %.2f", path.c_str(), t.pos[0], t.pos[1], t.pos[2], clamped.scale);
+        return true;
+    }
 
-        float at[3] = { t.pos[0], t.pos[1], t.pos[2] };
+    bool Editor::Spawn()
+    {
+        float at[3] = { matrix_[12], matrix_[13], matrix_[14] };
         void* chunk = doodad::ChunkAt(at);
         if (!CanAttachToChunk(chunk))
         {
@@ -242,23 +258,22 @@ namespace wxl_guildhouse
         *reinterpret_cast<uint16_t*>(mddf + kMddfScale) = 1024;
         *reinterpret_cast<uint16_t*>(mddf + kMddfFlags) = 1;
 
-        void* spawned = s_spawn(path.c_str(), mddf, origin);
+        void* spawned = s_spawn(path_.c_str(), mddf, origin);
         if (!spawned)
         {
-            WLOG_WARN("edit: the client could not make %s", path.c_str());
+            WLOG_WARN("edit: the client could not make %s", path_.c_str());
             return false;
         }
         if (!AttachToChunk(spawned, chunk))
         {
             s_purge(spawned);      // no reference yet: its purge is safe
-            WLOG_WARN("edit: chunk attachment failed for %s", path.c_str());
+            WLOG_WARN("edit: chunk attachment failed for %s", path_.c_str());
             return false;
         }
         object_ = spawned;
+        chunk_ = chunk;
         pending_ = true;
         frames_ = 0;
-        Compose(t, matrix_);
-        WLOG_INFO("edit: %s at (%.2f %.2f %.2f) scale %.2f", path.c_str(), at[0], at[1], at[2], t.scale);
         return true;
     }
 
@@ -280,7 +295,19 @@ namespace wxl_guildhouse
         if (!object_) return;
         Hide();
         object_ = nullptr;
+        chunk_ = nullptr;
         pending_ = false;
+        path_.clear();
+    }
+
+    void Editor::Stash()
+    {
+        if (Ready()) Hide();
+    }
+
+    void Editor::Unstash()
+    {
+        if (Ready()) doodad::SetWorldMatrix(object_, matrix_);
     }
 
     Transform Editor::Current() const
@@ -290,7 +317,9 @@ namespace wxl_guildhouse
 
     void Editor::Set(const Transform& t)
     {
-        Compose(t, matrix_);
+        Transform clamped = t;
+        clamped.scale = (std::max)(kScaleMin, (std::min)(t.scale, kScaleMax));
+        Compose(clamped, matrix_);
         if (Ready()) doodad::SetWorldMatrix(object_, matrix_);
     }
 
@@ -301,7 +330,9 @@ namespace wxl_guildhouse
         {
             // its chunk unloaded under it (the player left the map)
             object_ = nullptr;
+            chunk_ = nullptr;
             pending_ = false;
+            path_.clear();
             return;
         }
         if (pending_)
@@ -319,6 +350,21 @@ namespace wxl_guildhouse
             }
             return;
         }
+        // The client draws a chunk's doodads with the chunk: an object moved over another chunk is
+        // made again there, or it would vanish whenever its first chunk is out of sight.
+        float at[3] = { matrix_[12], matrix_[13], matrix_[14] };
+        void* chunk = doodad::ChunkAt(at);
+        if (chunk && chunk != chunk_ && CanAttachToChunk(chunk))
+        {
+            Hide();
+            object_ = nullptr;
+            if (!Spawn())
+            {
+                chunk_ = nullptr;
+                path_.clear();
+            }
+            return;
+        }
         doodad::SetWorldMatrix(object_, matrix_);
     }
 
@@ -331,17 +377,22 @@ namespace wxl_guildhouse
         ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
         const ImGuizmo::OPERATION op = mode_ == GizmoMode::Rotate ? ImGuizmo::ROTATE
                                      : mode_ == GizmoMode::Scale ? ImGuizmo::SCALEU : ImGuizmo::TRANSLATE;
-        // moved along the world's axes, turned and sized around its own
-        const ImGuizmo::MODE space = mode_ == GizmoMode::Move ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
+        // moved and turned along the world's axes (as wxl-housing does), sized around its own
+        const ImGuizmo::MODE space = mode_ == GizmoMode::Scale ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
         float m[16];
         std::memcpy(m, matrix_, sizeof m);
         ImGuizmo::Manipulate(camera::GetView(), camera::GetProjection(), op, space, m);
         if (ImGuizmo::IsUsing())
         {
-            // the scale stays uniform and sane, whatever the handle did
-            Transform t = Decompose(m);
-            t.scale = (std::max)(0.05f, (std::min)(t.scale, 20.0f));
-            Compose(t, matrix_);
+            if (mode_ == GizmoMode::Scale)
+            {
+                // uniform, and within its bounds
+                Transform t = Decompose(m);
+                t.scale = (std::max)(kScaleMin, (std::min)(t.scale, kScaleMax));
+                Compose(t, matrix_);
+            }
+            else
+                std::memcpy(matrix_, m, sizeof m);
             doodad::SetWorldMatrix(object_, matrix_);
         }
         return ImGuizmo::IsOver() || ImGuizmo::IsUsing();

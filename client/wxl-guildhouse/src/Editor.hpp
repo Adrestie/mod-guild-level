@@ -40,6 +40,10 @@ namespace wxl_guildhouse
         void SetMode(GizmoMode mode) { mode_ = mode; }
         GizmoMode Mode() const { return mode_; }
 
+        /// Out of the way of a ray for a moment (Script.cpp's traces), and back.
+        void Stash();
+        void Unstash();
+
         /// Per frame, in EndScene: promotes a loaded model, keeps it on its transform.
         void Tick();
         /// Per frame, inside the overlay's ImGui frame: the gizmo. Returns true while the cursor is
@@ -49,8 +53,11 @@ namespace wxl_guildhouse
     private:
         Editor() = default;
         void Hide();
+        bool Spawn();                    // the model at matrix_, held by the chunk under it
 
+        std::string path_;
         void* object_ = nullptr;
+        void* chunk_ = nullptr;
         bool pending_ = false;
         unsigned frames_ = 0;
         float matrix_[16] = {};          // the wanted world matrix (row vectors, translation last)

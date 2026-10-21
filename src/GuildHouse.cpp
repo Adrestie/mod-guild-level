@@ -538,13 +538,24 @@ void GuildHouseMgr::SyncDecor(Map* map, Slot& slot, uint8 index)
             continue;
         auto const& q = w.rot;
         float const facing = std::atan2(2.0f * (q[3] * q[2] + q[0] * q[1]), 1.0f - 2.0f * (q[1] * q[1] + q[2] * q[2]));
-        if (GameObject* go = map->SummonGameObject(w.entry, w.pos[0], w.pos[1], w.pos[2], facing,
-                q[0], q[1], q[2], q[3], 0))
+        // Made here rather than summoned: its phase and its size have to be in place before the
+        // clients first see it (the client takes an object's size from its creation only).
+        GameObject* go = new GameObject();
+        if (!go->Create(map->GenerateLowGuid<HighGuid::GameObject>(), w.entry, map, mask, w.pos[0], w.pos[1],
+                w.pos[2], facing, G3D::Quat(q[0], q[1], q[2], q[3]), 100, GO_STATE_READY))
         {
-            go->SetPhaseMask(mask, true);
-            go->SetObjectScale(w.scale);
-            slot.decor[w.id] = { go->GetGUID(), w.version };
+            delete go;
+            continue;
         }
+        go->SetObjectScale(w.scale);
+        go->SetRespawnTime(0);
+        go->SetSpawnedByDefault(false);
+        if (!map->AddToMap(go))
+        {
+            delete go;
+            continue;
+        }
+        slot.decor[w.id] = { go->GetGUID(), w.version };
     }
 }
 

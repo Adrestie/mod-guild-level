@@ -11,6 +11,7 @@
 #include "ExtensionApi.hpp"
 #include "FreeBuildCamera.hpp"
 #include "Overlay.hpp"
+#include "Targets.hpp"
 
 #include "game/Camera.hpp"
 #include "game/Pick.hpp"
@@ -32,6 +33,23 @@ namespace wxl_guildhouse
         namespace world = wxl::game::world;
 
         constexpr float kReach = 250.0f;          // yards a cursor ray looks into the world
+        constexpr float kGroundDepth = 60.0f;     // yards a ray looks down for the floor
+        // terrain and map objects (the client's cursor pick, less its 0x4): never a model
+        constexpr uint32_t kSurfaces = 0x01000120;
+
+        // A ray against the hall, the object in hand out of its way.
+        bool Trace(const float from[3], const float to[3], float out[3])
+        {
+            Editor::Instance().Stash();
+            world::WorldHit hit;
+            const bool found = world::TraceLine(from, to, hit, kSurfaces) != 0;
+            Editor::Instance().Unstash();
+            if (!found) return false;
+            out[0] = hit.pos.x;
+            out[1] = hit.pos.y;
+            out[2] = hit.pos.z;
+            return true;
+        }
 
         script::ValidateCallbackFn g_validate = nullptr;
         script::InterfaceLoadFn g_interfaceLoad = nullptr;
@@ -118,12 +136,7 @@ namespace wxl_guildhouse
             if (!(len > 1e-6f)) return false;
             const float to[3] = { nearPoint[0] + dir[0] / len * kReach, nearPoint[1] + dir[1] / len * kReach,
                                   nearPoint[2] + dir[2] / len * kReach };
-            world::WorldHit hit;
-            if (!world::TraceLine(nearPoint, to, hit)) return false;
-            out[0] = hit.pos.x;
-            out[1] = hit.pos.y;
-            out[2] = hit.pos.z;
-            return true;
+            return Trace(nearPoint, to, out);
         }
 
         // --- the functions -------------------------------------------------------------------
@@ -200,12 +213,14 @@ namespace wxl_guildhouse
             return 3;
         }
 
-        // GuildHouse_GroundZ(x, y, z) -> the height of the surface below (or just above), or nothing
+        // GuildHouse_GroundZ(x, y, z) -> the height of the first surface below the point, or nothing
         int GroundZ(void* L)
         {
-            float z;
-            if (!world::GroundZ(Num(L, 1), Num(L, 2), Num(L, 3), z)) return 0;
-            script::PushNumber(L, z);
+            const float from[3] = { Num(L, 1), Num(L, 2), Num(L, 3) };
+            const float to[3] = { from[0], from[1], from[2] - kGroundDepth };
+            float hit[3];
+            if (!Trace(from, to, hit)) return 0;
+            script::PushNumber(L, hit[2]);
             return 1;
         }
 
@@ -240,6 +255,44 @@ namespace wxl_guildhouse
             return 1;
         }
 
+        // GuildHouse_ShowTargets(shown): the placed objects' outlines, and their picking
+        int ShowTargets(void* L)
+        {
+            Targets::Instance().SetShown(script::ToBoolean(L, 1));
+            return 0;
+        }
+
+        // GuildHouse_ClearTargets()
+        int ClearTargets(void*)
+        {
+            Targets::Instance().Clear();
+            return 0;
+        }
+
+        // GuildHouse_AddTarget(id, x, y, z, qx, qy, qz, qw, scale, minX, minY, minZ, maxX, maxY, maxZ)
+        int AddTarget(void* L)
+        {
+            Target t;
+            t.id = static_cast<uint32_t>(Num(L, 1));
+            Compose(ReadTransform(L, 2), t.matrix);
+            for (int k = 0; k < 3; ++k)
+            {
+                t.lo[k] = Num(L, 10 + k, -0.5f);
+                t.hi[k] = Num(L, 13 + k, 0.5f);
+            }
+            if (t.id) Targets::Instance().Add(t);
+            return 0;
+        }
+
+        // GuildHouse_TakePicked() -> the id of the placed object clicked since the last call, or nothing
+        int TakePicked(void* L)
+        {
+            const uint32_t id = Targets::Instance().TakePicked();
+            if (!id) return 0;
+            script::PushNumber(L, id);
+            return 1;
+        }
+
         struct Entry { const char* name; script::Function fn; };
         const Entry kFunctions[] = {
             { "GuildHouse_BeginEdit", &BeginEdit },
@@ -254,6 +307,10 @@ namespace wxl_guildhouse
             { "GuildHouse_GroundZ", &GroundZ },
             { "GuildHouse_WorldToScreen", &WorldToScreen },
             { "GuildHouse_FreeCamera", &FreeCamera },
+            { "GuildHouse_ShowTargets", &ShowTargets },
+            { "GuildHouse_ClearTargets", &ClearTargets },
+            { "GuildHouse_AddTarget", &AddTarget },
+            { "GuildHouse_TakePicked", &TakePicked },
         };
 
         bool Ours(uintptr_t fn)

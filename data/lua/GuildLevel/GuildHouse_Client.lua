@@ -18,8 +18,8 @@
 --[[----------------------------------------------------------------------------
     The Customization mode of the guild house, client side.
 
-    In the house, a member allowed to decorate enters the mode (the button at
-    the top of the screen, or /gdeco): the usual interface gives way to the
+    In the house, a member allowed to decorate enters the mode with /gdeco
+    (nothing shows it on screen): the usual interface gives way to the
     guild's objects (left) and the edit bar (bottom). An object of the stock is
     picked, follows the cursor on the hall's floors and walls (the mouse wheel
     turns it), and is set down with a click; its gizmo then moves, turns and
@@ -44,25 +44,25 @@ local floor, min, max, sin, cos = math.floor, math.min, math.max, math.sin, math
 
 local L = {
     enUS = {
-        button = "Customization", title = "Guild objects", validate = "Place", cancel = "Cancel",
+        title = "Guild objects", validate = "Place", cancel = "Cancel", store = "To the stock",
         move = "Move (1)", rotate = "Turn (2)", scale = "Size (3)", follow = "Follow the mouse",
         ground = "Set on the floor", camera = "Free camera", exit = "Leave (Esc)",
         noext = "The Customization mode needs WarcraftXL and its guild house editor (Extensions\\wxl-guildhouse).",
         cannot = "You cannot decorate the house: Paragon level %d, guild rank %d or above, in the house.",
         aim = "Point at the hall's floor to place the object.",
         carry = "Left click: set it down. Wheel: turn it. Right click: give up.",
-        hint = "Left click: take it. Right click: back to the stock.",
+        hint = "Click an outlined object to take it in hand.",
         categories = { Furnishings = "Furniture", Lighting = "Lights", Accents = "Decoration", Nature = "Plants" },
     },
     frFR = {
-        button = "Personnalisation", title = "Objets de guilde", validate = "Valider", cancel = "Annuler",
+        title = "Objets de guilde", validate = "Valider", cancel = "Annuler", store = "Ranger",
         move = "Déplacer (1)", rotate = "Pivoter (2)", scale = "Taille (3)", follow = "Suivre la souris",
         ground = "Poser au sol", camera = "Caméra libre", exit = "Quitter (Échap)",
         noext = "Le mode Personnalisation demande WarcraftXL et son éditeur de maison de guilde (Extensions\\wxl-guildhouse).",
         cannot = "Vous ne pouvez pas décorer la maison : Parangon %d, rang de guilde %d ou mieux, dans la maison.",
         aim = "Visez le sol du hall pour poser l'objet.",
         carry = "Clic gauche : poser. Molette : tourner. Clic droit : abandonner.",
-        hint = "Clic gauche : le prendre. Clic droit : le rendre au stock.",
+        hint = "Cliquez sur un objet entouré pour le prendre en main.",
         categories = { Furnishings = "Mobilier", Lighting = "Lumières", Accents = "Décoration", Nature = "Plantes" },
     },
 }
@@ -210,7 +210,7 @@ end
 -- The edit bar, at the bottom.
 local Bar = CreateFrame("Frame", nil, UI)
 Bar:SetHeight(76)
-Bar:SetWidth(820)
+Bar:SetWidth(920)
 Bar:SetPoint("BOTTOM", UI, "BOTTOM", 0, 30)
 Bar:EnableMouse(true)
 Backdrop(Bar)
@@ -231,6 +231,7 @@ local barButtons = {
     { "follow", L.follow, function() UI:Carry() end },
     { "ground", L.ground, function() UI:Ground() end },
     { "camera", L.camera, function() if Has("GuildHouse_FreeCamera") then GuildHouse_FreeCamera() end end },
+    { "store", L.store, function() UI:Store() end },
     { "validate", L.validate, function() UI:Validate() end },
     { "cancel", L.cancel, function() UI:Cancel() end },
 }
@@ -275,38 +276,21 @@ Panel:SetFrameLevel(Catcher:GetFrameLevel() + 2)
 Bar:SetFrameLevel(Catcher:GetFrameLevel() + 2)
 Exit:SetFrameLevel(Catcher:GetFrameLevel() + 2)
 
--- The markers of the placed objects.
-local markers = {}
-local function Marker(i)
-    local m = markers[i]
-    if m then return m end
-    m = CreateFrame("Button", nil, UI)
-    m:SetWidth(20)
-    m:SetHeight(20)
-    m:SetFrameLevel(Catcher:GetFrameLevel() + 1)
-    m:SetNormalTexture("Interface\\Minimap\\ObjectIcons")
-    m:GetNormalTexture():SetTexCoord(0.375, 0.5, 0.25, 0.375)     -- the yellow dot
-    m:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight", "ADD")
-    m:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    m:SetScript("OnClick", function(self, button)
-        if not self.placed then return end
-        if button == "RightButton" then
-            AIO.Handle("GuildHouse", "Remove", self.placed.id)
-        else
-            UI:Edit(self.placed)
+-- The placed objects the member can take in hand: the extension outlines them
+-- (blue, lighter under the cursor) and tells which one was clicked.
+local function Targets()
+    if not Has("GuildHouse_ClearTargets") then return end
+    GuildHouse_ClearTargets()
+    local s = S.state
+    for _, p in ipairs(s and s.placed or {}) do
+        local d = GuildHouseDecor[p.decor]
+        if d and p.map == s.map and not (S.edit and S.edit.id == p.id) then
+            GuildHouse_AddTarget(p.id, p.x, p.y, p.z, p.qx, p.qy, p.qz, p.qw, p.scale,
+                d[6], d[7], d[8], d[9], d[10], d[11])
         end
-    end)
-    m:SetScript("OnEnter", function(self)
-        if not self.placed then return end
-        local d = GuildHouseDecor[self.placed.decor]
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:AddLine(d and d[4] or "?")
-        GameTooltip:AddLine(L.hint, 0.7, 0.7, 0.7, true)
-        GameTooltip:Show()
-    end)
-    m:SetScript("OnLeave", function() GameTooltip:Hide() end)
-    markers[i] = m
-    return m
+    end
+    -- shown in the mode, while nothing is in hand
+    GuildHouse_ShowTargets(S.active and not S.edit)
 end
 
 ------------------------------------------------------------------------------
@@ -314,6 +298,7 @@ end
 ------------------------------------------------------------------------------
 
 function UI:Refresh()
+    Targets()
     local list = Kinds()
     for cat, t in pairs(Panel.tabs) do
         if cat == S.category then t:LockHighlight() else t:UnlockHighlight() end
@@ -391,6 +376,7 @@ function UI:Leave()
     ClearOverrideBindings(UI)
     if Has("GuildHouse_FreeCamera") then GuildHouse_FreeCamera(false) end
     S.active = false
+    if Has("GuildHouse_ShowTargets") then GuildHouse_ShowTargets(false) end
     UI:Hide()
     UIParent:Show()
 end
@@ -447,6 +433,19 @@ function UI:Validate()
     UI:Refresh()
 end
 
+-- The object in hand goes back to the stock (a new one is only given up).
+function UI:Store()
+    if not S.edit then return end
+    local id = S.edit.id
+    if Has("GuildHouse_EndEdit") then GuildHouse_EndEdit() end
+    S.edit = nil
+    Catcher:Hide()
+    if id ~= 0 then
+        AIO.Handle("GuildHouse", "Remove", id)
+    end
+    UI:Refresh()
+end
+
 function UI:Cancel()
     if not S.edit then return end
     if S.edit.id ~= 0 then
@@ -491,25 +490,15 @@ UI:SetScript("OnUpdate", function()
         end
     end
 
-    -- the markers, where the placed objects stand on the screen
-    local w, h = UI:GetWidth(), UI:GetHeight()
-    local n = 0
-    for _, p in ipairs(S.state and S.state.placed or {}) do
-        if p.map == S.state.map and not (e and e.id == p.id) then
-            local fx, fy = GuildHouse_WorldToScreen(p.x, p.y, p.z + 0.3)
-            if fx and fx > 0 and fx < 1 and fy > 0 and fy < 1 then
-                n = n + 1
-                local m = Marker(n)
-                m.placed = p
-                m:ClearAllPoints()
-                m:SetPoint("CENTER", UI, "BOTTOMLEFT", fx * w, fy * h)
-                m:Show()
+    -- a placed object clicked: taken in hand
+    local picked = GuildHouse_TakePicked()
+    if picked and not S.edit then
+        for _, p in ipairs(S.state and S.state.placed or {}) do
+            if p.id == picked then
+                UI:Edit(p)
+                break
             end
         end
-    end
-    for i = n + 1, #markers do
-        markers[i]:Hide()
-        markers[i].placed = nil
     end
 end)
 
@@ -517,17 +506,8 @@ end)
 -- The way in
 ------------------------------------------------------------------------------
 
-local Open = CreateFrame("Button", "GuildHouseOpenButton", UIParent, "UIPanelButtonTemplate")
-Open:SetWidth(150)
-Open:SetHeight(24)
-Open:SetPoint("TOP", UIParent, "TOP", 0, -8)
-Open:SetText(L.button)
-Open:Hide()
-Open:SetScript("OnClick", function() UI:Enter() end)
-
 local function Shown(state)
     S.state = state
-    if state.inHouse and state.can then Open:Show() else Open:Hide() end
     if S.active and not state.inHouse then
         UI:Leave()
     end
@@ -549,9 +529,27 @@ local listener = CreateFrame("Frame")
 listener:RegisterEvent("CHAT_MSG_ADDON")
 listener:RegisterEvent("PLAYER_ENTERING_WORLD")
 listener:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+-- After a loading screen the server may not have the player on his new map
+-- yet, nor AIO its channel: asked again a little later.
+local again = {}
 listener:SetScript("OnEvent", function(_, event, prefix)
     if event == "CHAT_MSG_ADDON" and prefix ~= "GuildHouse" then return end
     AIO.Handle("GuildHouse", "Refresh")
+    if event ~= "CHAT_MSG_ADDON" then
+        again = { 2, 6 }
+    end
+end)
+local waited = 0
+listener:SetScript("OnUpdate", function(_, elapsed)
+    if not again[1] then
+        waited = 0
+        return
+    end
+    waited = waited + elapsed
+    if waited >= again[1] then
+        table.remove(again, 1)
+        AIO.Handle("GuildHouse", "Refresh")
+    end
 end)
 
 SLASH_GUILDHOUSEDECO1 = "/gdeco"

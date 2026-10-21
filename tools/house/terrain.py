@@ -17,6 +17,7 @@ TILE = 1600.0 / 3.0                 # yards per ADT
 CHUNK = TILE / 16.0
 HALF = 32 * TILE                    # 17066.66: the placement space's origin, in world yards
 DEPTH = 40.0                        # yards under the hall's lowest point
+ROOF = 30.0                         # yards above its highest, where the chunks' boxes reach
 TEMPLATE = 'World\\Maps\\Azeroth\\Azeroth_32_48.adt'     # the game's tile the hall's are made from
 
 # area: the hall's AreaTable row, written in the chunks
@@ -40,13 +41,12 @@ def read_chunks(data):
         i += 8 + size
 
 
-def hall_bbox(wdt):
-    """The hall's world box from the WDT's placement: (x0, y0, z0, x1, y1, z1)."""
-    for tag, body in read_chunks(wdt):
-        if tag == b'MODF':
-            y0, z0, x0, y1, z1, x1 = struct.unpack_from('<6f', body, 32)
-            return x0, y0, z0, x1, y1, z1
-    raise SystemExit('the WDT places no building')
+def hall_bbox(wmo_name):
+    """The hall's world box (x0, y0, z0, x1, y1, z1): its WMO's own (MOHD), the hall standing at the
+    world's origin, unturned."""
+    data = open(os.path.join(ROOT, 'data', 'art', *wmo_name.split(chr(92))), 'rb').read()
+    i = data.find(b'DHOM')
+    return struct.unpack_from('<6f', data, i + 8 + 36)
 
 
 def tiles_of(bbox):
@@ -83,7 +83,7 @@ def template_chunks(data):
 OFS = {'MCVT': 5, 'MCNR': 6, 'MCLY': 7, 'MCRF': 8, 'MCAL': 9, 'MCSH': 11}
 
 
-def mcnk(src, ix, iy, tx, ty, height, area):
+def mcnk(src, ix, iy, tx, ty, height, top, area):
     """One chunk of the tile from the template's: flat at height, no doodad, the hall referenced
     (MCRF), no liquid; its layers, alpha and shadow maps as the game's."""
     head = bytearray(src[8:136])
@@ -95,7 +95,10 @@ def mcnk(src, ix, iy, tx, ty, height, area):
             continue
         size = struct.unpack_from('<I', src, o + 4)[0]
         subs[name] = src[o:o + 8 + size]
-    subs['MCVT'] = chunk(b'MCVT', struct.pack('<145f', *([0.0] * 145)))
+    # Every square a hole (nothing drawn, nothing to stand on), and the chunk's box from under the
+    # hall to above its roof: the client draws a chunk's doodads only while the chunk's box is in
+    # sight, and the editor's preview stands anywhere in that height.
+    subs['MCVT'] = chunk(b'MCVT', struct.pack('<145f', 0.0, *([top - height] * 144)))
     # the normals keep their 13 bytes of padding after the chunk, outside its size, as the game's
     subs['MCNR'] = chunk(b'MCNR', bytes([0, 127, 0]) * 145) + bytes(13)
     subs['MCRF'] = chunk(b'MCRF', struct.pack('<I', 0))
@@ -114,6 +117,7 @@ def mcnk(src, ix, iy, tx, ty, height, area):
     f[13] = area
     f[14] = 1                                       # the hall
     struct.pack_into('<15I', head, 0, *f)
+    struct.pack_into('<HH', head, 60, 0xFFFF, 0)    # holes: all 16 squares
     struct.pack_into('<2I', head, 96, 0, 0)         # liquid
     struct.pack_into('<2I', head, 88, pos - 8, 0)   # no sound emitter: the chunk's size, as the game's
     wx = HALF - ty * TILE - iy * CHUNK
@@ -126,6 +130,7 @@ def mcnk(src, ix, iy, tx, ty, height, area):
 def adt(tx, ty, wmo_name, bbox, src, area):
     x0, y0, z0, x1, y1, z1 = bbox
     height = z0 - DEPTH
+    top = z1 + ROOF
     mver = chunk(b'MVER', struct.pack('<I', 18))
     mtex = chunk(b'MTEX', next(b for t, b in read_chunks(src) if t == b'MTEX'))
     mmdx = chunk(b'MMDX', b'')
@@ -155,7 +160,7 @@ def adt(tx, ty, wmo_name, bbox, src, area):
     cnks, entries = [], []
     for k in range(256):
         iy, ix = divmod(k, 16)
-        c = mcnk(sources[k], ix, iy, tx, ty, height, area)
+        c = mcnk(sources[k], ix, iy, tx, ty, height, top, area)
         entries.append(struct.pack('<4I', pos, len(c), 0, 0))
         cnks.append(c)
         pos += len(c)
@@ -178,10 +183,7 @@ def main(side):
     s = SIDES[side]
     folder = os.path.join(ROOT, 'data', 'art', 'World', 'Maps', s['dir'])
     wdt_path = os.path.join(folder, s['dir'] + '.wdt')
-    old = open(wdt_path, 'rb').read()
-    bbox = hall_bbox(old) if any(t == b'MODF' for t, _ in read_chunks(old)) else None
-    if bbox is None:
-        raise SystemExit('the WDT already lists tiles: built from the hall\'s placement, run on the original WDT')
+    bbox = hall_bbox(s['wmo'])
     tiles = tiles_of(bbox)
     src = template()
     for tx, ty in tiles:

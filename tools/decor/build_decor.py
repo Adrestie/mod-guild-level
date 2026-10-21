@@ -138,14 +138,16 @@ def main(export_dir):
 
     lines = [
         '-- The Customization objects (tools/decor/build_decor.py, from tools/decor/catalog.json):',
-        '-- HouseDecor ID = { category, kind, model, English name, scale }.',
+        '-- HouseDecor ID = { category, kind, model, English name, scale, the model\'s bounds (min x, y, z,',
+        '-- max x, y, z) }.',
         'if AIO.AddAddon() then return end',
         '',
         'GuildHouseDecor = {',
     ]
-    for e, path in rows:
-        lines.append('    [%d] = { %s, %s, %s, %s, %g },' % (e['decor'], lua_string(e['category']), lua_string(e['kind']),
-                                                           lua_string(path), lua_string(e['name']), e.get('scale', 1)))
+    for (e, path), (_, _, _, _, box) in zip(rows, sql_rows):
+        lines.append('    [%d] = { %s, %s, %s, %s, %g, %s },' % (
+            e['decor'], lua_string(e['category']), lua_string(e['kind']), lua_string(path), lua_string(e['name']),
+            e.get('scale', 1), ', '.join('%.3f' % v for v in box)))
     lines.append('}')
     open(LUA, 'w', encoding='utf-8', newline='\n').write('\n'.join(lines) + '\n')
     size = sum(os.path.getsize(os.path.join(out, f)) for f in os.listdir(out))

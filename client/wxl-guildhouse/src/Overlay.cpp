@@ -7,6 +7,7 @@
 #include "Editor.hpp"
 #include "ExtensionApi.hpp"
 #include "FreeBuildCamera.hpp"
+#include "Targets.hpp"
 
 #include <windows.h>
 #include <d3d9.h>
@@ -58,10 +59,17 @@ namespace wxl_guildhouse
                 ImGui::SetCurrentContext(overlay.Context());
                 ImGui_ImplWin32_WndProcHandler(h, m, w, l);
                 bool handled = FreeBuildCamera::Instance().HandleWindowMessage(h, m, w, l, false, false);
-                if (!handled && Editor::Instance().Ready())
+                if (!handled)
                 {
-                    if (m == WM_LBUTTONDOWN && overlay.GizmoBusy())
+                    if (m == WM_LBUTTONDOWN && Editor::Instance().Ready() && overlay.GizmoBusy())
                     {
+                        g_gizmoClick = true;
+                        handled = true;
+                    }
+                    else if (m == WM_LBUTTONDOWN && Targets::Instance().Hovered())
+                    {
+                        // a placed object picked: the interface takes it in hand
+                        Targets::Instance().Pick();
                         g_gizmoClick = true;
                         handled = true;
                     }
@@ -154,7 +162,7 @@ namespace wxl_guildhouse
         EnsureInit(device);
         FreeBuildCamera::Instance().Tick();
         Editor::Instance().Tick();
-        if (!ready_ || !Editor::Instance().Ready())
+        if (!ready_ || (!Editor::Instance().Ready() && !Targets::Instance().Shown()))
         {
             gizmoBusy_ = false;
             return;
@@ -167,6 +175,7 @@ namespace wxl_guildhouse
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         ImGuizmo::BeginFrame();
+        Targets::Instance().Draw();
         gizmoBusy_ = Editor::Instance().DrawGizmo();
         ImGui::EndFrame();
         ImGui::Render();

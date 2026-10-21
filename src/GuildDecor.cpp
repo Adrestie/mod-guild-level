@@ -34,8 +34,8 @@
 
 namespace
 {
-    constexpr float SCALE_MIN = 0.05f;
-    constexpr float SCALE_MAX = 20.0f;
+    constexpr float SCALE_MIN = 0.1f;      // the sizes the editor allows (wxl-guildhouse)
+    constexpr float SCALE_MAX = 2.0f;
     constexpr float COORD_MAX = 2000.0f;    // the halls are a few hundred yards around the origin
 
     // The members' interface refreshes (GuildHouse_Client.lua): addon message
