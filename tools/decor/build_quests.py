@@ -1,7 +1,6 @@
-"""The quests that give a Customization object (src/GuildDecor.h, GuildDecorMgr::OnQuestRewarded): about one
-eligible quest in fifteen, spread over the expansions and the zones, gives an object: a quest open to
-both factions, or a pair of quests (one of each faction, of the same expansion) giving the same
-object, so that the Alliance and the Horde can get the same objects. One object a quest (or pair); the
+"""The quests that give a Customization object (src/GuildDecor.h, GuildDecorMgr::OnQuestRewarded): about 800
+objects go to quests, spread over the expansions and the zones: quests open to both factions first,
+then pairs of quests (one of each faction, of the same expansion) giving the same object, so that the Alliance and the Horde can get the same objects. One object a quest (or pair); the
 other objects are only looted. A quest's object is one of the theme (loot.json) of its zone if any.
 
 A quest is taken when it can really be done once by anyone: not a test or development quest, not
@@ -38,7 +37,7 @@ QUEST_INFO_RAID = (62, 88, 89)                   # raid, raid (10), raid (25)
 SPECIAL_REPEATABLE = 0x1
 BAD_TITLE = re.compile(r"\b(test|testing|unused|deprecated|nyi|dnd|placeholder|zzold|old)\b|\[|<|^zz|^z ", re.I)
 SEED = 335
-RATIO = 15                                       # one eligible quest in RATIO gives an object
+OBJECTS = 800                                    # the objects quests give
 
 
 def expansion(level):
@@ -122,10 +121,10 @@ def main(server_folder):
         start = rng.random() * step
         return [pool[int(start + k * step)] for k in range(count)]
 
-    # about one eligible quest in RATIO: the open ones, and as many pairs (an Alliance quest and a Horde
-    # one of the same expansion) as the faction quests allow
-    neutral = spread(pools['both'], round(len(pools['both']) / RATIO))
-    pairs_count = round((len(pools['alliance']) + len(pools['horde'])) / 2 / RATIO)
+    # OBJECTS objects: quests open to both first, then pairs (an Alliance quest and a Horde one of the
+    # same expansion) when those run short
+    neutral = spread(pools['both'], min(OBJECTS, len(pools['both'])))
+    pairs_count = min(OBJECTS - len(neutral), len(pools['alliance']), len(pools['horde']))
     side = {f: sorted(spread(pools[f], pairs_count), key=lambda q: (open_to[q][3], q))
             for f in ('alliance', 'horde')}
     slots = [(q,) for q in neutral] + list(zip(side['alliance'], side['horde']))
@@ -156,7 +155,7 @@ def main(server_folder):
         '-- mod-guild-level — the quests that give a Customization object (tools/decor/build_quests.py).',
         '--',
         '-- Rewarding one of these quests, a member of a guild also gets the item of its object (by mail',
-        '-- when his bags are full): src/GuildDecor.h. About one quest in fifteen: one open to both factions,',
+        '-- when his bags are full): src/GuildDecor.h. About 800 objects: a quest open to both factions,',
         '-- or a pair (one of each faction) giving the same object. No quest of the game is changed.',
         '--',
         '-- Idempotent: the table is created once, its rows are written again.',
