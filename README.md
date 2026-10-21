@@ -4,21 +4,20 @@ An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm:
 members of a guild who play together earn guild experience, and the guild
 climbs **25 levels**, then **9 Paragon levels**.
 
-> **Status: step 3 of the roadmap.** Guild experience, levels, Paragon levels,
-> announcements, GM commands, the passive perks of levels 1 to 20 and the
-> active perks of levels 21 to 24 work (see [Perks](#perks-of-levels-1-to-20)
-> and [Active perks](#active-perks-of-levels-21-to-25)). The level 25 perk, the
-> guild talents, the guild house and its Customization mode are planned (see
-> [Roadmap](#roadmap)) and not built yet.
+> **Status:** guild experience, levels, Paragon levels, announcements, GM
+> commands, the perks of levels 1 to 25, the guild talents, the guild house and
+> its Customization mode (Paragon 9) work.
 
-No client patch: core hooks, one characters table, texts in `module_string`,
-and one hidden server-side spell. The module owns the tranches **92-93**
-(92000-93999) of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
+Core hooks, characters and world tables, texts in `module_string`. The module
+owns the tranches **92-93** (92000-93999) and 82200-82899 of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
 spell 92000 is the perks' aura, creature 92001 the guild supplier, displays
-92010-92011 and gameobjects 920000-920001 the Guild Chest; the rest is kept for
-the guild house and the talents to come.
+92010-92011 and gameobjects 920000-920001 the Guild Chest, spells 92021-92071
+the talents, 92080-92081 the Customization objects' use and loot mark; the
+Customization objects are displays and items 92100-93999 then 82200-82899,
+gameobjects from 920100.
 
-**A client patch for one thing**: the Guild Chest of `.gperk bank` is
+**A client patch** (the WoW-mods installer puts it in place): the Customization
+objects' models, icons and display rows, the halls' terrain and light, and the Guild Chest of `.gperk bank` is
 Cataclysm's Mobile Banking chest, converted for 3.3.5a by
 `tools/convert_guild_chest.py` from what wow.export exports of a modern
 client. Its files (`data/art/World/GuildLevel/GuildChest`) and its display rows
@@ -209,6 +208,70 @@ Someone who is not a member (or whose guild has no house) and ends up in a
 hall -- a GM teleport, a login after leaving the guild -- is sent back. Game
 masters keep their own phase there (`.modify phase` shows a house).
 
+## Customization (Paragon 9)
+
+At **Paragon 9** the guild decorates its house with the furniture of the modern
+housing: **2497 objects** in seven families (furniture, lights, decoration,
+plants, structure, utility, miscellaneous), the models of Midnight's housing
+converted for 3.3.5a (`tools/decor`). Every guild sees only its own objects, in
+its own phase of the hall.
+
+**Placing.** A member of a rank allowed to decorate (`GuildLevel.House.Decor.Rank`),
+inside the house, presses **Customization** at the top of the screen (or types
+`/gdeco`): the usual interface gives way to the guild's objects (left) and the
+edit bar (bottom).
+
+| Action | How |
+|---|---|
+| Take a new object | click it in the list (hovering shows it turning above the list); it follows the cursor on the hall's floors and walls, the wheel turns it, a left click sets it down |
+| Take a placed object | the objects within 30 yards and in the same room are outlined in blue (lighter under the cursor): click one |
+| Move, turn, size | the gizmo (keys 1, 2, 3); turning around the world's axes or the object's own, and back to its first rotation; size from 0.1 to 2 |
+| Place | Place, or a click away from the object and its gizmo |
+| Back to the stock | right click on a placed object (it turns red), right click again |
+| Leave | Leave, or Esc |
+
+One member at a time handles an object; an object is placed at most as many
+times as the guild owns it, and taken away it goes back to the stock. A guild
+disbanded loses its stock and its placed objects.
+
+**Getting objects.** Each object is an item (rare, **not bound: traded and
+sold**, 50 silver), used to add the object to the guild's stock:
+
+* **Bosses** of dungeons and raids drop one (`DropChance`, 10%) for a guild of
+  the Customization's Paragon level there in numbers: 4 members in a dungeon,
+  8 in a 10-player raid, 20 in a 25-player one. Only that guild's members see
+  it in the loot. Which one: a boss's own objects first (`tools/decor/loot.json`,
+  `bosses`), else, 60% of the time (`ThemeChance`), one of the instance's theme
+  (blood elves in Magisters' Terrace, dragons in Onyxia's Lair...), else one of
+  the objects of no theme.
+* **800 quests** of Vanilla, Burning Crusade and Wrath, all open to both
+  factions, each give one object to a member of a guild who hands it in (by
+  mail when the bags are full). No test, disabled, raid, daily, weekly,
+  repeatable, class, profession or holiday quest. The quests of a theme's
+  zones give that theme's objects first (`tools/decor/build_quests.py`).
+
+**Collection.** `/gcoll`, the **Collection** button of the Customization panel
+or of the guild window: every object, owned (with how many, how many placed)
+or missing, by family, with a search; hovering one shows it turning and where
+it is found (its quest, its bosses, the dungeons and raids of its theme).
+
+**Languages.** The objects' names are the housing's own in English, French,
+German, Spanish and Russian (`tools/decor/build_locales.py`), as are the
+module's texts and the interface.
+
+**What it needs on the client:** [WarcraftXL](https://github.com/WarcraftXL/wxl-core)
+and its extension **wxl-guildhouse** (`client/dist/wxl-guildhouse`, sources in
+`client/wxl-guildhouse`): the preview of an object in hand, the outlines, the
+gizmo and the cursor's ray on the hall are its work. Without it the
+Customization mode says so and stays closed; the objects placed are still seen
+by everyone, and the Collection works. The models, icons and display rows go
+into the game's archives with the rest of the client patch.
+
+| Command | Effect |
+|---|---|
+| `.ghouse give $object $count [$guild]` | GM (2): adds (or, negative, takes away) objects to a guild's stock; 0 for every object. |
+| `.ghouse begin\|place\|cancel\|remove ...` | What the Customization window does for the member (any player, with the rules above). |
+
 ## GM commands
 
 Every command ends with an optional guild: its **name** (spaces allowed, no
@@ -261,6 +324,12 @@ their step costs climb at once, without announcement.
 | `GuildLevel.House.Enable` | 1 | 0 = no guild house. |
 | `GuildLevel.House.Paragon` | 1 | The Paragon level that opens the house. |
 | `GuildLevel.House.EmptyDelay` | 60 | Seconds an empty house keeps its phase. |
+| `GuildLevel.House.Decor.Enable` | 1 | 0 = no Customization (no drop, no quest object, no edit). |
+| `GuildLevel.House.Decor.Paragon` | 9 | The Paragon level that opens it. |
+| `GuildLevel.House.Decor.Rank` | 1 | Highest guild rank id allowed to decorate (0: the guild master only). |
+| `GuildLevel.House.Decor.DropChance` | 10 | % for a boss to drop an object for a guild there in numbers. |
+| `GuildLevel.House.Decor.ThemeChance` | 60 | % for that object to be of the instance's theme (else one of no theme). |
+| `GuildLevel.House.Decor.Members.Dungeon` / `.Raid10` / `.Raid25` | 4 / 8 / 20 | Guildmates needed at the kill. |
 | `GuildLevel.Active.<Perk>.Level` | 21 to 25 | Guild level of each active perk (Raid, Rez, Bank, Vendor, Home). |
 | `GuildLevel.Active.<Perk>.Cooldown` | 3600 (Rez 600, Home 0) | Seconds; 0 = none. |
 | `GuildLevel.Active.Rez.Percent` | 35 | Health and mana of the resurrection offered. |
@@ -285,6 +354,7 @@ level 0. The next steps of this module read the level there.
 | AzerothCore WotLK (3.3.5a) | the C++ module is compiled into it |
 | [ALE](https://github.com/azerothcore/mod-ale) (the AzerothCore Lua Engine, formerly mod-eluna) | runs the server side of the windows (`data/lua/GuildLevel` goes into `lua_scripts`) |
 | [AIO](https://github.com/Rochet2/AIO) | server AND client: the windows are sent over it, and every player needs the `AIO_Client` addon |
+| [WarcraftXL](https://github.com/WarcraftXL/wxl-core) and its extension `wxl-guildhouse` | client: the Customization mode's editor (the rest of the module works without it) |
 
 ALE and AIO carry the interface: the guild talent window, the level bar in the
 guild window and the level-up toast. Without them, experience, levels and perks
@@ -304,6 +374,14 @@ With the WoW-mods installer: point it at this folder. By hand:
 4. For the interface: copy `data/lua/GuildLevel` into the ALE scripts folder
    (`lua_scripts/GuildLevel`), with AIO installed on the server and the
    `AIO_Client` addon on every client.
+5. For the client: write `data/art` into a patch archive the game reads last
+   (`Data\patch-Z.MPQ`), with the rows of `data/dbc` added to the game's DBC
+   files of the same names, and copy `client/dist/wxl-guildhouse` into the
+   game's `Extensions` folder (WarcraftXL installed).
+
+The WoW-mods installer does all of it, and leaves the extension's sources
+(`client`) out of the server's modules folder: they are a Windows client DLL,
+not server code.
 
 ## In-game tests
 
@@ -482,9 +560,32 @@ in a group, characters with a client to accept summons and resurrections.
 52. **Logout inside:** a member logs out in the house and back in: he is in
     his house again, in its phase.
 
+### Customization
+
+53. **Way in:** a guild at Paragon 9 (`.guildlevel setparagon 9`), an officer
+    goes home: the Customization button shows at the top of the screen, at
+    login in the house as on arrival. A member of a lower rank, or a guild at
+    Paragon 8, gets the reason instead.
+54. **Stock:** `.ghouse give 494 4`: four Sturdy Wooden Chairs in the list.
+    Place them: the fifth cannot be. Right click twice on one: back to the
+    stock, 1 left to place.
+55. **Edit:** take a placed chair, move, turn (World, then Local, then back to
+    its first rotation) and size it, click away: it stays as left, and another
+    member of the guild sees it there after relog; size is kept.
+56. **Item:** `.additem 92100`: the item is not bound, sells for 50 silver,
+    and used by a member of a Paragon 9 guild it joins the stock ("goes into
+    your guild's objects"). Used outside a guild: refused.
+57. **Quest:** a member of a guild hands in a quest of
+    `mod_guild_level_decor_quest`: its object comes into the bags (by mail
+    with full bags), with a message in the player's language.
+58. **Collection:** `/gcoll`: owned and missing objects, families, search;
+    hovering a missing one shows its quest or its dungeons.
+59. **Disband:** the guild disbanded: its stock and placed objects are gone
+    and its phase is freed.
+
 ## Roadmap
 
-The steps to come, in the order of the original concept.
+The original concept, in its order (every step is built; the sections above tell how).
 
 ### An interface
 
