@@ -133,13 +133,27 @@ UI:SetAllPoints(WorldFrame)
 UI:SetFrameStrata("HIGH")
 UI:Hide()
 
-local function Backdrop(f)
+-- ForeverUI's look when it is installed (its window, buttons and scroll bar), else the game's.
+local FUI = _G.ForeverUI and _G.ForeverUI.Templates
+
+-- A panel's frame, and its title if any.
+local function Backdrop(f, title)
+    if FUI and FUI.Window then
+        local parts = FUI.Window(f, title)
+        return parts and parts.title
+    end
     f:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
         tile = true, tileSize = 32, edgeSize = 24,
         insets = { left = 6, right = 6, top = 6, bottom = 6 },
     })
+    if title then
+        local t = f:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+        t:SetPoint("TOP", 0, -16)
+        t:SetText(title)
+        return t
+    end
 end
 
 local function Button(parent, text, width)
@@ -147,6 +161,7 @@ local function Button(parent, text, width)
     b:SetWidth(width or 110)
     b:SetHeight(24)
     b:SetText(text)
+    if FUI and FUI.PanelButton then FUI.PanelButton(b) end
     return b
 end
 
@@ -156,10 +171,7 @@ Panel:SetWidth(300)
 Panel:SetHeight(ROWS * ROW_HEIGHT + 110)
 Panel:SetPoint("LEFT", UI, "LEFT", 20, 40)
 Panel:EnableMouse(true)
-Backdrop(Panel)
-Panel.title = Panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-Panel.title:SetPoint("TOP", 0, -16)
-Panel.title:SetText(L.title)
+Panel.title = Backdrop(Panel, L.title)
 
 Panel.tabs = {}
 for i, cat in ipairs(CATEGORIES) do
@@ -178,6 +190,46 @@ Panel.scroll:SetPoint("BOTTOMRIGHT", -34, 16)
 Panel.scroll:SetScript("OnVerticalScroll", function(self, offset)
     FauxScrollFrame_OnVerticalScroll(self, offset, ROW_HEIGHT, function() UI:Refresh() end)
 end)
+if FUI then
+    if FUI.Inset then FUI.Inset(Panel, Panel.scroll) end
+    if FUI.Bar then FUI.Bar(_G.GuildHouseUIScrollScrollBar) end
+end
+
+-- The object under the cursor in the list, turning slowly, above the list.
+local Preview = CreateFrame("Frame", nil, UI)
+Preview:SetWidth(300)
+Preview:SetHeight(260)
+Preview:SetPoint("BOTTOM", Panel, "TOP", 0, 6)
+Backdrop(Preview)
+Preview.model = CreateFrame("Model", nil, Preview)
+Preview.model:SetPoint("TOPLEFT", 10, -26)
+Preview.model:SetPoint("BOTTOMRIGHT", -10, 10)
+Preview.name = Preview:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+Preview.name:SetPoint("BOTTOM", 0, 14)
+Preview:Hide()
+Preview:SetScript("OnUpdate", function(self, elapsed)
+    -- a camera index the model does not have: an orthographic view, where the scale is a zoom
+    -- and the position moves the model linearly (a model takes its own camera at each load)
+    self.model:SetCamera(99)
+    self.facing = (self.facing or 0) + elapsed * 0.6
+    self.model:SetFacing(self.facing)
+end)
+
+function Preview:ShowDecor(decor)
+    local d = GuildHouseDecor[decor]
+    if not d then return self:Hide() end
+    self.model:ClearModel()
+    self.model:SetModel((d[3]:gsub("%.m2$", ".mdx")))
+    -- the whole object in sight whichever way it turns: sized from its bounds (the footprint's
+    -- diagonal, and its height), its middle at the frame's
+    local dx, dy = d[9] - d[6], d[10] - d[7]
+    local size = math.max(math.sqrt(dx * dx + dy * dy), d[11] - d[8], 0.1)
+    local scale = 1.4 / size
+    self.model:SetModelScale(scale)
+    self.model:SetPosition(0, 0, -((d[8] + d[11]) / 2) * scale)
+    self.name:SetText(d[4])
+    self:Show()
+end
 
 Panel.rows = {}
 for i = 1, ROWS do
@@ -199,6 +251,7 @@ for i = 1, ROWS do
     end)
     r:SetScript("OnEnter", function(self)
         if not self.decor then return end
+        Preview:ShowDecor(self.decor)
         local d = GuildHouseDecor[self.decor]
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:AddLine(d[4])
@@ -206,7 +259,10 @@ for i = 1, ROWS do
         GameTooltip:AddLine(fmt("%d / %d", Available(self.decor), (S.state and S.state.owned[self.decor]) or 0), 1, 0.82, 0)
         GameTooltip:Show()
     end)
-    r:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    r:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+        Preview:Hide()
+    end)
     Panel.rows[i] = r
 end
 

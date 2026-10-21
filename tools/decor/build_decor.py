@@ -1,6 +1,7 @@
 """The Customization objects' game files, from export_decor.py's export:
   * each model laid out for the client's modern M2 plugin (WarcraftXL's wxl-modern-m2, through
-    mod-limit-break's m2port) in data/art/World/GuildLevel/Decor, its textures named by path there;
+    mod-limit-break's m2port) in data/art/World/GuildLevel/Decor, its textures named by path there
+    and brought down to 512 at most (shrink_blp.py);
   * the catalogue the interface reads, data/lua/GuildLevel/GuildHouse_Decor.lua (one row per object:
     its HouseDecor ID, kind, model and English name);
   * its display (GameObjectDisplayInfo, 92100 + n) for the client, beside the Guild Chest's in
@@ -17,6 +18,8 @@ import sys
 
 sys.path.insert(0, 'E:/WoW-mods/mod-limit-break/tools/m2port')
 import pack  # noqa: E402
+
+import shrink_blp  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
@@ -125,6 +128,9 @@ def main(export_dir):
             continue
         pack.pack(os.path.join(export_dir, name, name + '.m2'), out, name, GAME_DIR, {}, None)
         rows.append((e, GAME_DIR + BACKSLASH + name + '.m2'))
+
+    # textures at 512 at most: the levels above are dropped
+    shrink_blp.main(out, 512)
 
     dbc_rows, sql_rows = [], []
     for n, (e, path) in enumerate(rows):
