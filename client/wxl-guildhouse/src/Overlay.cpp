@@ -108,14 +108,12 @@ namespace wxl_guildhouse
                                 float cx = x, cy = y;
                                 if (GetCursorPos(&p) && ScreenToClient(h, &p)) { cx = float(p.x); cy = float(p.y); }
                                 const bool onIt = targets.Covers(editor.Model(), editor.Matrix(), cx, cy);
-                                WLOG_INFO("click: away=%d at %.0f,%.0f", onIt ? 0 : 1, cx, cy);
                                 if (!onIt) overlay.ClickedAway();
                             }
                         }
                     }
                     else if (m == WM_RBUTTONDOWN)
                     {
-                        WLOG_INFO("right click: hovered=%d", targets.Hovered() ? 1 : 0);
                         if (targets.Hovered())
                         {
                             targets.RightClick();
