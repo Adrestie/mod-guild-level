@@ -10236,7 +10236,7 @@ INSERT INTO `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubclas
 (82207, 15, 4, -1, 'Purified Troll Urn', 82207, 3, 0, 1, 0, 5000, 1, 20, 92080, 0, -1, 0, -1, -1, 0, 'Customization object of the guild house.', 4, ''),
 (82208, 15, 4, -1, 'Elegant Enchanted Vanity', 7913, 3, 0, 1, 0, 5000, 1, 20, 92080, 0, -1, 0, -1, -1, 0, 'Customization object of the guild house.', 4, ''),
 (82209, 15, 4, -1, 'Purified Floating Lantern', 82209, 3, 0, 1, 0, 5000, 1, 20, 92080, 0, -1, 0, -1, -1, 0, 'Customization object of the guild house.', 4, ''),
-(82210, 15, 4, -1, 'Sunsmoke Censer DEPRECATED DONT USE', 82210, 3, 0, 1, 0, 5000, 1, 20, 92080, 0, -1, 0, -1, -1, 0, 'Customization object of the guild house.', 4, ''),
+(82210, 15, 4, -1, 'Sunsmoke Censer', 82210, 3, 0, 1, 0, 5000, 1, 20, 92080, 0, -1, 0, -1, -1, 0, 'Customization object of the guild house.', 4, ''),
 (82211, 15, 4, -1, 'Grummle Kafa Refinery', 82211, 3, 0, 1, 0, 5000, 1, 20, 92080, 0, -1, 0, -1, -1, 0, 'Customization object of the guild house.', 4, ''),
 (82212, 15, 4, -1, 'Wind Rider Roost', 82212, 3, 0, 1, 0, 5000, 1, 20, 92080, 0, -1, 0, -1, -1, 0, 'Customization object of the guild house.', 4, ''),
 (82213, 15, 4, -1, 'Founder''s Point Street Sign', 82213, 3, 0, 1, 0, 5000, 1, 20, 92080, 0, -1, 0, -1, -1, 0, 'Customization object of the guild house.', 4, ''),

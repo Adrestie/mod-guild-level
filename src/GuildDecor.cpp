@@ -91,6 +91,7 @@ void GuildDecorMgr::LoadConfig()
     c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Paragon", 9), 0, GUILD_PARAGON_LIMIT));
     c.rank = uint8(std::min<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Rank", 1), 9));
     c.dropChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.House.Decor.DropChance", 10.0f), 0.0f, 100.0f);
+    c.themeChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.House.Decor.ThemeChance", 60.0f), 0.0f, 100.0f);
     c.dungeonMembers = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Dungeon", 4), 1, 5));
     c.raid10Members = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Raid10", 8), 1, 10));
     c.raid25Members = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Raid25", 20), 1, 25));
@@ -457,11 +458,23 @@ std::vector<GuildDecorShown> GuildDecorMgr::Snapshot(uint32 guildId, uint32 mapI
 
 // ---------------------------------------------------------------- the items, and their drops
 
-std::string GuildDecorMgr::NameOf(uint32 decor) const
+std::string GuildDecorMgr::NameOf(uint32 decor, uint8 locale) const
 {
-    std::lock_guard<std::mutex> guard(_lock);
-    auto k = _kinds.find(decor);
-    return k == _kinds.end() ? std::string() : k->second.name;
+    std::string name;
+    uint32 item = 0;
+    {
+        std::lock_guard<std::mutex> guard(_lock);
+        auto k = _kinds.find(decor);
+        if (k == _kinds.end())
+            return name;
+        name = k->second.name;
+        auto i = _decorItem.find(decor);
+        item = i == _decorItem.end() ? 0 : i->second;
+    }
+    if (item && locale)
+        if (ItemLocale const* l = sObjectMgr->GetItemLocale(item))
+            ObjectMgr::GetLocaleString(l->Name, locale, name);
+    return name;
 }
 
 GuildDecorResult GuildDecorMgr::CheckCollect(Player* player, uint32 item) const
@@ -541,7 +554,7 @@ void GuildDecorMgr::OnCreatureKill(Player* killer, Creature* creature)
         if (!roll_chance_f(_config.dropChance))
             continue;
 
-        // which: the boss's own, else the instance's theme, else one of no theme
+        // which: the boss's own, else the instance's theme (ThemeChance) or one of no theme
         uint32 decor = 0, item = 0;
         {
             std::lock_guard<std::mutex> guard(_lock);
@@ -550,7 +563,7 @@ void GuildDecorMgr::OnCreatureKill(Player* killer, Creature* creature)
             auto m = _mapLoot.find(map->GetId());
             if (b != _bossLoot.end() && !b->second.empty())
                 pool = &b->second;
-            else if (m != _mapLoot.end() && !m->second.empty())
+            else if (m != _mapLoot.end() && !m->second.empty() && (_anywhere.empty() || roll_chance_f(_config.themeChance)))
                 pool = &m->second;
             else if (!_anywhere.empty())
                 pool = &_anywhere;
@@ -605,10 +618,10 @@ void GuildDecorMgr::OnQuestRewarded(Player* player, uint32 questId)
     {
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
         mailed->SaveToDB(trans);
-        MailDraft(NameOf(decor), "").AddItem(mailed).SendMailTo(trans, MailReceiver(player),
-            MailSender(MAIL_NORMAL, player->GetGUID().GetCounter(), MAIL_STATIONERY_GM));
+        MailDraft(NameOf(decor, player->GetSession()->GetSessionDbLocaleIndex()), "").AddItem(mailed)
+            .SendMailTo(trans, MailReceiver(player), MailSender(MAIL_NORMAL, player->GetGUID().GetCounter(), MAIL_STATIONERY_GM));
         CharacterDatabase.CommitTransaction(trans);
     }
     ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_DECOR_QUEST,
-        NameOf(decor));
+        NameOf(decor, player->GetSession()->GetSessionDbLocaleIndex()));
 }

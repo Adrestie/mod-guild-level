@@ -47,8 +47,8 @@ local L = {
     enUS = {
         button = "Customization",
         title = "Guild objects", validate = "Place", cancel = "Cancel", store = "To the stock",
-        move = "Move (1)", rotate = "Turn (2)", scale = "Size (3)", world = "World", localAxes = "Local", reset = "Reset turn", follow = "Follow the mouse",
-        ground = "Set on the floor", camera = "Free camera", exit = "Leave (Esc)",
+        move = "Move (1)", rotate = "Turn (2)", scale = "Size (3)", world = "World", localAxes = "Local", reset = "Reset turn",
+        ground = "Set on the floor", exit = "Leave (Esc)",
         noext = "The Customization mode needs WarcraftXL and its guild house editor (Extensions\\wxl-guildhouse).",
         cannot = "You cannot decorate the house: Paragon level %d, guild rank %d or above, in the house.",
         aim = "Point at the hall's floor to place the object.",
@@ -56,12 +56,21 @@ local L = {
         hint = "Click an outlined object to take it in hand.",
         categories = { Furnishings = "Furniture", Lighting = "Lights", Accents = "Decoration", Nature = "Plants",
             Structural = "Structure", Functional = "Utility", Miscellaneous = "Misc" },
+        collection = "Collection", collectionTitle = "Guild collection",
+        progress = "%d / %d objects owned by your guild", noguild = "You are not in a guild: nothing is owned yet.",
+        all = "All", owned = "Owned", missing = "Missing", search = "Search",
+        loading = "Looking for where it is found...", count = "Owned: %d (placed: %d)", none = "Not owned yet",
+        quest = "Quest:", level = "level %d",
+        questRule = "Handed in by a member of a guild, the quest gives its object.",
+        boss = "Dropped by:", themed = "Dungeons and raids:", anywhere = "Dungeons and raids: any boss.",
+        dropRule = "A boss drops objects for a Paragon %d guild there in numbers: %d members in a dungeon, %d in a 10-player raid, %d in a 25-player raid.",
+        tradable = "The object can be traded and sold; used, it joins your guild's stock.",
     },
     frFR = {
         button = "Personnalisation",
         title = "Objets de guilde", validate = "Valider", cancel = "Annuler", store = "Ranger",
-        move = "Déplacer (1)", rotate = "Pivoter (2)", scale = "Taille (3)", world = "Monde", localAxes = "Local", reset = "Rotation d'origine", follow = "Suivre la souris",
-        ground = "Poser au sol", camera = "Caméra libre", exit = "Quitter (Échap)",
+        move = "Déplacer (1)", rotate = "Pivoter (2)", scale = "Taille (3)", world = "Monde", localAxes = "Local", reset = "Rotation d'origine",
+        ground = "Poser au sol", exit = "Quitter (Échap)",
         noext = "Le mode Personnalisation demande WarcraftXL et son éditeur de maison de guilde (Extensions\\wxl-guildhouse).",
         cannot = "Vous ne pouvez pas décorer la maison : Parangon %d, rang de guilde %d ou mieux, dans la maison.",
         aim = "Visez le sol du hall pour poser l'objet.",
@@ -69,9 +78,104 @@ local L = {
         hint = "Cliquez sur un objet entouré pour le prendre en main.",
         categories = { Furnishings = "Mobilier", Lighting = "Lumières", Accents = "Décoration", Nature = "Plantes",
             Structural = "Structure", Functional = "Utilitaire", Miscellaneous = "Divers" },
+        collection = "Collection", collectionTitle = "Collection de la guilde",
+        progress = "%d / %d objets possédés par votre guilde", noguild = "Vous n'êtes pas dans une guilde : rien n'est encore possédé.",
+        all = "Tous", owned = "Possédés", missing = "Manquants", search = "Rechercher",
+        loading = "Recherche de sa provenance...", count = "Possédés : %d (placés : %d)", none = "Pas encore possédé",
+        quest = "Quête :", level = "niveau %d",
+        questRule = "Rendue par un membre d'une guilde, la quête donne son objet.",
+        boss = "Butin de :", themed = "Donjons et raids :", anywhere = "Donjons et raids : n'importe quel boss.",
+        dropRule = "Un boss donne des objets à une guilde de Parangon %d présente en nombre : %d membres en donjon, %d en raid à 10, %d en raid à 25.",
+        tradable = "L'objet s'échange et se vend ; utilisé, il rejoint le stock de votre guilde.",
+    },
+    deDE = {
+        button = "Gestaltung",
+        title = "Gildengegenstände", validate = "Platzieren", cancel = "Abbrechen", store = "Ins Lager",
+        move = "Bewegen (1)", rotate = "Drehen (2)", scale = "Größe (3)", world = "Welt", localAxes = "Lokal", reset = "Drehung zurück",
+        ground = "Auf den Boden", exit = "Verlassen (Esc)",
+        noext = "Der Gestaltungsmodus benötigt WarcraftXL und seinen Gildenhaus-Editor (Extensions\\wxl-guildhouse).",
+        cannot = "Ihr könnt das Haus nicht gestalten: Paragonstufe %d, Gildenrang %d oder höher, im Haus.",
+        aim = "Zielt auf den Boden der Halle, um den Gegenstand zu platzieren.",
+        carry = "Linksklick: abstellen. Mausrad: drehen. Rechtsklick: abbrechen.",
+        hint = "Klickt auf einen umrandeten Gegenstand, um ihn aufzunehmen.",
+        categories = { Furnishings = "Möbel", Lighting = "Licht", Accents = "Deko", Nature = "Pflanzen",
+            Structural = "Bauteile", Functional = "Nützliches", Miscellaneous = "Sonstiges" },
+        collection = "Sammlung", collectionTitle = "Gildensammlung",
+        progress = "%d / %d Gegenstände im Besitz Eurer Gilde", noguild = "Ihr seid in keiner Gilde: noch nichts im Besitz.",
+        all = "Alle", owned = "Im Besitz", missing = "Fehlend", search = "Suchen",
+        loading = "Fundorte werden gesucht...", count = "Im Besitz: %d (platziert: %d)", none = "Noch nicht im Besitz",
+        quest = "Quest:", level = "Stufe %d",
+        questRule = "Gibt ein Gildenmitglied die Quest ab, bringt sie ihren Gegenstand ein.",
+        boss = "Beute von:", themed = "Dungeons und Schlachtzüge:", anywhere = "Dungeons und Schlachtzüge: jeder Boss.",
+        dropRule = "Ein Boss lässt Gegenstände für eine Gilde der Paragonstufe %d fallen, die zahlreich da ist: %d Mitglieder im Dungeon, %d im 10er-, %d im 25er-Schlachtzug.",
+        tradable = "Der Gegenstand ist handelbar und verkäuflich; benutzt, kommt er ins Lager Eurer Gilde.",
+    },
+    esES = {
+        button = "Personalización",
+        title = "Objetos de hermandad", validate = "Colocar", cancel = "Cancelar", store = "Al almacén",
+        move = "Mover (1)", rotate = "Girar (2)", scale = "Tamaño (3)", world = "Mundo", localAxes = "Local", reset = "Giro original",
+        ground = "Al suelo", exit = "Salir (Esc)",
+        noext = "El modo Personalización necesita WarcraftXL y su editor de casa de hermandad (Extensions\\wxl-guildhouse).",
+        cannot = "No puedes decorar la casa: nivel de Paragón %d, rango de hermandad %d o superior, dentro de la casa.",
+        aim = "Apunta al suelo del salón para colocar el objeto.",
+        carry = "Clic izquierdo: colocarlo. Rueda: girarlo. Clic derecho: abandonar.",
+        hint = "Haz clic en un objeto contorneado para tomarlo.",
+        categories = { Furnishings = "Mobiliario", Lighting = "Luces", Accents = "Decoración", Nature = "Plantas",
+            Structural = "Estructura", Functional = "Utilidad", Miscellaneous = "Varios" },
+        collection = "Colección", collectionTitle = "Colección de la hermandad",
+        progress = "%d / %d objetos en posesión de tu hermandad", noguild = "No estás en una hermandad: aún no tienes nada.",
+        all = "Todos", owned = "Obtenidos", missing = "Faltan", search = "Buscar",
+        loading = "Buscando dónde conseguirlo...", count = "Obtenidos: %d (colocados: %d)", none = "Aún no obtenido",
+        quest = "Misión:", level = "nivel %d",
+        questRule = "Entregada por un miembro de una hermandad, la misión otorga su objeto.",
+        boss = "Botín de:", themed = "Mazmorras y bandas:", anywhere = "Mazmorras y bandas: cualquier jefe.",
+        dropRule = "Un jefe suelta objetos para una hermandad de Paragón %d presente en número: %d miembros en mazmorra, %d en banda de 10, %d en banda de 25.",
+        tradable = "El objeto se puede comerciar y vender; al usarlo, se suma al almacén de tu hermandad.",
+    },
+    ruRU = {
+        button = "Оформление",
+        title = "Предметы гильдии", validate = "Разместить", cancel = "Отмена", store = "На склад",
+        move = "Двигать (1)", rotate = "Вращать (2)", scale = "Размер (3)", world = "Мир", localAxes = "Локально", reset = "Сброс поворота",
+        ground = "На пол", exit = "Выйти (Esc)",
+        noext = "Для режима оформления нужен WarcraftXL и его редактор дома гильдии (Extensions\\wxl-guildhouse).",
+        cannot = "Вы не можете обустраивать дом: нужен %d-й уровень Парагона, звание гильдии %d или выше и нахождение в доме.",
+        aim = "Наведите курсор на пол зала, чтобы разместить предмет.",
+        carry = "Левый клик: поставить. Колесо: повернуть. Правый клик: отменить.",
+        hint = "Щелкните по выделенному предмету, чтобы взять его.",
+        categories = { Furnishings = "Мебель", Lighting = "Свет", Accents = "Декор", Nature = "Растения",
+            Structural = "Постройки", Functional = "Полезное", Miscellaneous = "Разное" },
+        collection = "Коллекция", collectionTitle = "Коллекция гильдии",
+        progress = "Предметов у гильдии: %d из %d", noguild = "Вы не состоите в гильдии: пока ничего нет.",
+        all = "Все", owned = "Есть", missing = "Нет", search = "Поиск",
+        loading = "Поиск источников...", count = "Есть: %d (размещено: %d)", none = "Пока нет",
+        quest = "Задание:", level = "уровень %d",
+        questRule = "Когда член гильдии сдает задание, оно приносит свой предмет.",
+        boss = "Добыча с:", themed = "Подземелья и рейды:", anywhere = "Подземелья и рейды: любой босс.",
+        dropRule = "Босс оставляет предметы гильдии %d-го уровня Парагона, если её членов достаточно: %d в подземелье, %d в рейде на 10, %d в рейде на 25.",
+        tradable = "Предмет можно передавать и продавать; при использовании он попадает на склад гильдии.",
     },
 }
+L.esMX = L.esES
 L = L[GetLocale()] or L.enUS
+
+-- The families, dungeons and zones in the player's language (GuildHouse_Locale.lua, an addon of
+-- its own: looked up when needed, whichever of the two the client ran first).
+local function Loc()
+    local all = _G.GuildHouseLocale
+    return all and (all[GetLocale()] or all.enUS) or {}
+end
+
+-- The objects' names in the player's language: the server's (their items'), English till then.
+local names = {}
+local function DecorName(decor)
+    local d = GuildHouseDecor and GuildHouseDecor[decor]
+    return names[decor] or (d and d[4]) or ""
+end
+
+local function KindName(kind)
+    local kinds = Loc().kinds
+    return kinds and kinds[kind] or kind
+end
 
 local CATEGORIES = { "Furnishings", "Lighting", "Accents", "Nature", "Structural", "Functional", "Miscellaneous" }
 local ROWS = 16
@@ -115,8 +219,8 @@ local function Kinds()
     end
     table.sort(list, function(a, b)
         local da, db = GuildHouseDecor[a], GuildHouseDecor[b]
-        if da[2] ~= db[2] then return da[2] < db[2] end
-        return da[4] < db[4]
+        if da[2] ~= db[2] then return KindName(da[2]) < KindName(db[2]) end
+        return DecorName(a) < DecorName(b)
     end)
     return list
 end
@@ -234,7 +338,7 @@ function Preview:ShowDecor(decor)
     -- the camera orbits the object by itself (its own loop); lit from the front and above
     self.model:SetFacing(0)
     self.model:SetLight(1, 0, -0.5, -0.6, -0.6, 0.8, 1, 1, 1, 0.8, 1, 0.95, 0.85)
-    self.name:SetText(d[4])
+    self.name:SetText(DecorName(decor))
     self:Show()
 end
 
@@ -261,8 +365,8 @@ for i = 1, ROWS do
         Preview:ShowDecor(self.decor)
         local d = GuildHouseDecor[self.decor]
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:AddLine(d[4])
-        GameTooltip:AddLine(d[2], 0.7, 0.7, 0.7)
+        GameTooltip:AddLine(DecorName(self.decor))
+        GameTooltip:AddLine(KindName(d[2]), 0.7, 0.7, 0.7)
         GameTooltip:AddLine(fmt("%d / %d", Available(self.decor), (S.state and S.state.owned[self.decor]) or 0), 1, 0.82, 0)
         GameTooltip:Show()
     end)
@@ -394,7 +498,7 @@ function UI:Refresh()
         r.decor = decor
         if decor then
             local n = Available(decor)
-            r.name:SetText(GuildHouseDecor[decor][4])
+            r.name:SetText(DecorName(decor))
             r.count:SetText(n)
             if n > 0 then
                 r.name:SetTextColor(1, 1, 1)
@@ -434,8 +538,7 @@ function UI:Refresh()
     if S.edit and S.edit.carry then
         Bar.text:SetText(L.carry)
     elseif S.edit then
-        local d = GuildHouseDecor[S.edit.decor]
-        Bar.text:SetText(d and d[4] or "")
+        Bar.text:SetText(DecorName(S.edit.decor))
     else
         Bar.text:SetText(L.hint)
     end
@@ -618,6 +721,335 @@ UI:SetScript("OnUpdate", function()
 end)
 
 ------------------------------------------------------------------------------
+-- The Collection: every object, those the guild owns and those it lacks, and
+-- where to find them (the server's: Handlers.Sources). Open anywhere: /gcoll,
+-- the Customization panel, the guild window.
+------------------------------------------------------------------------------
+
+local COLL_ROWS = 14
+local COLL_ROW = 26
+local ICONS = "Interface\\Icons\\GuildLevel_Decor_"
+local NO_ICON = "Interface\\Icons\\INV_Crate_01"
+
+local C = {
+    category = nil,     -- nil: every family
+    filter = "all",     -- all, owned, missing
+    search = "",
+    list = {},
+    selected = nil,     -- the object clicked (its details stay)
+    shown = nil,        -- the object whose details are shown (the one under the cursor first)
+    sources = {},       -- decor: the server's answer
+    asked = {},         -- decor: asked for, no answer yet
+}
+
+-- Above everything, the mode's screen included (the usual interface is hidden in the mode).
+local Coll = CreateFrame("Frame", "GuildHouseCollection", nil)
+Coll:SetWidth(660)
+Coll:SetHeight(COLL_ROWS * COLL_ROW + 166)
+Coll:SetPoint("CENTER", UIParent, "CENTER", 0, 20)
+Coll:SetFrameStrata("DIALOG")
+Coll:SetToplevel(true)
+Coll:EnableMouse(true)
+Coll:SetMovable(true)
+Coll:SetClampedToScreen(true)
+Coll:RegisterForDrag("LeftButton")
+Coll:SetScript("OnDragStart", Coll.StartMoving)
+Coll:SetScript("OnDragStop", Coll.StopMovingOrSizing)
+Coll:Hide()
+tinsert(UISpecialFrames, "GuildHouseCollection")
+Backdrop(Coll, L.collectionTitle)
+
+Coll.close = CreateFrame("Button", nil, Coll, "UIPanelCloseButton")
+Coll.close:SetPoint("TOPRIGHT", -4, -4)
+
+Coll.progress = Coll:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+Coll.progress:SetPoint("TOPLEFT", 18, -40)
+
+-- the families: every one, then each
+Coll.tabs = {}
+local families = { false }
+for _, cat in ipairs(CATEGORIES) do families[#families + 1] = cat end
+for i, cat in ipairs(families) do
+    local t = Button(Coll, cat and L.categories[cat] or L.all, 80)
+    t:SetPoint("TOPLEFT", 16 + ((i - 1) % 4) * 83, -60 - floor((i - 1) / 4) * 26)
+    t:SetScript("OnClick", function()
+        C.category = cat or nil
+        Coll:Rebuild()
+    end)
+    Coll.tabs[i] = { button = t, category = cat or nil }
+end
+
+Coll.filters = {}
+for i, f in ipairs({ "all", "owned", "missing" }) do
+    local b = Button(Coll, L[f], 80)
+    b:SetPoint("TOPLEFT", 16 + (i - 1) * 83, -116)
+    b:SetScript("OnClick", function()
+        C.filter = f
+        Coll:Rebuild()
+    end)
+    Coll.filters[f] = b
+end
+
+Coll.search = CreateFrame("EditBox", "GuildHouseCollectionSearch", Coll, "InputBoxTemplate")
+Coll.search:SetWidth(82)
+Coll.search:SetHeight(20)
+Coll.search:SetPoint("TOPLEFT", 270, -118)
+Coll.search:SetAutoFocus(false)
+Coll.search.hint = Coll.search:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+Coll.search.hint:SetPoint("LEFT", 2, 0)
+Coll.search.hint:SetText(L.search)
+Coll.search:SetScript("OnTextChanged", function(self)
+    C.search = (self:GetText() or ""):lower()
+    if C.search == "" then self.hint:Show() else self.hint:Hide() end
+    Coll:Rebuild()
+end)
+Coll.search:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+Coll.search:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
+
+Coll.scroll = CreateFrame("ScrollFrame", "GuildHouseCollectionScroll", Coll, "FauxScrollFrameTemplate")
+Coll.scroll:SetPoint("TOPLEFT", 16, -146)
+Coll.scroll:SetWidth(330)
+Coll.scroll:SetHeight(COLL_ROWS * COLL_ROW)
+Coll.scroll:SetScript("OnVerticalScroll", function(self, offset)
+    FauxScrollFrame_OnVerticalScroll(self, offset, COLL_ROW, function() Coll:Refresh() end)
+end)
+if FUI then
+    if FUI.Inset then FUI.Inset(Coll, Coll.scroll) end
+    if FUI.Bar then FUI.Bar(_G.GuildHouseCollectionScrollScrollBar) end
+end
+
+-- The details, on the right: the object turning, its name, its family, how many the guild has,
+-- where it is found.
+local Detail = CreateFrame("Frame", nil, Coll)
+Detail:SetPoint("TOPLEFT", 372, -36)
+Detail:SetPoint("BOTTOMRIGHT", -16, 16)
+Detail.model = CreateFrame("Model", nil, Detail)
+Detail.model:SetPoint("TOPLEFT", 0, 0)
+Detail.model:SetPoint("TOPRIGHT", 0, 0)
+Detail.model:SetHeight(200)
+Detail.model:SetScript("OnUpdate", function(self)
+    if self.camera then self:SetCamera(self.camera) end
+end)
+Detail.name = Detail:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+Detail.name:SetPoint("TOPLEFT", Detail.model, "BOTTOMLEFT", 0, -6)
+Detail.name:SetPoint("RIGHT", Detail, "RIGHT", 0, 0)
+Detail.name:SetJustifyH("LEFT")
+Detail.kind = Detail:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+Detail.kind:SetPoint("TOPLEFT", Detail.name, "BOTTOMLEFT", 0, -4)
+Detail.count = Detail:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+Detail.count:SetPoint("TOPLEFT", Detail.kind, "BOTTOMLEFT", 0, -6)
+Detail.sources = Detail:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+Detail.sources:SetPoint("TOPLEFT", Detail.count, "BOTTOMLEFT", 0, -8)
+Detail.sources:SetPoint("RIGHT", Detail, "RIGHT", 0, 0)
+Detail.sources:SetPoint("BOTTOM", Detail, "BOTTOM", 0, 0)
+Detail.sources:SetJustifyH("LEFT")
+Detail.sources:SetJustifyV("TOP")
+
+local function Owned(decor)
+    return S.state and S.state.owned and S.state.owned[decor] or 0
+end
+
+local function Placed(decor)
+    local n = 0
+    for _, p in ipairs(S.state and S.state.placed or {}) do
+        if p.decor == decor then n = n + 1 end
+    end
+    return n
+end
+
+-- Where the object is found, in words.
+local function SourceText(decor)
+    local src = C.sources[decor]
+    if not src then return L.loading end
+    local loc, lines = Loc(), {}
+    for _, q in ipairs(src.quests or {}) do
+        local zone = loc.zones and loc.zones[q[3]]
+        lines[#lines + 1] = fmt("|cffffd100%s|r %s (%s%s)", L.quest, q[1], fmt(L.level, q[2]), zone and (", " .. zone) or "")
+    end
+    if #(src.quests or {}) > 0 then
+        lines[#lines + 1] = "|cff999999" .. L.questRule .. "|r"
+        lines[#lines + 1] = " "
+    end
+    if #(src.bosses or {}) > 0 then
+        lines[#lines + 1] = fmt("|cffffd100%s|r %s", L.boss, table.concat(src.bosses, ", "))
+    end
+    if #(src.maps or {}) > 0 then
+        local maps = {}
+        for _, m in ipairs(src.maps) do
+            maps[#maps + 1] = loc.maps and loc.maps[m] or tostring(m)
+        end
+        table.sort(maps)
+        lines[#lines + 1] = fmt("|cffffd100%s|r %s", L.themed, table.concat(maps, ", "))
+    else
+        lines[#lines + 1] = "|cffffd100" .. L.anywhere .. "|r"
+    end
+    local s, m = S.state or {}, (S.state and S.state.members) or { 4, 8, 20 }
+    lines[#lines + 1] = "|cff999999" .. fmt(L.dropRule, s.paragonNeeded or 9, m[1], m[2], m[3]) .. "|r"
+    lines[#lines + 1] = " "
+    lines[#lines + 1] = "|cff999999" .. L.tradable .. "|r"
+    return table.concat(lines, "\n")
+end
+
+function Detail:Display(decor)
+    C.shown = decor
+    local d = decor and GuildHouseDecor[decor]
+    if not d then
+        self.model:ClearModel()
+        self.model.camera = nil
+        self.name:SetText("")
+        self.kind:SetText("")
+        self.count:SetText("")
+        self.sources:SetText("")
+        return
+    end
+    if self.decor ~= decor then
+        self.decor = decor
+        self.model:ClearModel()
+        self.model:SetModel((d[3]:gsub("%.m2$", ".mdx")))
+        self.model.camera = d[12] or 0
+        self.model:SetModelScale(1)
+        self.model:SetPosition(0, 0, 0)
+        self.model:SetCamera(self.model.camera)
+        self.model:SetFacing(0)
+        self.model:SetLight(1, 0, -0.5, -0.6, -0.6, 0.8, 1, 1, 1, 0.8, 1, 0.95, 0.85)
+    end
+    self.name:SetText(DecorName(decor))
+    local cats = L.categories
+    self.kind:SetText((cats[d[1]] or d[1]) .. " - " .. KindName(d[2]))
+    local owned = Owned(decor)
+    if owned > 0 then
+        self.count:SetText(fmt(L.count, owned, Placed(decor)))
+        self.count:SetTextColor(0.25, 1, 0.25)
+    else
+        self.count:SetText(L.none)
+        self.count:SetTextColor(0.6, 0.6, 0.6)
+    end
+    self.sources:SetText(SourceText(decor))
+    if not C.sources[decor] and not C.asked[decor] then
+        C.asked[decor] = true
+        AIO.Handle("GuildHouse", "Sources", decor)
+    end
+end
+
+Coll.rows = {}
+for i = 1, COLL_ROWS do
+    local r = CreateFrame("Button", nil, Coll)
+    r:SetHeight(COLL_ROW)
+    r:SetPoint("TOPLEFT", 18, -146 - (i - 1) * COLL_ROW)
+    r:SetPoint("RIGHT", Coll.scroll, "RIGHT", -4, 0)
+    r:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+    r.selection = r:CreateTexture(nil, "BACKGROUND")
+    r.selection:SetAllPoints()
+    r.selection:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+    r.selection:SetBlendMode("ADD")
+    r.selection:SetVertexColor(1, 0.82, 0)
+    r.icon = r:CreateTexture(nil, "ARTWORK")
+    r.icon:SetWidth(COLL_ROW - 4)
+    r.icon:SetHeight(COLL_ROW - 4)
+    r.icon:SetPoint("LEFT", 2, 0)
+    r.name = r:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    r.name:SetPoint("LEFT", r.icon, "RIGHT", 6, 0)
+    r.name:SetPoint("RIGHT", -34, 0)
+    r.name:SetJustifyH("LEFT")
+    r.count = r:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    r.count:SetPoint("RIGHT", -4, 0)
+    r:SetScript("OnClick", function(self)
+        C.selected = self.decor
+        Detail:Display(self.decor)
+        Coll:Refresh()
+    end)
+    r:SetScript("OnEnter", function(self)
+        if self.decor then Detail:Display(self.decor) end
+    end)
+    r:SetScript("OnLeave", function()
+        Detail:Display(C.selected)
+    end)
+    Coll.rows[i] = r
+end
+
+-- The list for the family, the filter and the search.
+function Coll:Rebuild()
+    local list = {}
+    for decor, d in pairs(GuildHouseDecor or {}) do
+        if not C.category or d[1] == C.category then
+            local owned = Owned(decor) > 0
+            if C.filter == "all" or (C.filter == "owned") == owned then
+                if C.search == "" or DecorName(decor):lower():find(C.search, 1, true) then
+                    list[#list + 1] = decor
+                end
+            end
+        end
+    end
+    table.sort(list, function(a, b) return DecorName(a) < DecorName(b) end)
+    C.list = list
+    Coll:Refresh()
+end
+
+function Coll:Refresh()
+    local total, owned = 0, 0
+    for decor in pairs(GuildHouseDecor or {}) do
+        total = total + 1
+        if Owned(decor) > 0 then owned = owned + 1 end
+    end
+    if S.state and S.state.guild then
+        Coll.progress:SetText(fmt(L.progress, owned, total))
+    else
+        Coll.progress:SetText(L.noguild)
+    end
+    for _, t in ipairs(Coll.tabs) do
+        if t.category == C.category then t.button:LockHighlight() else t.button:UnlockHighlight() end
+    end
+    for f, b in pairs(Coll.filters) do
+        if f == C.filter then b:LockHighlight() else b:UnlockHighlight() end
+    end
+    local list = C.list
+    FauxScrollFrame_Update(Coll.scroll, #list, COLL_ROWS, COLL_ROW)
+    local offset = FauxScrollFrame_GetOffset(Coll.scroll)
+    for i = 1, COLL_ROWS do
+        local r = Coll.rows[i]
+        local decor = list[i + offset]
+        r.decor = decor
+        if decor then
+            local n = Owned(decor)
+            if not r.icon:SetTexture(ICONS .. decor) then r.icon:SetTexture(NO_ICON) end
+            r.icon:SetDesaturated(n == 0)
+            r.name:SetText(DecorName(decor))
+            r.count:SetText(n > 0 and n or "")
+            if n > 0 then r.name:SetTextColor(1, 1, 1) else r.name:SetTextColor(0.55, 0.55, 0.55) end
+            if decor == C.selected then r.selection:Show() else r.selection:Hide() end
+            r:Show()
+        else
+            r:Hide()
+        end
+    end
+    Detail:Display(C.shown or C.selected)
+end
+
+Coll:SetScript("OnShow", function(self)
+    self:SetScale(UIParent:GetScale())
+    AIO.Handle("GuildHouse", "Refresh")
+    self:Rebuild()
+end)
+
+function Coll:Toggle()
+    if self:IsShown() then self:Hide() else self:Show() end
+end
+
+function Handlers.Sources(_, sources)
+    if type(sources) ~= "table" or not sources.decor then return end
+    C.sources[sources.decor] = sources
+    C.asked[sources.decor] = nil
+    if Coll:IsShown() and C.shown == sources.decor then
+        Detail:Display(C.shown)
+    end
+end
+
+-- The way in from the Customization panel: in its third row of families, beside the last one.
+local collButton = Button(Panel, L.collection, 88)
+collButton:SetPoint("TOPLEFT", 14 + 2 * 91, -36 - 2 * 26)
+collButton:SetScript("OnClick", function() Coll:Toggle() end)
+
+------------------------------------------------------------------------------
 -- The way in
 ------------------------------------------------------------------------------
 
@@ -637,6 +1069,18 @@ local function Shown(state)
         UI:Leave()
     end
     if S.active then UI:Refresh() end
+    if Coll:IsShown() then Coll:Rebuild() end
+end
+
+-- The objects' names in the player's language, a part at a time (none for English).
+function Handlers.Names(_, part, done)
+    for decor, name in pairs(type(part) == "table" and part or {}) do
+        names[decor] = name
+    end
+    if done then
+        if S.active then UI:Refresh() end
+        if Coll:IsShown() then Coll:Rebuild() end
+    end
 end
 
 function Handlers.Show(_, state)
@@ -688,6 +1132,27 @@ leaving:SetScript("OnEvent", function()
     UIParent:Show()
 end)
 
+SLASH_GUILDHOUSECOLLECTION1 = "/gcoll"
+SLASH_GUILDHOUSECOLLECTION2 = "/gcollection"
+SlashCmdList.GUILDHOUSECOLLECTION = function() Coll:Toggle() end
+
+-- And from the stock guild window, under the talents' button (ForeverUI's guild page: /gcoll).
+local guildButton
+local function AttachGuildButton()
+    local parent = _G.GuildFrame
+    if guildButton or not parent then return end
+    guildButton = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    guildButton:SetWidth(130)
+    guildButton:SetHeight(22)
+    guildButton:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -44, -68)
+    guildButton:SetText(L.collection)
+    guildButton:SetFrameLevel(parent:GetFrameLevel() + 10)
+    guildButton:SetScript("OnClick", function() Coll:Toggle() end)
+end
+if FriendsFrame then FriendsFrame:HookScript("OnShow", AttachGuildButton) end
+if FriendsFrame_Update then hooksecurefunc("FriendsFrame_Update", AttachGuildButton) end
+AttachGuildButton()
+
 SLASH_GUILDHOUSEDECO1 = "/gdeco"
 SlashCmdList.GUILDHOUSEDECO = function()
     if S.active then UI:Leave() else AIO.Handle("GuildHouse", "Open") end
@@ -697,3 +1162,7 @@ end
 -- PLAYER_ENTERING_WORLD: the state is asked for at once, and again a little later.
 AIO.Handle("GuildHouse", "Refresh")
 again = { 2, 6 }
+-- the names, once, in a language other than English
+if GetLocale() ~= "enUS" and GetLocale() ~= "enGB" then
+    AIO.Handle("GuildHouse", "Names")
+end

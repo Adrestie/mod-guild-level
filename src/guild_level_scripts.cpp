@@ -410,7 +410,7 @@ class spell_guild_decor_collect : public SpellScript
         uint32 decor = 0, owned = 0;
         if (sGuildDecorMgr->Collect(player, item->GetEntry(), decor, owned) == GuildDecorResult::Ok)
             ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_DECOR_COLLECTED,
-                sGuildDecorMgr->NameOf(decor), owned);
+                sGuildDecorMgr->NameOf(decor, player->GetSession()->GetSessionDbLocaleIndex()), owned);
     }
 
     void Register() override

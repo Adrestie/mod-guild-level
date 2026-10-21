@@ -35,8 +35,8 @@
  * HOW A GUILD GETS THEM: each object is an item too (`mod_guild_level_decor_item`).
  * A dungeon or raid boss killed by enough members of a guild of the
  * Customization's Paragon level (4 in a dungeon, 8 in a 10-player raid, 20 in
- * a 25-player one) may drop one: the boss's own objects first, else those of
- * the instance's theme, else one of no theme (`mod_guild_level_decor_loot`,
+ * a 25-player one) may drop one: the boss's own objects first, else one of
+ * the instance's theme (ThemeChance) or of no theme (`mod_guild_level_decor_loot`,
  * tools/decor/loot.json). Only that guild's members see it in the loot: they
  * carry a hidden mark from the kill (GUILD_DECOR_LOOT_MARK), the item's loot
  * condition. Quests give some too (`mod_guild_level_decor_quest`,
@@ -77,6 +77,7 @@ struct GuildDecorConfig
     uint8 paragon = 9;                  // the Paragon level that opens the Customization
     uint8 rank = 1;                     // highest guild rank id allowed (0 guild master, 1 officer...)
     float dropChance = 10.0f;           // % for a boss of an eligible kill to drop an object
+    float themeChance = 60.0f;          // % for an instance of a theme to drop one of its theme (else one of none)
     uint8 dungeonMembers = 4;           // guildmates needed at the kill: a dungeon
     uint8 raid10Members = 8;            // a 10-player raid
     uint8 raid25Members = 20;           // a 25-player raid
@@ -152,7 +153,8 @@ public:
     // and put it there (Collect, the stock's new count in owned).
     GuildDecorResult CheckCollect(Player* player, uint32 item) const;
     GuildDecorResult Collect(Player* player, uint32 item, uint32& decor, uint32& owned);
-    [[nodiscard]] std::string NameOf(uint32 decor) const;
+    // An object's name in a language (its item's, item_template_locale), English when it has none there.
+    [[nodiscard]] std::string NameOf(uint32 decor, uint8 locale = 0) const;
 
     // A creature killed by the player (or his pet): a boss of an eligible kill may drop an object.
     void OnCreatureKill(Player* killer, Creature* creature);
