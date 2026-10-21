@@ -137,8 +137,16 @@
           "where": "entry BETWEEN 920100 AND 939999"
         },
         {
+          "table": "gameobject_template_locale",
+          "where": "entry BETWEEN 920100 AND 939999"
+        },
+        {
           "table": "item_template",
           "where": "entry BETWEEN 92100 AND 93999 OR entry BETWEEN 82200 AND 82899"
+        },
+        {
+          "table": "item_template_locale",
+          "where": "ID BETWEEN 92100 AND 93999 OR ID BETWEEN 82200 AND 82899"
         },
         {
           "table": "spell_dbc",
@@ -1908,6 +1916,9 @@
       "Interface/GuildLevel"
     ]
   },
+  "extensions": [
+    "client/dist/wxl-guildhouse"
+  ],
   "server_data": {
     "sources": [
       "data/server"
@@ -1918,7 +1929,8 @@
     "data/dbc",
     "tools",
     "data/server",
-    "data/lua"
+    "data/lua",
+    "client"
   ],
   "lua": {
     "folder": "GuildLevel",

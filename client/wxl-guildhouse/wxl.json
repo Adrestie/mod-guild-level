@@ -1,6 +1,5 @@
 {
   "manifest": 1,
-
   "extension": {
     "id": "wxl-guildhouse",
     "version": "1.0.0",
@@ -9,10 +8,16 @@
     "assets": [],
     "requires": {},
     "conflicts": [],
-
     "hooks": []
   },
-
   "license": "GPL-3.0-or-later",
-  "signature": null
+  "signature": null,
+  "listing": {
+    "title": "Guild House",
+    "tagline": "Client side of mod-guild-level's Customization: the guild house's objects previewed, picked, outlined and moved, turned and sized with a gizmo.",
+    "categories": [
+      "interface"
+    ],
+    "accent": "#d9a441"
+  }
 }
