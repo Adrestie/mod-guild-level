@@ -18,8 +18,8 @@
 --[[----------------------------------------------------------------------------
     The Customization mode of the guild house, client side.
 
-    In the house, a member allowed to decorate enters the mode with /gdeco
-    (nothing shows it on screen): the usual interface gives way to the
+    In the house, a member allowed to decorate enters the mode (the button at
+    the top of the screen, or /gdeco): the usual interface gives way to the
     guild's objects (left) and the edit bar (bottom). An object of the stock is
     picked, follows the cursor on the hall's floors and walls (the mouse wheel
     turns it), and is set down with a click; its gizmo then moves, turns and
@@ -45,6 +45,7 @@ local floor, min, max, sin, cos = math.floor, math.min, math.max, math.sin, math
 
 local L = {
     enUS = {
+        button = "Customization",
         title = "Guild objects", validate = "Place", cancel = "Cancel", store = "To the stock",
         move = "Move (1)", rotate = "Turn (2)", scale = "Size (3)", world = "World", localAxes = "Local", reset = "Reset turn", follow = "Follow the mouse",
         ground = "Set on the floor", camera = "Free camera", exit = "Leave (Esc)",
@@ -56,6 +57,7 @@ local L = {
         categories = { Furnishings = "Furniture", Lighting = "Lights", Accents = "Decoration", Nature = "Plants" },
     },
     frFR = {
+        button = "Personnalisation",
         title = "Objets de guilde", validate = "Valider", cancel = "Annuler", store = "Ranger",
         move = "Déplacer (1)", rotate = "Pivoter (2)", scale = "Taille (3)", world = "Monde", localAxes = "Local", reset = "Rotation d'origine", follow = "Suivre la souris",
         ground = "Poser au sol", camera = "Caméra libre", exit = "Quitter (Échap)",
@@ -556,8 +558,18 @@ end)
 -- The way in
 ------------------------------------------------------------------------------
 
+-- The way in, at the top of the screen, while the member stands in his house and may decorate it.
+local Open = CreateFrame("Button", "GuildHouseOpenButton", UIParent, "UIPanelButtonTemplate")
+Open:SetWidth(150)
+Open:SetHeight(24)
+Open:SetPoint("TOP", UIParent, "TOP", 0, -8)
+Open:SetText(L.button)
+Open:Hide()
+Open:SetScript("OnClick", function() UI:Enter() end)
+
 local function Shown(state)
     S.state = state
+    if state.inHouse and state.can then Open:Show() else Open:Hide() end
     if S.active and not state.inHouse then
         UI:Leave()
     end
