@@ -22,6 +22,7 @@
 #include "Chat.h"
 #include "Guild.h"
 #include "GuildActivePerks.h"
+#include "GuildDecor.h"
 #include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
@@ -51,6 +52,7 @@ public:
         sGuildPerkMgr->LoadConfig();
         sGuildActivePerkMgr->LoadConfig();
         sGuildHouseMgr->LoadConfig();
+        sGuildDecorMgr->LoadConfig();
         sGuildTalentMgr->LoadConfig();
 
         // New amounts for the members online at once.
@@ -64,6 +66,7 @@ public:
     {
         sGuildLevelMgr->LoadFromDB();
         sGuildHouseMgr->LoadFromDB();
+        sGuildDecorMgr->LoadFromDB();
         sGuildTalentMgr->LoadTree();
         sGuildTalentMgr->LoadGuilds();
     }
@@ -339,6 +342,7 @@ public:
     {
         sGuildLevelMgr->DeleteGuild(guild->GetId());
         sGuildHouseMgr->DeleteGuild(guild->GetId());
+        sGuildDecorMgr->DeleteGuild(guild->GetId());
         sGuildTalentMgr->DeleteGuild(guild->GetId());
     }
 };
@@ -373,6 +377,7 @@ public:
 void AddSC_guild_level_commands();
 void AddSC_guild_perk_commands();
 void AddSC_guild_talent_commands();
+void AddSC_guild_decor_commands();
 
 void AddSC_guild_level_scripts()
 {
@@ -388,4 +393,5 @@ void AddSC_guild_level_scripts()
     AddSC_guild_level_commands();
     AddSC_guild_perk_commands();
     AddSC_guild_talent_commands();
+    AddSC_guild_decor_commands();
 }

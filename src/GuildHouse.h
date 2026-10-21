@@ -116,6 +116,7 @@ public:
     void OnMapUpdate(Map* map, uint32 diff);
     // World thread.
     void OnGuildChanged(uint32 guildId);        // a Paragon level moved
+    void OnDecorChanged(uint32 guildId);        // its Customization objects (GuildDecor.h)
     void OnMemberLeft(ObjectGuid player);       // left or was removed from his guild
     void DeleteGuild(uint32 guildId);
 
@@ -140,6 +141,9 @@ private:
         std::set<uint32> placed;                // spawn ids standing
         std::vector<ObjectGuid> objects;        // what was placed, to take away
         std::map<ObjectGuid, uint32> spawnOf;   // and the spawn each one came from
+        // the guild's Customization objects standing: placed id -> (object, its version)
+        std::map<uint32, std::pair<ObjectGuid, uint32>> decor;
+        bool decorDirty = true;                 // to compare with GuildDecorMgr again
     };
 
     struct Hall
@@ -155,6 +159,7 @@ private:
     [[nodiscard]] uint8 ParagonOf(uint32 guildId) const;
     void Furnish(Map* map, Slot& slot, uint8 index);
     void Empty(Map* map, Slot& slot);
+    void SyncDecor(Map* map, Slot& slot, uint8 index);
     void RebuildHall(uint32 mapId);             // under _lock
 
     // Where each character came from (characters table mod_guild_level_house_origin).

@@ -26,14 +26,18 @@
         "mod_guild_level_perk_cooldown",
         "mod_guild_level_house_origin",
         "mod_guild_level_talent",
-        "mod_guild_level_talent_reset"
+        "mod_guild_level_talent_reset",
+        "mod_guild_level_decor_stock",
+        "mod_guild_level_decor_placed"
       ],
       "kept_on_update": [
         "mod_guild_level",
         "mod_guild_level_perk_cooldown",
         "mod_guild_level_house_origin",
         "mod_guild_level_talent",
-        "mod_guild_level_talent_reset"
+        "mod_guild_level_talent_reset",
+        "mod_guild_level_decor_stock",
+        "mod_guild_level_decor_placed"
       ],
       "rows": [
         {
@@ -121,6 +125,18 @@
           "where": "SpellId = 92027"
         },
         {
+          "table": "command",
+          "where": "name = 'ghouse' OR name LIKE 'ghouse %'"
+        },
+        {
+          "table": "gameobjectdisplayinfo_dbc",
+          "where": "ID BETWEEN 92100 AND 92249"
+        },
+        {
+          "table": "gameobject_template",
+          "where": "entry BETWEEN 920100 AND 920249"
+        },
+        {
           "table": "updates",
           "where": "name IN ({sql_files:world})"
         }
@@ -128,7 +144,8 @@
       "tables": [
         "mod_guild_level_house_spawn",
         "mod_guild_level_talent_node",
-        "mod_guild_level_talent_link"
+        "mod_guild_level_talent_link",
+        "mod_guild_level_decor"
       ],
       "kept_on_update": [
         "mod_guild_level_talent_node",
@@ -1600,6 +1617,211 @@
           "217": 1065353216,
           "218": 1065353216,
           "225": 1
+        }
+      ]
+    },
+    {
+      "file": "Light.dbc",
+      "fields": 15,
+      "client": true,
+      "server": false,
+      "rows": [
+        {
+          "0": 92200,
+          "1": 449,
+          "7": 92200,
+          "8": 92200,
+          "9": 92200,
+          "10": 92200,
+          "11": 4
+        },
+        {
+          "0": 92201,
+          "1": 450,
+          "7": 92200,
+          "8": 92200,
+          "9": 92200,
+          "10": 92200,
+          "11": 4
+        }
+      ]
+    },
+    {
+      "file": "LightParams.dbc",
+      "fields": 9,
+      "client": true,
+      "server": false,
+      "rows": [
+        {
+          "0": 92200,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0,
+          "5": 1056964608,
+          "6": 1065353216,
+          "7": 1061158912,
+          "8": 1065353216
+        }
+      ]
+    },
+    {
+      "file": "LightIntBand.dbc",
+      "fields": 34,
+      "client": true,
+      "server": false,
+      "rows": [
+        {
+          "0": 1659583,
+          "1": 1,
+          "2": 0,
+          "18": 7234648
+        },
+        {
+          "0": 1659584,
+          "1": 1,
+          "2": 0,
+          "18": 5919820
+        },
+        {
+          "0": 1659585,
+          "1": 1,
+          "2": 0,
+          "18": 8009
+        },
+        {
+          "0": 1659586,
+          "1": 1,
+          "2": 0,
+          "18": 3842767
+        },
+        {
+          "0": 1659587,
+          "1": 1,
+          "2": 0,
+          "18": 10083573
+        },
+        {
+          "0": 1659588,
+          "1": 1,
+          "2": 0,
+          "18": 11524832
+        },
+        {
+          "0": 1659589,
+          "1": 1,
+          "2": 0,
+          "18": 11842740
+        },
+        {
+          "0": 1659590,
+          "1": 1,
+          "2": 0,
+          "18": 5077135
+        },
+        {
+          "0": 1659591,
+          "1": 1,
+          "2": 0,
+          "18": 5066061
+        },
+        {
+          "0": 1659592,
+          "1": 1,
+          "2": 0,
+          "18": 16775134
+        },
+        {
+          "0": 1659593,
+          "1": 1,
+          "2": 0,
+          "18": 16762762
+        },
+        {
+          "0": 1659594,
+          "1": 1,
+          "2": 0,
+          "18": 2845060
+        },
+        {
+          "0": 1659595,
+          "1": 1,
+          "2": 0,
+          "18": 0
+        },
+        {
+          "0": 1659596,
+          "1": 1,
+          "2": 0,
+          "18": 6390455
+        },
+        {
+          "0": 1659597,
+          "1": 1,
+          "2": 0,
+          "18": 1133401
+        },
+        {
+          "0": 1659598,
+          "1": 1,
+          "2": 0,
+          "18": 7465
+        },
+        {
+          "0": 1659599,
+          "1": 1,
+          "2": 0,
+          "18": 5201172
+        },
+        {
+          "0": 1659600,
+          "1": 1,
+          "2": 0,
+          "18": 3363413
+        }
+      ]
+    },
+    {
+      "file": "LightFloatBand.dbc",
+      "fields": 34,
+      "client": true,
+      "server": false,
+      "rows": [
+        {
+          "0": 553195,
+          "1": 1,
+          "2": 0,
+          "18": 1183621120
+        },
+        {
+          "0": 553196,
+          "1": 1,
+          "2": 0,
+          "18": 1048576000
+        },
+        {
+          "0": 553197,
+          "1": 1,
+          "2": 0,
+          "18": 1065353216
+        },
+        {
+          "0": 553198,
+          "1": 1,
+          "2": 0,
+          "18": 1056964608
+        },
+        {
+          "0": 553199,
+          "1": 1,
+          "2": 0,
+          "18": 1064514355
+        },
+        {
+          "0": 553200,
+          "1": 1,
+          "2": 0,
+          "18": 1065353216
         }
       ]
     }

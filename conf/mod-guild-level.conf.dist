@@ -269,6 +269,26 @@ GuildLevel.House.EmptyDelay       = 60
 
 ###############################################################################
 #
+#    THE CUSTOMIZATION MODE
+#
+#    The guild decorates its house with the objects it owns (mod_guild_level_decor,
+#    world; .ghouse give fills a guild's stock), each placed at most as many
+#    times as it is owned. The members' client needs WarcraftXL with the
+#    guild house editor (Extensions/wxl-guildhouse) and wxl-modern-m2.
+#
+#    GuildLevel.House.Decor.Enable    0 = no Customization.
+#    GuildLevel.House.Decor.Paragon   the Paragon level that opens it.
+#    GuildLevel.House.Decor.Rank      the highest guild rank id allowed to
+#                                     decorate: 0 the guild master only, 1
+#                                     the officers too, and so on.
+#
+
+GuildLevel.House.Decor.Enable     = 1
+GuildLevel.House.Decor.Paragon    = 9
+GuildLevel.House.Decor.Rank       = 1
+
+###############################################################################
+#
 #    THE GUILD TALENTS
 #
 #    From level FromLevel, each level and each Paragon level gives the guild

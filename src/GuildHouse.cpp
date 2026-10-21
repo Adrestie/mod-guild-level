@@ -16,6 +16,7 @@
  */
 
 #include "GuildHouse.h"
+#include "GuildDecor.h"
 #include "GuildActivePerks.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
@@ -330,6 +331,8 @@ void GuildHouseMgr::OnPlayerLeaveMap(Map* map, Player* player)
     if (!IsHouseMap(map->GetId()))
         return;
     sGuildActivePerkMgr->ShowCooldown(player, GUILD_ACTIVE_HOME);
+    // an edit he left open is cancelled: the object goes back where it was
+    sGuildDecorMgr->CancelAllOf(player->GetGUID());
     // Nothing of a house's phase follows the player out.
     if (!player->IsGameMaster() && player->GetPhaseMask() != PHASEMASK_NORMAL)
         player->SetPhaseMask(PHASEMASK_NORMAL, false);
@@ -396,6 +399,14 @@ void GuildHouseMgr::Empty(Map* map, Slot& slot)
     }
     slot.objects.clear();
     slot.spawnOf.clear();
+    for (auto const& [id, shown] : slot.decor)
+        if (GameObject* go = map->GetGameObject(shown.first))
+        {
+            go->SetRespawnTime(0);
+            go->Delete();
+        }
+    slot.decor.clear();
+    slot.decorDirty = true;
     slot.placed.clear();
 }
 
@@ -487,6 +498,53 @@ void GuildHouseMgr::OnMapUpdate(Map* map, uint32 diff)
             Furnish(map, slot, i);
             slot.furnish = false;
         }
+        if (slot.decorDirty)
+        {
+            slot.decorDirty = false;
+            SyncDecor(map, slot, i);
+        }
+    }
+}
+
+void GuildHouseMgr::SyncDecor(Map* map, Slot& slot, uint8 index)
+{
+    std::vector<GuildDecorShown> const wanted = sGuildDecorMgr->Snapshot(slot.guildId, map->GetId());
+    std::map<uint32, GuildDecorShown const*> byId;
+    for (GuildDecorShown const& w : wanted)
+        byId[w.id] = &w;
+
+    // Taken away: no longer placed, in a member's hand, or moved since.
+    for (auto itr = slot.decor.begin(); itr != slot.decor.end();)
+    {
+        auto w = byId.find(itr->first);
+        if (w != byId.end() && w->second->version == itr->second.second)
+        {
+            ++itr;
+            continue;
+        }
+        if (GameObject* go = map->GetGameObject(itr->second.first))
+        {
+            go->SetRespawnTime(0);
+            go->Delete();
+        }
+        itr = slot.decor.erase(itr);
+    }
+
+    // Put (back): where it was left, turned and sized as it was.
+    uint32 const mask = MaskOf(index);
+    for (GuildDecorShown const& w : wanted)
+    {
+        if (slot.decor.count(w.id))
+            continue;
+        auto const& q = w.rot;
+        float const facing = std::atan2(2.0f * (q[3] * q[2] + q[0] * q[1]), 1.0f - 2.0f * (q[1] * q[1] + q[2] * q[2]));
+        if (GameObject* go = map->SummonGameObject(w.entry, w.pos[0], w.pos[1], w.pos[2], facing,
+                q[0], q[1], q[2], q[3], 0))
+        {
+            go->SetPhaseMask(mask, true);
+            go->SetObjectScale(w.scale);
+            slot.decor[w.id] = { go->GetGUID(), w.version };
+        }
     }
 }
 
@@ -559,6 +617,15 @@ void GuildHouseMgr::OnGuildChanged(uint32 guildId)
         for (Slot& slot : hall->slots)
             if (slot.guildId == guildId)
                 slot.rebuild = true;
+}
+
+void GuildHouseMgr::OnDecorChanged(uint32 guildId)
+{
+    std::lock_guard<std::mutex> guard(_lock);
+    for (Hall* hall : { &_alliance, &_horde })
+        for (Slot& slot : hall->slots)
+            if (slot.guildId == guildId)
+                slot.decorDirty = true;
 }
 
 void GuildHouseMgr::SendBack(Player* player)
