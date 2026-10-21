@@ -140,6 +140,11 @@ local FUI = _G.ForeverUI and _G.ForeverUI.Templates
 
 -- A panel's frame, and its title if any.
 local function Backdrop(f, title)
+    -- without a title, ForeverUI's dialog frame (its window has a title band)
+    if FUI and not title and FUI.DialogFrame then
+        FUI.DialogFrame(f)
+        return
+    end
     if FUI and FUI.Window then
         local parts = FUI.Window(f, title)
         return parts and parts.title
