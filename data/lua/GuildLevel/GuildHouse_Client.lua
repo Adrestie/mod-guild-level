@@ -618,3 +618,8 @@ SLASH_GUILDHOUSEDECO1 = "/gdeco"
 SlashCmdList.GUILDHOUSEDECO = function()
     if S.active then UI:Leave() else AIO.Handle("GuildHouse", "Open") end
 end
+
+-- This file is run when AIO hands it over, after the first loading screen's
+-- PLAYER_ENTERING_WORLD: the state is asked for at once, and again a little later.
+AIO.Handle("GuildHouse", "Refresh")
+again = { 2, 6 }
