@@ -1243,45 +1243,6 @@ leaving:SetScript("OnEvent", function()
     UIParent:Show()
 end)
 
--- A game master's check of the previews (.gdecoshots): each object in the window of its own, a
--- screenshot of it two seconds later.
-local shots = CreateFrame("Frame")
-shots:Hide()
-shots:SetScript("OnUpdate", function(self, elapsed)
-    self.wait = self.wait - elapsed
-    if self.wait > 0 then return end
-    if self.taken then
-        table.remove(self.list, 1)
-        self.taken = false
-        if not self.list[1] then
-            self:Hide()
-            Say("GuildHouse: screenshots done.")
-            return
-        end
-    end
-    local decor = self.list[1]
-    if not self.shown then
-        C.selected = decor
-        C.shown = nil
-        Detail:Display(decor)
-        Coll:Refresh()
-        self.shown = true
-        self.wait = 2
-        return
-    end
-    Say(fmt("GuildHouse: screenshot of %d, %s", decor, DecorName(decor)))
-    Screenshot()
-    self.shown, self.taken, self.wait = false, true, 0.5
-end)
-
-function Handlers.Shots(_, ids)
-    if type(ids) ~= "table" or not ids[1] then return end
-    Unembed()
-    Coll:Show()
-    shots.list, shots.wait, shots.shown, shots.taken = ids, 1, false, false
-    shots:Show()
-end
-
 SLASH_GUILDHOUSECOLLECTION1 = "/gcoll"
 SLASH_GUILDHOUSECOLLECTION2 = "/gcollection"
 SlashCmdList.GUILDHOUSECOLLECTION = function() Coll:Toggle(S.active) end
