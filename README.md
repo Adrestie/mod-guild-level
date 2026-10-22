@@ -31,7 +31,6 @@ talents, a house of its own and, at Paragon 9, the furniture to decorate it.
 | AzerothCore WotLK | the server the module is compiled into (required) |
 | [ALE](https://github.com/azerothcore/mod-ale) + [AIO](https://github.com/Rochet2/AIO) | the windows (server and client); without them, commands only |
 | [WarcraftXL](https://github.com/WarcraftXL/wxl-core) + its Modern M2 plugin | the client draws the furniture and the level-up effects |
-| `wxl-guildhouse` (`client/dist`) | the client extension of the Customization editor |
 | [ForeverUI](https://github.com/Adrestie/mod-forever-ui) | optional: its look, talents and Collection in its guild page |
 
 ## Installation
