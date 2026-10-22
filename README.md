@@ -42,9 +42,9 @@ tests: [docs/GUIDE.md](docs/GUIDE.md).
 
 ## Credits
 
-* [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk), ALE, AIO (Rochet2), WarcraftXL.
+* [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk), ALE, AIO (Rochet2).
 * [wxl-housing](https://github.com/sogyboi/wxl-housing) by sogyboi, which `wxl-guildhouse` forks.
-* [Dear ImGui](https://github.com/ocornut/imgui), [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo), wow.export, [wago.tools](https://wago.tools), m2port ([mod-limit-break](https://github.com/Adrestie/mod-limit-break)), WebWowViewerCpp.
+* [WXL](https://github.com/WarcraftXL/wxl-core) (WarcraftXL).
 
 ## Licence
 
