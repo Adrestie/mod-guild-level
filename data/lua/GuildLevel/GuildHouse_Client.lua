@@ -987,6 +987,12 @@ function Coll:Rebuild()
     end
     table.sort(list, function(a, b) return DecorName(a) < DecorName(b) end)
     C.list = list
+    -- something to look at: the first object of the list when none is chosen (or it left the list)
+    local kept = false
+    for _, decor in ipairs(list) do
+        if decor == C.selected then kept = true break end
+    end
+    if not kept then C.selected = list[1] end
     Coll:Refresh()
 end
 
@@ -1033,7 +1039,10 @@ end
 Coll:SetScript("OnShow", function(self)
     self:SetScale(UIParent:GetScale())
 end)
+-- the window's size for the guild page (below)
+local Fit
 Box:SetScript("OnShow", function()
+    if Box:GetParent() ~= Coll and Fit then Fit() end
     AIO.Handle("GuildHouse", "Refresh")
     Coll:Rebuild()
 end)
@@ -1069,6 +1078,19 @@ local function Hold(self)
     end
 end
 
+-- The window's size for the page: the box, plus what surrounds it (the guild column, the title
+-- bar). Again whenever the page shows: a window closed on this page and opened again shows it
+-- without its show(), at the guild page's size.
+Fit = function()
+    local win = Window()
+    if not (win and view) then return end
+    local left = (Box:GetLeft() and win:GetLeft()) and (Box:GetLeft() - win:GetLeft()) or 180
+    local top = (Box:GetTop() and win:GetTop()) and (win:GetTop() - Box:GetTop()) or 40
+    view.wantW = max(PAGE_W, min(left + Box:GetWidth() + 8, UIParent:GetWidth() * 0.92))
+    view.wantH = max(PAGE_H, min(top + Box:GetHeight() + 8, UIParent:GetHeight() * 0.92))
+    view:SetScript("OnUpdate", Hold)
+end
+
 local function Embed()
     if not view then return end
     Coll:Hide()
@@ -1078,14 +1100,7 @@ local function Embed()
     -- the right pane, from the guild column on (the box's own title band under the window's)
     Box:SetPoint("TOPLEFT", G.column or view, G.column and "TOPRIGHT" or "TOPLEFT", 4, -4)
     Box:Show()
-    local win = Window()
-    if win then
-        local left = (Box:GetLeft() and win:GetLeft()) and (Box:GetLeft() - win:GetLeft()) or 180
-        local top = (Box:GetTop() and win:GetTop()) and (win:GetTop() - Box:GetTop()) or 40
-        view.wantW = max(PAGE_W, min(left + Box:GetWidth() + 8, UIParent:GetWidth() * 0.92))
-        view.wantH = max(PAGE_H, min(top + Box:GetHeight() + 8, UIParent:GetHeight() * 0.92))
-        view:SetScript("OnUpdate", Hold)
-    end
+    Fit()
 end
 
 if GFUI then
