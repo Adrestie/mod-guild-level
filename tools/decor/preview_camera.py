@@ -12,7 +12,8 @@ its farthest corner sweeps about the vertical axis in the frame's width, its hei
 height. The client's projection takes the camera's field of view across the frame's diagonal
 (GxuXformCreateProjection_SG): FOV divided by sqrt(aspect^2 + 1) is the vertical.
 
-    add(m2 bytes, aspect) -> (new m2 bytes, the camera's index)
+    add(m2 bytes, aspect, box) -> (new m2 bytes, the camera's index); box: what the model draws
+    (build_decor.bounds), the header's box holding its lights' and particles' reach too
 """
 import math
 import struct
@@ -53,11 +54,12 @@ def _distance(x0, y0, z0, x1, y1, z1, aspect):
     return max(by_width, by_height) * MARGIN, rho, half_h
 
 
-def add(data, aspect):
+def add(data, aspect, box=None):
+    """box: what to frame (min x, y, z, max x, y, z), else the header's bounding box."""
     data = bytearray(data)
     base, size = next((at, size) for tag, at, size in _chunks(data) if tag == b'MD21')
     md20 = bytearray(data[base:base + size])
-    x0, y0, z0, x1, y1, z1 = struct.unpack_from('<6f', md20, BOUNDS)
+    x0, y0, z0, x1, y1, z1 = box or struct.unpack_from('<6f', md20, BOUNDS)
     distance, rho, half_h = _distance(x0, y0, z0, x1, y1, z1, aspect)
     zc = (z0 + z1) / 2
     height = zc + distance * math.tan(ELEVATION)

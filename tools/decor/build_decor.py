@@ -45,11 +45,53 @@ def sql_string(s):
     return "'%s'" % s.replace(BACKSLASH, BACKSLASH * 2).replace("'", "''")
 
 
+# blending modes that only add light (glows, halos, light shafts): left out of the bounds
+ADDITIVE = (3, 4)
+CARD_VERTICES = 8                   # a see-through section this small is a glow's card
+
+
+def _array(b, off):
+    return struct.unpack_from('<II', b, off)
+
+
 def bounds(path):
-    """The model's bounding box (MD20 header, 0xA0): min x, y, z, max x, y, z."""
-    m = open(path, 'rb').read()
-    i = m.find(b'MD20')
-    return struct.unpack_from('<6f', m, i + 0xA0)
+    """The box of what the model draws: min x, y, z, max x, y, z of the vertices of its first skin's
+    batches, those that add light and the see-through cards of glows left out (unless it has
+    nothing else). The header's box (MD20,
+    0xA0) holds its lights' and particles' reach too: a candle's is ten times its size."""
+    data = open(path, 'rb').read()
+    i = data.find(b'MD20')
+    m = data[i:]
+    header = struct.unpack_from('<6f', m, 0xA0)
+    skin = path[:-3] + '00.skin'
+    if not os.path.isfile(skin):
+        return header
+    s = open(skin, 'rb').read()
+    nv, ov = _array(m, 0x3C)
+    nmat, omat = _array(m, 0x70)
+    blending = [struct.unpack_from('<HH', m, omat + 4 * k)[1] for k in range(nmat)]
+    nlook, olook = _array(s, 4)
+    lookup = struct.unpack_from('<%dH' % nlook, s, olook)
+    nsub, osub = _array(s, 28)
+    nbatch, obatch = _array(s, 36)
+    solid, every = set(), set()
+    for k in range(nbatch):
+        section, material = struct.unpack_from('<H', s, obatch + 24 * k + 4)[0],             struct.unpack_from('<H', s, obatch + 24 * k + 10)[0]
+        every.add(section)
+        mode = blending[material] if material < len(blending) else 0
+        count = struct.unpack_from('<H', s, osub + 48 * section + 6)[0]
+        # light that adds up, and the see-through cards of a few vertices (glows, beams)
+        if mode in ADDITIVE or (mode >= 2 and count <= CARD_VERTICES):
+            continue
+        solid.add(section)
+    used = set()
+    for section in solid or every:
+        start, count = struct.unpack_from('<HH', s, osub + 48 * section + 4)
+        used.update(lookup[start:start + count])
+    points = [struct.unpack_from('<3f', m, ov + 48 * v) for v in used if v < nv]
+    if not points:
+        return header
+    return tuple(min(p[a] for p in points) for a in range(3)) + tuple(max(p[a] for p in points) for a in range(3))
 
 
 def display_of(n):
@@ -143,7 +185,7 @@ def main(export_dir):
         pack.pack(os.path.join(export_dir, name, name + '.m2'), out, name, GAME_DIR, {}, None)
         # a camera of its own for the interface's turntable preview
         m2 = os.path.join(out, name + '.m2')
-        data, camera = preview_camera.add(open(m2, 'rb').read(), PREVIEW_ASPECT)
+        data, camera = preview_camera.add(open(m2, 'rb').read(), PREVIEW_ASPECT, bounds(m2))
         open(m2, 'wb').write(data)
         e = dict(e, camera=camera)
         rows.append((e, GAME_DIR + BACKSLASH + name + '.m2'))
