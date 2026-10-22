@@ -34,6 +34,10 @@ PREVIEW_ASPECT = 280 / 224         # the interface's preview: its model's width 
 DISPLAY_BLOCKS = [(92100, 94599)]
 ENTRY = 920100                      # its gameobject: ENTRY + n (the blocks' gameobjects, x 10)
 KEEP_DISPLAYS = (92010, 92011)      # the Guild Chest's, in the same file
+# a modern model leaves its texture unit lookup empty (each texture's UV set follows from the
+# shader); the client reads it per batch: filled, the effects' environment maps (the reflections
+# of shader 0x8000) are drawn as such instead of from whatever the batch points at
+PACK_OPTIONS = {'fill_units': True}
 BACKSLASH = chr(92)
 
 
@@ -182,7 +186,7 @@ def main(export_dir):
         if not name:
             print('not exported:', e['decor'], e['name'])
             continue
-        pack.pack(os.path.join(export_dir, name, name + '.m2'), out, name, GAME_DIR, {}, None)
+        pack.pack(os.path.join(export_dir, name, name + '.m2'), out, name, GAME_DIR, PACK_OPTIONS, None)
         # a camera of its own for the interface's turntable preview
         m2 = os.path.join(out, name + '.m2')
         data, camera = preview_camera.add(open(m2, 'rb').read(), PREVIEW_ASPECT, bounds(m2))
