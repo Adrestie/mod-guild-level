@@ -1,30 +1,49 @@
 # mod-guild-level
 
-An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm:
-members of a guild who play together earn guild experience, and the guild
-climbs **25 levels**, then **9 Paragon levels**.
+An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm,
+and builds a guild house on them:
 
-> **Status:** guild experience, levels, Paragon levels, announcements, GM
-> commands, the perks of levels 1 to 25, the guild talents, the guild house and
-> its Customization mode (Paragon 9) work.
+* **Guild experience and levels:** members of a guild who play together earn
+  guild experience; the guild climbs **25 levels**, then **9 Paragon levels**,
+  announced to its members with a level-up toast and shown on a bar in the
+  guild window.
+* **Perks:** levels 1 to 20 give passive perks to every member (experience,
+  honor, reputation, mount speed, cheaper vendors...), levels 21 to 25 active
+  perks (summon the raid, resurrect it, a guild bank chest, a guild supplier,
+  the way home).
+* **Guild talents:** from level 10, every level and Paragon level gives the
+  guild a talent point, spent by its officers in a tree of statistics and
+  bonuses that every member gets.
+* **The guild house:** from Paragon 1, the guild has its own house in its
+  faction's PvP hall (Champions' Hall, Hall of Legends), one phase per guild;
+  Paragon 2 to 8 bring its services (supplier, banker, trainers, auction
+  house, portals).
+* **Customization (Paragon 9):** the members decorate the house with the
+  furniture of the modern housing: **2443 objects** in seven families,
+  dropped by dungeon and raid bosses (by theme and by boss) and given by
+  **800 quests**, placed, turned and sized with a 3D editor, and listed in a
+  Collection window that tells where each one is found.
 
-Core hooks, characters and world tables, texts in `module_string`. The module
-owns the numbers **92000-94599** of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
+The texts, the interface and the objects' names are in English, French,
+German, Spanish (esES) and Russian.
+
+The module owns the numbers **92000-94599** of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
 spell 92000 is the perks' aura, creature 92001 the guild supplier, displays
-92010-92011 and gameobjects 920000-920001 the Guild Chest, spells 92021-92071
-the talents, 92080-92081 the Customization objects' use and loot mark; the
-Customization objects are displays and items 92100-94599 (92100 + their rank in `tools/decor/catalog.json`),
+92010-92011 and gameobjects 920000-920001 the Guild Chest, gameobject 920002
+the house's portal, spells 92021-92071 the talents, 92080-92081 the
+Customization objects' use and loot mark; the Customization objects are
+displays and items 92100-94599 (92100 + their rank in
+`tools/decor/catalog.json`; the objects taken out leave their number unused),
 gameobjects from 920100.
 
-**A client patch** (the WoW-mods installer puts it in place): the Customization
-objects' models, icons and display rows, the halls' terrain and light, and the Guild Chest of `.gperk bank` is
+**A client patch** (the WoW-mods installer puts it in place): the
+Customization objects' models, icons and display rows, the halls' terrain and
+light, the level-up effects, and the Guild Chest of `.gperk bank`,
 Cataclysm's Mobile Banking chest, converted for 3.3.5a by
 `tools/convert_guild_chest.py` from what wow.export exports of a modern
-client. Its files (`data/art/World/GuildLevel/GuildChest`) and its display rows
-(`data/dbc/guild_level_GameObjectDisplayInfo.dbc`) go into the game client with
-the WoW-mods installer. The model loses what 3.3.5a cannot draw: the guild's
-own colours and emblem on the banner (baked blue for the Alliance, red for the
-Horde) and the reflections of the metal.
+client. The chest loses what 3.3.5a cannot draw: the guild's own colours and
+emblem on the banner (baked blue for the Alliance, red for the Horde) and the
+reflections of the metal.
 
 ## Guild experience
 
@@ -154,6 +173,24 @@ Symbols of Kings and of Divinity, Holy, Sacred and Devout Candles, Ankh,
 Infernal Stone, Demonic Figurine, Corpse Dust, Flash Powder, Maple and
 Ironwood Seeds, Wild Quillvine, Wild Spineleaf and Starleaf Seed.
 
+## Guild talents
+
+From guild level 10 (`GuildLevel.Talents.FromLevel`), every level and Paragon
+level gives the guild a talent point (`PointsPerLevel`). The guild master and
+the officers (ranks up to `GuildLevel.Talents.Rank`) spend them in a tree of
+nodes: statistics (stamina, strength, critical strike rating...) that stack
+point after point, and unique bonuses. A node is bought when it starts the
+tree or is linked to a node that holds a point; tiers 2 and 3 open once the
+guild has spent 10 and 25 points. Resetting gives every point back and costs
+gold from the guild bank (5000 gold the first time, 10 % more each reset, 10 %
+less each week without one).
+
+Every member of the guild gets the effects; the guild's aura lists them in its
+tooltip. The tree is drawn by a game master in the talent window's edit mode
+and kept in the world database. `.gtalent` opens the window (a side tab of
+ForeverUI's guild page when it is installed, a button on the stock guild
+window otherwise).
+
 ## The guild house
 
 From **Paragon 1**, a guild has a house: **Champions' Hall** (map 449) for an
@@ -211,7 +248,7 @@ masters keep their own phase there (`.modify phase` shows a house).
 ## Customization (Paragon 9)
 
 At **Paragon 9** the guild decorates its house with the furniture of the modern
-housing: **2453 objects** in seven families (furniture, lights, decoration,
+housing: **2443 objects** in seven families (furniture, lights, decoration,
 plants, structure, utility, miscellaneous), the models of Midnight's housing
 converted for 3.3.5a (`tools/decor`). Every guild sees only its own objects, in
 its own phase of the hall.
@@ -351,18 +388,48 @@ is +5 from level 1, +15 from level 11. `""` turns a perk off. After
 experience of a guild, from any thread; a guild the module never heard of is
 level 0. The next steps of this module read the level there.
 
-## Requirements
+## Dependencies
 
-| What | Why |
+### Server, required
+
+| What | What for |
 |---|---|
-| AzerothCore WotLK (3.3.5a) | the C++ module is compiled into it |
-| [ALE](https://github.com/azerothcore/mod-ale) (the AzerothCore Lua Engine, formerly mod-eluna) | runs the server side of the windows (`data/lua/GuildLevel` goes into `lua_scripts`) |
-| [AIO](https://github.com/Rochet2/AIO) | server AND client: the windows are sent over it, and every player needs the `AIO_Client` addon |
-| [WarcraftXL](https://github.com/WarcraftXL/wxl-core) and its extension `wxl-guildhouse` | client: the Customization mode's editor (the rest of the module works without it) |
+| AzerothCore WotLK (3.3.5a) | the C++ module is compiled into it: guild experience, levels, perks, talents, the guild house, the Customization's objects, drops and quest rewards |
 
-ALE and AIO carry the interface: the guild talent window, the level bar in the
-guild window and the level-up toast. Without them, experience, levels and perks
-work the same, and the talents stay reachable through the `.gtalent` commands.
+### Server and client, required for the interface
+
+| What | What for | Without it |
+|---|---|---|
+| [ALE](https://github.com/azerothcore/mod-ale) (the AzerothCore Lua Engine, formerly mod-eluna) | runs the server side of the windows (`data/lua/GuildLevel` goes into `lua_scripts`) | no window: experience, levels, perks, talents and the house work the same, through the commands (`.gtalent`, `.ghouse`) |
+| [AIO](https://github.com/Rochet2/AIO) | sends the windows to the players: the server side next to ALE, the `AIO_Client` addon on every client | as above |
+
+The windows: the level bar in the guild window, the level-up toast, the talent
+window, the Customization mode and the Collection window.
+
+### Client, required for the Customization and the effects
+
+| What | What for | Without it |
+|---|---|---|
+| [WarcraftXL](https://github.com/WarcraftXL/wxl-core) | loads the client extensions below | as below |
+| WarcraftXL's Modern M2 plugin (`wxl-modern-m2`) | draws the modern (MD21) models: the 2443 Customization objects and the level-up effects | those models are not drawn |
+| the extension `wxl-guildhouse` (this module's, `client/dist/wxl-guildhouse`, sources in `client/wxl-guildhouse`) | the Customization mode's editor: the object in hand, the outlines, the 3D gizmo, the cursor's ray on the hall | the Customization mode says so and stays closed; placed objects are still seen by everyone, the Collection works |
+| the client patch (`data/art`, the rows of `data/dbc`) | models, icons, display rows, the halls' terrain and light, the Guild Chest | missing models and icons |
+
+### Optional
+
+| What | What for |
+|---|---|
+| [ForeverUI](https://github.com/Adrestie/mod-forever-ui) | its look for the Customization windows, and the talent window and the Collection as side tabs of its guild page |
+
+### The installer
+
+The [WoW-mods](https://github.com/Adrestie/WoW-mods) installer puts everything
+in place from this folder: the module into the server's sources, the SQL, the
+configuration, the Lua scripts, the client patch (written into the game's last
+patch archive, `Data\patch-Z.MPQ` and its language twins) and the extension
+into the game's `Extensions` folder. It needs the game's Wow.exe to load
+WarcraftXL for the extension, and may patch Wow.exe so that it reads the
+custom archives (`--patch-wow-exe`).
 
 ## Installation
 
@@ -587,93 +654,45 @@ in a group, characters with a client to accept summons and resurrections.
 59. **Disband:** the guild disbanded: its stock and placed objects are gone
     and its phase is freed.
 
-## Roadmap
+## Credits
 
-The original concept, in its order (every step is built; the sections above tell how).
-
-### An interface
-
-A window of its own, or a page in
-[ForeverUI](https://github.com/Adrestie/mod-forever-ui) when it is installed.
-
-### Perks of levels 1 to 25
-
-1. 5% more experience.
-2. 5% less durability loss.
-3. 5% more honor.
-4. Hearthstone cooldown 5 minutes shorter.
-5. Sometimes 1 more material when gathering.
-6. Vendor prices 5% lower.
-7. 5% of the gold looted goes to the guild bank.
-8. Mounted speed 5% higher.
-9. 5% more reputation.
-10. Being resurrected by a guild member restores all health and mana.
-11. 10% more experience (on top of level 1).
-12. 15% less durability loss (on top of level 2).
-13. 10% more honor (on top of level 3).
-14. Hearthstone cooldown 10 more minutes shorter.
-15. Sometimes 2 more materials when gathering.
-16. Vendor prices 5% lower again.
-17. 5% more of the gold looted goes to the guild bank.
-18. Mounted speed 5% higher again.
-19. 5% more reputation again.
-20. Consumable effects last 30 minutes longer.
-21. Teleport the raid members to you (1 hour cooldown).
-22. Resurrect the raid members (out of combat only).
-23. Summon a temporary guild bank (1 hour cooldown).
-24. Summon a temporary reagent vendor and repairer (1 hour cooldown).
-25. Teleport to the guild house.
-
-### Paragon levels: the guild house
-
-Paragon levels give the guild a house and reward its members who play
-together:
-
-1. The guild house, a mailbox, and the spell to teleport to the house.
-2. A reagent vendor.
-3. A banker.
-4. (Nothing: the Guild Supplier repairs.)
-5. Class trainers and a stable master.
-6. Profession trainers with every recipe of the Vanilla, Burning Crusade and
-   Wrath trainers, a forge, an anvil and the other objects crafting needs.
-7. An auction house.
-8. Portals to Orgrimmar / Stormwind, Thunder Bluff / Ironforge, Undercity /
-   Darnassus, the Exodar / Silvermoon, the Caverns of Time, Shattrath and
-   Dalaran.
-9. The Customization mode.
-
-### Guild talents, from level 10
-
-From level 10 the guild earns talent points and unlocks its talent tree, laid
-out like the grid of [mod-spheregrid](https://github.com/Adrestie/mod-spheregrid).
-The guild master and the officers spend the points; resetting them costs gold
-from the guild bank. Some nodes stack (statistics: +10 stamina, +10 strength,
-+5 critical strike rating...), others are unique.
-
-### Customization mode (Paragon 9)
-
-Members decorate the guild house with objects found in dungeons and raids. The
-guild ranks allowed to do so are set by the guild.
-
-* **Drops:** customization objects only drop for a guild that unlocked the
-  mode, and only in a group of 4 guildmates in a 5-player dungeon, 8 in a
-  10-player raid, 20 in a 25-player raid. They can drop many times and be
-  looted by any guildmate; in a 25-player raid only the 20 guildmates see them
-  in their loot window.
-* **Collection:** a looted object is used to add it to the guild's objects. A
-  window lists the objects the guild owns and the ones it lacks, with a tooltip
-  telling where to find them.
-* **Placing:** a member with the right, inside the house, enters the
-  Customization mode: the usual interface gives way to the Customization one.
-  He drags an object from the guild's list into the world, selects a placed
-  object to move, rotate and scale it with a 3D gizmo, and removes it with a
-  right-click.
-* **Rules:** one member at a time handles a given object. An object is placed
-  at most as many times as the guild owns it (4 chairs looted, 4 chairs
-  placed). Removing one gives it back to the guild's stock (3 chairs placed and
-  1 in stock: removing one leaves 2 in stock).
+* **Blizzard Entertainment** owns World of Warcraft and everything taken from
+  it here: the models, textures, icons and names of the modern housing's
+  furniture and their official translations, the Guild Chest, the level-up
+  effects and the halls. This module is not affiliated with Blizzard.
+* [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk), the server the module is
+  compiled into.
+* [ALE](https://github.com/azerothcore/mod-ale), the AzerothCore Lua Engine
+  (formerly mod-eluna), and [AIO](https://github.com/Rochet2/AIO) by Rochet2,
+  which carry the windows.
+* [WarcraftXL](https://github.com/WarcraftXL/wxl-core) and its Modern M2
+  plugin, which load the extension and draw the modern models.
+* [wxl-housing](https://github.com/sogyboi/wxl-housing) by sogyboi: the
+  extension `wxl-guildhouse` is a fork of it (the spawn and chunk attachment of
+  the objects, the ImGui overlay's host), under its licence, GPL-3.0-or-later.
+* [Dear ImGui](https://github.com/ocornut/imgui) by Omar Cornut and
+  [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo) by Cedric Guillemet
+  and contributors (MIT), for the gizmo.
+* wow.export, through which the furniture, the Guild Chest and the effects were
+  exported from the modern client.
+* [wago.tools](https://wago.tools), whose tables of the modern client gave the
+  objects' names in each language, their families and the dungeons' and zones'
+  names (`tools/decor/build_locales.py`).
+* m2port of [mod-limit-break](https://github.com/Adrestie/mod-limit-break),
+  which lays the modern models out for the client; its table of the modern
+  shaders' texture coordinates comes from WebWowViewerCpp.
+* [ForeverUI](https://github.com/Adrestie/mod-forever-ui), whose look and guild
+  page the windows use when it is installed.
 
 ## Licence
 
-GPL-2.0-or-later, the licence of AzerothCore it is compiled into. See
-[LICENSE](LICENSE).
+The module (server code, SQL, Lua, tools): GPL-2.0-or-later, the licence of
+AzerothCore it is compiled into. See [LICENSE](LICENSE).
+
+The client extension `wxl-guildhouse` (`client/wxl-guildhouse`,
+`client/dist/wxl-guildhouse`): GPL-3.0-or-later, the licence of wxl-housing it
+is forked from; ImGuizmo (`client/wxl-guildhouse/third_party/imguizmo`) keeps
+its MIT licence. See [client/wxl-guildhouse/LICENSE](client/wxl-guildhouse/LICENSE).
+
+The game's assets (models, textures, icons, names) belong to Blizzard
+Entertainment and are not covered by these licences.
