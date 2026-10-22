@@ -2,14 +2,14 @@
 
 An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm
 and builds a guild house on them. Members who play together earn guild
-experience; the guild climbs 25 levels and 9 Paragon levels, unlocking perks,
+experience; the guild climbs 25 levels, then Paragon levels, unlocking perks,
 talents, a house of its own and, at Paragon 9, the furniture to decorate it.
 
 ## Features
 
 * **Levels 1-25:** passive perks for every member (experience, honor, mount speed, cheaper vendors...).
 * **Active perks 21-25:** summon or resurrect the raid, a guild bank chest, a supplier, the way home.
-* **Paragon levels:** past level 25, the guild climbs 9 Paragon levels.
+* **Paragon levels:** past level 25, the guild keeps climbing Paragon levels (up to 99 by default, `GuildLevel.Paragon.Max`); the first 9 unlock its house and Customization.
 * **Guild talents:** from level 10, a point per level, a tree of bonuses for every member.
 * **Paragon 1-8:** a house in the faction's PvP hall, one phase per guild, with its services.
 * **Customization (Paragon 9):** a 3D editor to place, turn and size 2443 objects of the modern housing.

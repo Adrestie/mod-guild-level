@@ -8,7 +8,8 @@ An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm,
 and builds a guild house on them:
 
 * **Guild experience and levels:** members of a guild who play together earn
-  guild experience; the guild climbs **25 levels**, then **9 Paragon levels**,
+  guild experience; the guild climbs **25 levels**, then **Paragon levels**
+  (99 by default, the first 9 unlocking the house),
   announced to its members with a level-up toast and shown on a bar in the
   guild window.
 * **Perks:** levels 1 to 20 give passive perks to every member (experience,
@@ -80,9 +81,12 @@ configuration, and the bar starts again from zero at each step:
 
 * **Levels 1 to 25:** `GuildLevel.Curve.Levels`, 25 amounts. By default 20,000
   for level 1 up to 1,300,000 for level 25, about 11 million in all.
-* **Paragon 1 to 9**, past level 25: `GuildLevel.Curve.Paragon`, 9 amounts. By
-  default 1,500,000 up to 4,000,000, about 23 million in all.
-* At Paragon 9 the guild earns nothing more; its lifetime total still counts.
+* **Paragon levels**, past level 25, up to `GuildLevel.Paragon.Max` (99 by
+  default): `GuildLevel.Curve.Paragon`. By default 1,500,000 for Paragon 1 up to
+  4,000,000 for Paragon 9, about 23 million in all, and 4,000,000 for each one
+  after it. The first 9 unlock the house and its Customization.
+* At the last Paragon level the guild earns nothing more; its lifetime total
+  still counts.
 
 For scale: a level 80 monster is worth about 500 experience to a level 80
 character, so five guildmates bring their guild about 2,500 per kill.
@@ -347,7 +351,8 @@ their step costs climb at once, without announcement.
 | `GuildLevel.MinMembers` | 2 | Guildmates needed at the kill. |
 | `GuildLevel.Rate` | 1.0 | Multiplies everything earned. |
 | `GuildLevel.Curve.Levels` | 25 amounts | Cost of levels 1 to 25. |
-| `GuildLevel.Curve.Paragon` | 9 amounts | Cost of Paragon 1 to 9. |
+| `GuildLevel.Paragon.Max` | 99 | The last Paragon level. |
+| `GuildLevel.Curve.Paragon` | 9 amounts | Cost of each Paragon level (the last amount for the ones after). |
 | `GuildLevel.Announce` | 1 | Announce each level to the guild. |
 | `GuildLevel.SaveInterval` | 10 | Seconds between two saves. |
 | `GuildLevel.Perks.Enable` | 1 | 0 = no perk at all. |
