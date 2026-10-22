@@ -4,8 +4,8 @@ A Model frame of the 3.3.5 client draws with one of the model's own cameras (Set
 one it falls back to a view from above. The objects have none (or a portrait one framed for
 another use): this adds one at the end of the model's camera list. The camera rides with the model
 (turning the model in the frame turns the camera with it), so the turntable is the camera's: it
-orbits the object once every ORBIT milliseconds, a little above it, looking at the middle of its
-height, on a global loop of its own (independent of the model's animations).
+orbits the middle of the object's box once every ORBIT milliseconds, a little above it, looking at
+that middle, on a global loop of its own (independent of the model's animations).
 
 Its distance is the least at which the object -- seen from any side -- fits the frame: the circle
 its farthest corner sweeps about the vertical axis in the frame's width, its height in the frame's
@@ -40,8 +40,8 @@ def _chunks(data):
 
 
 def _distance(x0, y0, z0, x1, y1, z1, aspect):
-    """The camera's distance from the vertical axis."""
-    rho = max(math.hypot(x, y) for x in (x0, x1) for y in (y0, y1))
+    """The camera's distance from the object's vertical axis (through the middle of its box)."""
+    rho = math.hypot(x1 - x0, y1 - y0) / 2
     rho = max(rho, 0.05)
     half_h = max((z1 - z0) / 2, 0.05)
     vertical = FOV / math.sqrt(aspect * aspect + 1)
@@ -61,7 +61,7 @@ def add(data, aspect, box=None):
     md20 = bytearray(data[base:base + size])
     x0, y0, z0, x1, y1, z1 = box or struct.unpack_from('<6f', md20, BOUNDS)
     distance, rho, half_h = _distance(x0, y0, z0, x1, y1, z1, aspect)
-    zc = (z0 + z1) / 2
+    xc, yc, zc = (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2
     height = zc + distance * math.tan(ELEVATION)
 
     def align():
@@ -95,22 +95,26 @@ def add(data, aspect, box=None):
         md20.extend(struct.pack('<II', len(times), values_at))
         return struct.pack('<hhIIII', interpolation, loop, 1, times_arr, 1, values_arr)
 
-    # the orbit: the camera's position around the vertical axis, linear between its keys
+    # the orbit: the camera's position around the box's vertical axis, linear between its keys. The
+    # keys are offsets from the camera's base (eye), in front of the object: a client that leaves the
+    # track still keeps the camera there, outside the object
+    eye = (xc + distance, yc, height)
     times, keys = [], b''
     for k in range(KEYS + 1):
         a = 2 * math.pi * k / KEYS
         times.append(int(ORBIT * k / KEYS))
-        keys += struct.pack('<9f', distance * math.cos(a), distance * math.sin(a), height, 0, 0, 0, 0, 0, 0)
+        keys += struct.pack('<9f', xc + distance * math.cos(a) - eye[0], yc + distance * math.sin(a) - eye[1], 0,
+                            0, 0, 0, 0, 0, 0)
     pos_track = track(times, keys, interpolation=1, loop=orbit_loop)
-    target_track = track([0], struct.pack('<9f', 0.0, 0.0, zc, 0, 0, 0, 0, 0, 0))
+    target_track = track([0], struct.pack('<9f', 0, 0, 0, 0, 0, 0, 0, 0, 0))
     roll_track = track([0], struct.pack('<3f', 0.0, 0.0, 0.0))
     fov_track = track([0], struct.pack('<3f', FOV, 0.0, 0.0))
     reach = distance + max(rho, half_h) * 2
     # the clip planes wide: the frame scales the model (and the camera with it) by the interface's
     # size, the planes stay as they are
     camera = (struct.pack('<Iff', 0, reach * 50, 0.01)
-              + pos_track + struct.pack('<3f', 0.0, 0.0, 0.0)
-              + target_track + struct.pack('<3f', 0.0, 0.0, 0.0)
+              + pos_track + struct.pack('<3f', *eye)
+              + target_track + struct.pack('<3f', xc, yc, zc)
               + roll_track + fov_track)
     assert len(camera) == CAMERA_SIZE
 
