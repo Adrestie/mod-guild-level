@@ -11,9 +11,6 @@ talents, a house of its own and, at Paragon 9, the furniture to decorate it.
 * **Active perks 21-25:** summon or resurrect the raid, a guild bank chest, a supplier, the way to the Guild House.
 * **Paragon levels:** past level 25, the guild keeps climbing Paragon levels (up to 99 by default); the first 9 unlock the Guild House features.
 * **Guild talents:** from level 10, the guild earns talent points to spend on raising its members' stats.
-* **Paragon 1-8:** a house in the faction's PvP hall, one phase per guild, with its services.
-* **Customization (Paragon 9):** a 3D editor to place, turn and size 2443 objects of the modern housing.
-* **Collection:** what the guild owns, what it lacks and where to find it.
 * **Drops and quests:** dungeon and raid bosses (by theme or by boss) and 800 quests give the objects.
 * **Languages:** English, French, German, Spanish (esES) and Russian.
 
