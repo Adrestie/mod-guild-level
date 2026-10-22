@@ -31,7 +31,7 @@ SQL = os.path.join(ROOT, 'data', 'sql', 'world', 'guild_level_11_decor.sql')
 PREVIEW_ASPECT = 280 / 224         # the interface's preview: its model's width over height
 # the module's blocks (WoW-mods ID_RANGES.md) the objects' numbers are taken from, in order: the
 # n-th object's display (and, later, its item) is the n-th number of these
-DISPLAY_BLOCKS = [(92100, 93999), (82200, 82899)]
+DISPLAY_BLOCKS = [(92100, 94599)]
 ENTRY = 920100                      # its gameobject: ENTRY + n (the blocks' gameobjects, x 10)
 KEEP_DISPLAYS = (92010, 92011)      # the Guild Chest's, in the same file
 BACKSLASH = chr(92)

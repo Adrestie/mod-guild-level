@@ -130,7 +130,7 @@
         },
         {
           "table": "gameobjectdisplayinfo_dbc",
-          "where": "ID BETWEEN 92100 AND 93999 OR ID BETWEEN 82200 AND 82899"
+          "where": "ID BETWEEN 92100 AND 94599"
         },
         {
           "table": "gameobject_template",
@@ -141,12 +141,8 @@
           "where": "entry BETWEEN 920100 AND 939999"
         },
         {
-          "table": "item_template",
-          "where": "entry BETWEEN 92100 AND 93999 OR entry BETWEEN 82200 AND 82899"
-        },
-        {
           "table": "item_template_locale",
-          "where": "ID BETWEEN 92100 AND 93999 OR ID BETWEEN 82200 AND 82899"
+          "where": "ID BETWEEN 92100 AND 94599"
         },
         {
           "table": "spell_dbc",
@@ -155,6 +151,10 @@
         {
           "table": "spell_script_names",
           "where": "ScriptName = 'spell_guild_decor_collect'"
+        },
+        {
+          "table": "item_template",
+          "where": "entry BETWEEN 92100 AND 94599"
         },
         {
           "table": "updates",

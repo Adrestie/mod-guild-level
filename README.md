@@ -9,11 +9,11 @@ climbs **25 levels**, then **9 Paragon levels**.
 > its Customization mode (Paragon 9) work.
 
 Core hooks, characters and world tables, texts in `module_string`. The module
-owns the tranches **92-93** (92000-93999) and 82200-82899 of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
+owns the numbers **92000-94599** of the [WoW-mods registry](https://github.com/Adrestie/WoW-mods/blob/main/ID_RANGES.md):
 spell 92000 is the perks' aura, creature 92001 the guild supplier, displays
 92010-92011 and gameobjects 920000-920001 the Guild Chest, spells 92021-92071
 the talents, 92080-92081 the Customization objects' use and loot mark; the
-Customization objects are displays and items 92100-93999 then 82200-82899,
+Customization objects are displays and items 92100-94599 (92100 + their rank in `tools/decor/catalog.json`),
 gameobjects from 920100.
 
 **A client patch** (the WoW-mods installer puts it in place): the Customization
