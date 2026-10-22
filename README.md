@@ -9,7 +9,7 @@ talents, a house of its own and, at Paragon 9, the furniture to decorate it.
 
 * **Levels 1-25:** passive perks for every member (experience, honor, mount speed, cheaper vendors...).
 * **Active perks 21-25:** summon or resurrect the raid, a guild bank chest, a supplier, the way to the Guild House.
-* **Paragon levels:** past level 25, the guild keeps climbing Paragon levels (up to 99 by default, `GuildLevel.Paragon.Max`); the first 9 unlock the Guild House features.
+* **Paragon levels:** past level 25, the guild keeps climbing Paragon levels (up to 99 by default); the first 9 unlock the Guild House features.
 * **Guild talents:** from level 10, a point per level, a tree of bonuses for every member.
 * **Paragon 1-8:** a house in the faction's PvP hall, one phase per guild, with its services.
 * **Customization (Paragon 9):** a 3D editor to place, turn and size 2443 objects of the modern housing.
