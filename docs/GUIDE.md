@@ -9,7 +9,7 @@ and builds a guild house on them:
 
 * **Guild experience and levels:** members of a guild who play together earn
   guild experience; the guild climbs **25 levels**, then **Paragon levels**
-  (99 by default, the first 9 unlocking the house),
+  (99 by default, the first 9 unlocking the Guild House features),
   announced to its members with a level-up toast and shown on a bar in the
   guild window.
 * **Perks:** levels 1 to 20 give passive perks to every member (experience,
@@ -84,7 +84,7 @@ configuration, and the bar starts again from zero at each step:
 * **Paragon levels**, past level 25, up to `GuildLevel.Paragon.Max` (99 by
   default): `GuildLevel.Curve.Paragon`. By default 1,500,000 for Paragon 1 up to
   4,000,000 for Paragon 9, about 23 million in all, and 4,000,000 for each one
-  after it. The first 9 unlock the house and its Customization.
+  after it. The first 9 unlock the Guild House features.
 * At the last Paragon level the guild earns nothing more; its lifetime total
   still counts.
 
