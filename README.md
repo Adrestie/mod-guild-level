@@ -42,7 +42,6 @@ tests: [docs/GUIDE.md](docs/GUIDE.md).
 
 ## Credits
 
-* Blizzard Entertainment: the game, its models, textures, icons and names (not affiliated).
 * [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk), ALE, AIO (Rochet2), WarcraftXL.
 * [wxl-housing](https://github.com/sogyboi/wxl-housing) by sogyboi, which `wxl-guildhouse` forks.
 * [Dear ImGui](https://github.com/ocornut/imgui), [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo), wow.export, [wago.tools](https://wago.tools), m2port ([mod-limit-break](https://github.com/Adrestie/mod-limit-break)), WebWowViewerCpp.
