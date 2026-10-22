@@ -49,5 +49,4 @@ tests: [docs/GUIDE.md](docs/GUIDE.md).
 ## Licence
 
 The module: GPL-2.0-or-later ([LICENSE](LICENSE)). The extension
-`wxl-guildhouse`: GPL-3.0-or-later, ImGuizmo MIT. Game assets belong to
-Blizzard Entertainment.
+`wxl-guildhouse`: GPL-3.0-or-later.
