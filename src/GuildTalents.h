@@ -18,7 +18,7 @@
 /*
  * mod-guild-level — the guild talents.
  *
- * From level GuildLevel.Talents.FromLevel, every level and Paragon level gives
+ * From Paragon level GuildLevel.Talents.FromParagon, every Paragon level gives
  * the guild GuildLevel.Talents.PointsPerLevel points. The guild master and the
  * officers (ranks up to GuildLevel.Talents.Rank) spend them in a tree of
  * nodes, drawn by a GM in the talent window's edit mode and kept in the world
@@ -174,7 +174,7 @@ struct GuildTalentNode
 struct GuildTalentConfig
 {
     bool enable = true;
-    uint8 fromLevel = 10;
+    uint8 fromParagon = 10;             // the first Paragon level that gives points
     uint32 pointsPerLevel = 1;
     uint8 rank = 1;                     // the highest guild rank id that spends points
     uint32 resetCost = 5000;            // gold
@@ -232,6 +232,9 @@ public:
     void LoadConfig();
     void LoadTree();                    // world database, startup and `.gtalent reload`
     void LoadGuilds();                  // characters database, startup
+    // A member of a guild whose points were given back at startup logs in: told so (each member
+    // once, until the next restart).
+    void OnLogin(Player* player);
 
     [[nodiscard]] GuildTalentConfig const& Config() const { return _config; }
 
@@ -303,6 +306,9 @@ private:
     mutable std::mutex _lock;
     std::map<uint32, GuildTalentNode> _tree;
     std::unordered_map<uint32, GuildTalentState> _guilds;
+    // The guilds that had spent more points than they earn, given back free at startup (the rules
+    // changed): the members told so are kept beside them.
+    std::map<uint32, std::set<ObjectGuid>> _givenBack;
     // Per guild, the effects summed from its points.
     std::unordered_map<uint32, GuildTalentTotals> _totals;
 

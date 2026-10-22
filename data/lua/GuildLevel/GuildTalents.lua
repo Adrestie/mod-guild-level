@@ -49,7 +49,7 @@ local ADMIN_RANK = 3                        -- SEC_ADMINISTRATOR: the edits
 local function Settings()
     return {
         enable = Conf("GuildLevel.Talents.Enable", 1) ~= 0,
-        from = math.max(1, math.min(LEVEL_MAX, Conf("GuildLevel.Talents.FromLevel", 10))),
+        from = math.max(1, math.min(255, Conf("GuildLevel.Talents.FromParagon", 10))),
         perLevel = Conf("GuildLevel.Talents.PointsPerLevel", 1),
         rank = math.min(9, Conf("GuildLevel.Talents.Rank", 1)),
         cost = Conf("GuildLevel.Talents.Reset.Cost", 5000),
@@ -99,8 +99,9 @@ local function State(player)
     if q then
         state.level, state.paragon = q:GetUInt32(0), q:GetUInt32(1)
     end
-    local levels = state.level >= s.from and (state.level - s.from + 1) or 0
-    state.earned = (levels + state.paragon) * s.perLevel
+    -- from Paragon level FromParagon on (GuildTalentMgr::Earned)
+    local paragons = (state.level >= LEVEL_MAX and state.paragon >= s.from) and (state.paragon - s.from + 1) or 0
+    state.earned = paragons * s.perLevel
 
     q = CharDBQuery(fmt("SELECT node, points FROM mod_guild_level_talent WHERE guildid = %d", guildId))
     if q then

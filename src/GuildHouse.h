@@ -16,7 +16,7 @@
  */
 
 /*
- * mod-guild-level — the guild house, from Paragon 1.
+ * mod-guild-level — the guild house, from guild level 25 (GuildLevel.House.Paragon: 0).
  *
  * WHERE: the two PvP halls the game left empty in 2.0, Champions' Hall (map
  * 449) for the Alliance and the Hall of Legends (map 450) for the Horde.
@@ -157,6 +157,8 @@ private:
     // The guild's slot in the hall, taken if it has none. -1: the hall is full.
     int SlotOf(uint32 mapId, uint32 guildId, bool take);
     [[nodiscard]] uint8 ParagonOf(uint32 guildId) const;
+    // The guild has its house: level 25, and House.Paragon (0 by default: from level 25 on).
+    [[nodiscard]] bool Unlocked(uint32 guildId) const;
     void Furnish(Map* map, Slot& slot, uint8 index);
     void Empty(Map* map, Slot& slot);
     void SyncDecor(Map* map, Slot& slot, uint8 index);

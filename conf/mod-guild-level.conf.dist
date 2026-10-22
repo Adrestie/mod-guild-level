@@ -223,7 +223,7 @@ GuildLevel.Perk.Consumables       = "20:30"
 #            guild bank type does: 187294 is the game's own Guild Vault.
 #    Vendor  a reagent vendor and repairer in front of the player for
 #            .Duration seconds (.Entry: creature 92001 of the module).
-#    Home    into the guild house, once the guild has one (Paragon 1, see
+#    Home    into the guild house, once the guild has one (level 25, see
 #            THE GUILD HOUSE below); without it, no cooldown starts.
 #
 
@@ -246,7 +246,7 @@ GuildLevel.Active.Home.Cooldown     = 0
 
 ###############################################################################
 #
-#    THE GUILD HOUSE (PARAGON 1 AND UP)
+#    THE GUILD HOUSE (LEVEL 25 AND UP)
 #
 #    Champions' Hall (map 449) for the Alliance, the Hall of Legends (map 450)
 #    for the Horde: every guild has its own house, in one of the hall's 31
@@ -258,13 +258,14 @@ GuildLevel.Active.Home.Cooldown     = 0
 #    Paragon level by Paragon level.
 #
 #    GuildLevel.House.Enable       0 = no guild house.
-#    GuildLevel.House.Paragon      the Paragon level that opens the house.
+#    GuildLevel.House.Paragon      the Paragon level that opens the house, past
+#                                  level 25 (0: level 25 itself).
 #    GuildLevel.House.EmptyDelay   seconds an empty house keeps its phase
 #                                  before it goes back to the pool.
 #
 
 GuildLevel.House.Enable           = 1
-GuildLevel.House.Paragon          = 1
+GuildLevel.House.Paragon          = 0
 GuildLevel.House.EmptyDelay       = 60
 
 ###############################################################################
@@ -312,15 +313,17 @@ GuildLevel.House.Decor.Members.Raid25  = 20
 #
 #    THE GUILD TALENTS
 #
-#    From level FromLevel, each level and each Paragon level gives the guild
+#    From Paragon level FromParagon, each Paragon level gives the guild
 #    PointsPerLevel talent points. The guild master and the officers spend
 #    them in the talent tree (the button of the guild window, or .gtalent);
 #    every member of the guild gets the effects.
 #
 #    GuildLevel.Talents.Enable          1: on, 0: no points, no effects.
-#    GuildLevel.Talents.FromLevel       the first guild level that gives
-#                                       points (1 to 25).
-#    GuildLevel.Talents.PointsPerLevel  points per level and Paragon level.
+#    GuildLevel.Talents.FromParagon     the first Paragon level that gives
+#                                       points (1 to 255). A guild that has
+#                                       spent more points than it earns gets
+#                                       them all back, free, at startup.
+#    GuildLevel.Talents.PointsPerLevel  points per Paragon level.
 #    GuildLevel.Talents.Rank            the members of guild rank 0 (the guild
 #                                       master) to this one spend the points
 #                                       and reset them: 1 = the officers.
@@ -335,7 +338,7 @@ GuildLevel.House.Decor.Members.Raid25  = 20
 #
 
 GuildLevel.Talents.Enable          = 1
-GuildLevel.Talents.FromLevel       = 10
+GuildLevel.Talents.FromParagon     = 10
 GuildLevel.Talents.PointsPerLevel  = 1
 GuildLevel.Talents.Rank            = 1
 GuildLevel.Talents.Tier2.Points    = 10

@@ -164,7 +164,7 @@ void GuildHouseMgr::LoadConfig()
 {
     GuildHouseConfig c;
     c.enable = sConfigMgr->GetOption<bool>("GuildLevel.House.Enable", true);
-    c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Paragon", 1), 0, GUILD_PARAGON_LIMIT));
+    c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Paragon", 0), 0, GUILD_PARAGON_LIMIT));
     c.emptyDelay = sConfigMgr->GetOption<uint32>("GuildLevel.House.EmptyDelay", 60);
     _config = c;
 }
@@ -195,6 +195,12 @@ uint8 GuildHouseMgr::ParagonOf(uint32 guildId) const
 {
     GuildLevelState const state = sGuildLevelMgr->Get(guildId);
     return state.level < GUILD_LEVEL_MAX ? 0 : state.paragon;
+}
+
+bool GuildHouseMgr::Unlocked(uint32 guildId) const
+{
+    GuildLevelState const state = sGuildLevelMgr->Get(guildId);
+    return state.level >= GUILD_LEVEL_MAX && state.paragon >= _config.paragon;
 }
 
 int GuildHouseMgr::SlotOf(uint32 mapId, uint32 guildId, bool take)
@@ -228,9 +234,12 @@ bool GuildHouseMgr::Enter(ChatHandler* handler, Player* player)
         Say(handler, GUILD_LEVEL_STR_ACTIVE_NO_GUILD);
         return false;
     }
-    if (ParagonOf(guildId) < _config.paragon)
+    if (!Unlocked(guildId))
     {
-        Say(handler, GUILD_LEVEL_STR_HOUSE_LOCKED, uint32(_config.paragon));
+        if (_config.paragon)
+            Say(handler, GUILD_LEVEL_STR_HOUSE_LOCKED, uint32(_config.paragon));
+        else
+            Say(handler, GUILD_LEVEL_STR_HOUSE_LOCKED_LEVEL, uint32(GUILD_LEVEL_MAX));
         return false;
     }
     if (player->InBattleground() || player->InArena())
@@ -309,7 +318,7 @@ void GuildHouseMgr::OnPlayerEnterMap(Map* map, Player* player)
         return;
 
     uint32 const guildId = player->GetGuildId();
-    bool const allowed = _config.enable && guildId && ParagonOf(guildId) >= _config.paragon;
+    bool const allowed = _config.enable && guildId && Unlocked(guildId);
 
     std::lock_guard<std::mutex> guard(_lock);
     int const slot = allowed ? SlotOf(map->GetId(), guildId, true) : -1;

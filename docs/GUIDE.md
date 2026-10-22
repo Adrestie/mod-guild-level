@@ -16,10 +16,10 @@ and builds a guild house on them:
   honor, reputation, mount speed, cheaper vendors...), levels 21 to 25 active
   perks (summon the raid, resurrect it, a guild bank chest, a guild supplier,
   the way home).
-* **Guild talents:** from level 10, every level and Paragon level gives the
-  guild a talent point, spent by its officers in a tree of statistics and
+* **Guild talents:** from Paragon 10, every Paragon level gives the guild a
+  talent point, spent by its officers in a tree of statistics and
   bonuses that every member gets.
-* **The guild house:** from Paragon 1, the guild has its own house in its
+* **The guild house:** from level 25, the guild has its own house in its
   faction's PvP hall (Champions' Hall, Hall of Legends), one phase per guild;
   Paragon 2 to 8 bring its services (supplier, banker, trainers, auction
   house, portals).
@@ -170,7 +170,7 @@ one dead, nothing could be placed) starts no cooldown.
 | 22 | `.gperk rez` | Every dead member of the group on the same map and instance gets a resurrection to accept, where the player stands, with 35% of their health and mana (full for guildmates, thanks to the level 10 perk). Out of combat. | 10 min |
 | 23 | `.gperk bank` | The Guild Chest of Cataclysm's Mobile Banking stands in front of the player for 5 minutes: blue banner for the Alliance (gameobject 920000), red for the Horde (920001). Not in a battleground or an arena. | 1 h |
 | 24 | `.gperk vendor` | The Guild Supplier (creature 92001), a reagent vendor who repairs, waits in front of the player for 5 minutes. Not in a battleground or an arena. | 1 h |
-| 25 | `.gperk home` | Into the guild house, once the guild has one (Paragon 1, see [The guild house](#the-guild-house)). `.gperk leave` goes back. | 1 h |
+| 25 | `.gperk home` | Into the guild house, once the guild has one (level 25, see [The guild house](#the-guild-house)). `.gperk leave` goes back. | 1 h |
 
 `.gperk list` shows the active perks of your guild: locked, ready, or the time
 left. A game master resets every cooldown of a character with
@@ -183,8 +183,9 @@ Ironwood Seeds, Wild Quillvine, Wild Spineleaf and Starleaf Seed.
 
 ## Guild talents
 
-From guild level 10 (`GuildLevel.Talents.FromLevel`), every level and Paragon
-level gives the guild a talent point (`PointsPerLevel`). The guild master and
+From Paragon 10 (`GuildLevel.Talents.FromParagon`), every Paragon level gives
+the guild a talent point (`PointsPerLevel`); a guild that had spent more points
+than it earns gets them all back, free, at the next startup. The guild master and
 the officers (ranks up to `GuildLevel.Talents.Rank`) spend them in a tree of
 nodes: statistics (stamina, strength, critical strike rating...) that stack
 point after point, and unique bonuses. A node is bought when it starts the
@@ -201,7 +202,7 @@ window otherwise).
 
 ## The guild house
 
-From **Paragon 1**, a guild has a house: **Champions' Hall** (map 449) for an
+From **level 25**, a guild has a house: **Champions' Hall** (map 449) for an
 Alliance guild, the **Hall of Legends** (map 450) for a Horde one -- the two PvP
 halls the game left empty in 2.0. Members go in with `.gperk home` (the level
 25 perk, 1 h cooldown) and out with `.gperk leave`, back where they came from.
@@ -223,7 +224,7 @@ Rows under id 1000 are the module's; a server adds its own above.
 
 | Paragon | What appears |
 |---|---|
-| 1 | a mailbox by the entrance |
+| 0 (level 25) | a mailbox by the entrance |
 | 2 | the Guild Supplier (reagents of every class, repairs) |
 | 3 | a banker of the faction's capital (Olivia Burnside / Karus) |
 | 4 | nobody (the Guild Supplier repairs) |
@@ -371,7 +372,7 @@ their step costs climb at once, without announcement.
 | `GuildLevel.Perk.Consumables` | `20:30` | Minutes added to flasks, elixirs and food buffs. |
 
 | `GuildLevel.House.Enable` | 1 | 0 = no guild house. |
-| `GuildLevel.House.Paragon` | 1 | The Paragon level that opens the house. |
+| `GuildLevel.House.Paragon` | 0 | The Paragon level that opens the house, past level 25 (0: level 25 itself). |
 | `GuildLevel.House.EmptyDelay` | 60 | Seconds an empty house keeps its phase. |
 | `GuildLevel.House.Decor.Enable` | 1 | 0 = no Customization (no drop, no quest object, no edit). |
 | `GuildLevel.House.Decor.Paragon` | 9 | The Paragon level that opens it. |
@@ -600,8 +601,8 @@ in a group, characters with a client to accept summons and resurrections.
 40. **Supplier:** at level 24, `.gperk vendor`: the Guild Supplier stands in
     front of the player, sells the 19 reagents and repairs. After 5 minutes he
     disappears. Cooldown 1 h.
-41. **House:** a guild at level 25, Paragon 0: `.gperk home` answers that the
-    house opens at Paragon 1, no cooldown. At Paragon 1, `.gperk home` takes an
+41. **House:** a guild at level 24: `.gperk home` answers that the house opens
+    at level 25, no cooldown. At level 25, `.gperk home` takes an
     Alliance member to Champions' Hall, a Horde member to the Hall of Legends,
     with a mailbox near the entrance; `.gperk leave` takes him back where he
     was.
@@ -616,7 +617,7 @@ in a group, characters with a client to accept summons and resurrections.
 
 ### Guild house
 
-45. **Own house:** two guilds at Paragon 1, one member of each goes home: each
+45. **Own house:** two guilds at level 25, one member of each goes home: each
     sees his mailbox, neither sees the other. Two members of the same guild,
     not grouped, both go home: they see each other.
 46. **Strangers:** a player of another guild, or none, teleported into the hall

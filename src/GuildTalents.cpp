@@ -224,7 +224,7 @@ void GuildTalentMgr::LoadConfig()
 {
     GuildTalentConfig c;
     c.enable = sConfigMgr->GetOption<bool>("GuildLevel.Talents.Enable", true);
-    c.fromLevel = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Talents.FromLevel", 10), 1, GUILD_LEVEL_MAX));
+    c.fromParagon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Talents.FromParagon", 10), 1, GUILD_PARAGON_LIMIT));
     c.pointsPerLevel = sConfigMgr->GetOption<uint32>("GuildLevel.Talents.PointsPerLevel", 1);
     c.rank = uint8(std::min<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.Talents.Rank", 1), 9));
     c.resetCost = sConfigMgr->GetOption<uint32>("GuildLevel.Talents.Reset.Cost", 5000);
@@ -323,11 +323,42 @@ void GuildTalentMgr::LoadGuilds()
         } while (result->NextRow());
     }
 
+    // a guild that has spent more points than it earns (the rules changed: points from Paragon
+    // FromParagon on) gets them all back, free
+    std::map<uint32, std::set<ObjectGuid>> givenBack;
+    for (auto& [guildId, state] : guilds)
+    {
+        uint32 spent = 0;
+        for (auto const& [nodeId, points] : state.points)
+            spent += points;
+        if (spent <= Earned(guildId))
+            continue;
+        CharacterDatabase.DirectExecute("DELETE FROM `mod_guild_level_talent` WHERE `guildid` = {}", guildId);
+        state.points.clear();
+        givenBack[guildId];
+        LOG_INFO("module", "mod-guild-level: guild {} had spent {} talent points, more than it earns: given back",
+            guildId, spent);
+    }
+
     std::lock_guard<std::mutex> guard(_lock);
     _guilds = std::move(guilds);
+    _givenBack = std::move(givenBack);
     _totals.clear();
     for (auto& [guildId, state] : _guilds)
         Total(guildId);
+}
+
+void GuildTalentMgr::OnLogin(Player* player)
+{
+    uint32 const guildId = player->GetGuildId();
+    {
+        std::lock_guard<std::mutex> guard(_lock);
+        auto itr = _givenBack.find(guildId);
+        if (itr == _givenBack.end() || !itr->second.insert(player->GetGUID()).second)
+            return;
+    }
+    ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_TALENT_GIVEN_BACK,
+        uint32(_config.fromParagon));
 }
 
 void GuildTalentMgr::Total(uint32 guildId)
@@ -365,8 +396,9 @@ std::map<uint32, GuildTalentNode> GuildTalentMgr::Tree() const
 uint32 GuildTalentMgr::Earned(uint32 guildId) const
 {
     GuildLevelState const level = sGuildLevelMgr->Get(guildId);
-    uint32 const levels = level.level >= _config.fromLevel ? level.level - _config.fromLevel + 1 : 0;
-    return (levels + level.paragon) * _config.pointsPerLevel;
+    if (level.level < GUILD_LEVEL_MAX || level.paragon < _config.fromParagon)
+        return 0;
+    return (uint32(level.paragon) - _config.fromParagon + 1) * _config.pointsPerLevel;
 }
 
 uint32 GuildTalentMgr::Spent(uint32 guildId) const
