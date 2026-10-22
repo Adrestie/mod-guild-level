@@ -323,42 +323,11 @@ void GuildTalentMgr::LoadGuilds()
         } while (result->NextRow());
     }
 
-    // a guild that has spent more points than it earns (the rules changed: points from Paragon
-    // FromParagon on) gets them all back, free
-    std::map<uint32, std::set<ObjectGuid>> givenBack;
-    for (auto& [guildId, state] : guilds)
-    {
-        uint32 spent = 0;
-        for (auto const& [nodeId, points] : state.points)
-            spent += points;
-        if (spent <= Earned(guildId))
-            continue;
-        CharacterDatabase.DirectExecute("DELETE FROM `mod_guild_level_talent` WHERE `guildid` = {}", guildId);
-        state.points.clear();
-        givenBack[guildId];
-        LOG_INFO("module", "mod-guild-level: guild {} had spent {} talent points, more than it earns: given back",
-            guildId, spent);
-    }
-
     std::lock_guard<std::mutex> guard(_lock);
     _guilds = std::move(guilds);
-    _givenBack = std::move(givenBack);
     _totals.clear();
     for (auto& [guildId, state] : _guilds)
         Total(guildId);
-}
-
-void GuildTalentMgr::OnLogin(Player* player)
-{
-    uint32 const guildId = player->GetGuildId();
-    {
-        std::lock_guard<std::mutex> guard(_lock);
-        auto itr = _givenBack.find(guildId);
-        if (itr == _givenBack.end() || !itr->second.insert(player->GetGUID()).second)
-            return;
-    }
-    ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_TALENT_GIVEN_BACK,
-        uint32(_config.fromParagon));
 }
 
 void GuildTalentMgr::Total(uint32 guildId)

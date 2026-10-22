@@ -133,7 +133,6 @@ enum GuildLevelStrings : uint32
     GUILD_LEVEL_STR_TALENT_EDITED     = 164,  // {} node
     GUILD_LEVEL_STR_TALENT_BAD_EDIT   = 165,
     GUILD_LEVEL_STR_TALENT_TIER       = 166,
-    GUILD_LEVEL_STR_TALENT_GIVEN_BACK = 167,  // {} Paragon level
 
     // .ghouse, the Customization mode of the guild house
     GUILD_LEVEL_STR_DECOR_LOCKED      = 170,  // {} Paragon level

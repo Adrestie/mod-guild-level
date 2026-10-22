@@ -320,9 +320,7 @@ GuildLevel.House.Decor.Members.Raid25  = 20
 #
 #    GuildLevel.Talents.Enable          1: on, 0: no points, no effects.
 #    GuildLevel.Talents.FromParagon     the first Paragon level that gives
-#                                       points (1 to 255). A guild that has
-#                                       spent more points than it earns gets
-#                                       them all back, free, at startup.
+#                                       points (1 to 255).
 #    GuildLevel.Talents.PointsPerLevel  points per Paragon level.
 #    GuildLevel.Talents.Rank            the members of guild rank 0 (the guild
 #                                       master) to this one spend the points

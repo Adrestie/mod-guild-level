@@ -184,8 +184,7 @@ Ironwood Seeds, Wild Quillvine, Wild Spineleaf and Starleaf Seed.
 ## Guild talents
 
 From Paragon 10 (`GuildLevel.Talents.FromParagon`), every Paragon level gives
-the guild a talent point (`PointsPerLevel`); a guild that had spent more points
-than it earns gets them all back, free, at the next startup. The guild master and
+the guild a talent point (`PointsPerLevel`). The guild master and
 the officers (ranks up to `GuildLevel.Talents.Rank`) spend them in a tree of
 nodes: statistics (stamina, strength, critical strike rating...) that stack
 point after point, and unique bonuses. A node is bought when it starts the

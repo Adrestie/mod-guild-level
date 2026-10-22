@@ -232,9 +232,6 @@ public:
     void LoadConfig();
     void LoadTree();                    // world database, startup and `.gtalent reload`
     void LoadGuilds();                  // characters database, startup
-    // A member of a guild whose points were given back at startup logs in: told so (each member
-    // once, until the next restart).
-    void OnLogin(Player* player);
 
     [[nodiscard]] GuildTalentConfig const& Config() const { return _config; }
 
@@ -306,9 +303,6 @@ private:
     mutable std::mutex _lock;
     std::map<uint32, GuildTalentNode> _tree;
     std::unordered_map<uint32, GuildTalentState> _guilds;
-    // The guilds that had spent more points than they earn, given back free at startup (the rules
-    // changed): the members told so are kept beside them.
-    std::map<uint32, std::set<ObjectGuid>> _givenBack;
     // Per guild, the effects summed from its points.
     std::unordered_map<uint32, GuildTalentTotals> _totals;
 

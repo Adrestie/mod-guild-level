@@ -141,7 +141,6 @@ public:
     {
         sGuildPerkMgr->Apply(player);
         sGuildActivePerkMgr->Load(player);
-        sGuildTalentMgr->OnLogin(player);
     }
 
     void OnPlayerDeleteFromDB(CharacterDatabaseTransaction trans, uint32 guid) override
