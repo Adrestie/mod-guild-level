@@ -80,15 +80,6 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 116, 'esES', 'Las ventajas están desactivadas (GuildLevel.Perks.Enable = 0).'),
 ('mod-guild-level', 117, 'esES', 'Durabilidad: {} objeto(s) equipado(s) dañado(s) reparado(s) 1 punto cada {} segundos.'),
 
-('mod-guild-level',   5, 'esMX', '[Hermandad] Recolección abundante: {} más de {}.'),
-('mod-guild-level', 110, 'esMX', 'Ventajas de una hermandad de nivel {}:'),
-('mod-guild-level', 111, 'esMX', 'Experiencia +{}%, honor +{}%, reputación +{}%, velocidad de montura +{}%.'),
-('mod-guild-level', 112, 'esMX', 'Precios de vendedores y reparaciones -{}%, oro despojado añadido al banco de hermandad {}%, reutilización de la piedra de hogar -{} min.'),
-('mod-guild-level', 113, 'esMX', 'Recolección: {}% de probabilidad de {} más. Resurrección completa por un miembro de la hermandad: {}. Frascos, elixires y comida: +{} min.'),
-('mod-guild-level', 114, 'esMX', 'sí'),
-('mod-guild-level', 115, 'esMX', 'no'),
-('mod-guild-level', 116, 'esMX', 'Las ventajas están desactivadas (GuildLevel.Perks.Enable = 0).'),
-('mod-guild-level', 117, 'esMX', 'Durabilidad: {} objeto(s) equipado(s) dañado(s) reparado(s) 1 punto cada {} segundos.'),
 
 ('mod-guild-level',   5, 'ruRU', '[Гильдия] Богатый сбор: ещё {} — {}.'),
 ('mod-guild-level', 110, 'ruRU', 'Бонусы гильдии {}-го уровня:'),

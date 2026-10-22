@@ -39,7 +39,7 @@ end
 
 local LEVEL_MAX = 25
 -- the game's locale numbers (LocaleConstant): their names in the *_locale tables
-local LOCALES = { [2] = "frFR", [3] = "deDE", [6] = "esES", [7] = "esMX", [8] = "ruRU" }
+local LOCALES = { [2] = "frFR", [3] = "deDE", [6] = "esES", [8] = "ruRU" }
 local HALLS = { [449] = true, [450] = true }
 
 local function State(player)

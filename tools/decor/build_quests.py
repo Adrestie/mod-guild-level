@@ -135,6 +135,7 @@ def main(server_folder):
         name = name.lower()
         return [t for t in spec['themes'] if any(re.search(r'(^|[^a-z])' + re.escape(k), name) for k in t['keywords'])]
     by_zone = {}
+    catalog = [e for e in catalog if not e.get('removed')]
     objects = [e['decor'] for e in catalog]
     rng.shuffle(objects)
     names = {e['decor']: e['name'] for e in catalog}

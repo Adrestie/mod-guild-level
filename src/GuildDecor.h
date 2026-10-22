@@ -35,7 +35,8 @@
  * HOW A GUILD GETS THEM: each object is an item too (`mod_guild_level_decor_item`).
  * A dungeon or raid boss killed by enough members of a guild of the
  * Customization's Paragon level (4 in a dungeon, 8 in a 10-player raid, 20 in
- * a 25-player one) may drop one: the boss's own objects first, else one of
+ * a 25-player one) may drop objects, one for 1, 2 or 3 members (Drops.*):
+ * each the boss's own objects first, else one of
  * the instance's theme (ThemeChance) or of no theme (`mod_guild_level_decor_loot`,
  * tools/decor/loot.json). Only that guild's members see it in the loot: they
  * carry a hidden mark from the kill (GUILD_DECOR_LOOT_MARK), the item's loot
@@ -78,6 +79,9 @@ struct GuildDecorConfig
     uint8 rank = 1;                     // highest guild rank id allowed (0 guild master, 1 officer...)
     float dropChance = 10.0f;           // % for a boss of an eligible kill to drop an object
     float themeChance = 60.0f;          // % for an instance of a theme to drop one of its theme (else one of none)
+    uint32 dungeonDrops = 1;            // objects a drop gives (one member each): a dungeon
+    uint32 raid10Drops = 2;             // a 10-player raid
+    uint32 raid25Drops = 3;             // a 25-player raid
     uint8 dungeonMembers = 4;           // guildmates needed at the kill: a dungeon
     uint8 raid10Members = 8;            // a 10-player raid
     uint8 raid25Members = 20;           // a 25-player raid

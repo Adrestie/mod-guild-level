@@ -211,7 +211,7 @@ masters keep their own phase there (`.modify phase` shows a house).
 ## Customization (Paragon 9)
 
 At **Paragon 9** the guild decorates its house with the furniture of the modern
-housing: **2497 objects** in seven families (furniture, lights, decoration,
+housing: **2453 objects** in seven families (furniture, lights, decoration,
 plants, structure, utility, miscellaneous), the models of Midnight's housing
 converted for 3.3.5a (`tools/decor`). Every guild sees only its own objects, in
 its own phase of the hall.
@@ -237,10 +237,11 @@ disbanded loses its stock and its placed objects.
 **Getting objects.** Each object is an item (rare, **not bound: traded and
 sold**, 50 silver), used to add the object to the guild's stock:
 
-* **Bosses** of dungeons and raids drop one (`DropChance`, 10%) for a guild of
-  the Customization's Paragon level there in numbers: 4 members in a dungeon,
-  8 in a 10-player raid, 20 in a 25-player one. Only that guild's members see
-  it in the loot. Which one: a boss's own objects first (`tools/decor/loot.json`,
+* **Bosses** of dungeons and raids drop objects (`DropChance`, 10%) for a guild
+  of the Customization's Paragon level there in numbers: 4 members in a
+  dungeon, 8 in a 10-player raid, 20 in a 25-player one. A drop gives 1 object
+  in a dungeon, 2 in a 10-player raid, 3 in a 25-player one (`Drops.*`): one
+  member each. Only that guild's members see them in the loot. Each one: a boss's own objects first (`tools/decor/loot.json`,
   `bosses`), else, 60% of the time (`ThemeChance`), one of the instance's theme
   (blood elves in Magisters' Terrace, dragons in Onyxia's Lair...), else one of
   the objects of no theme.
@@ -250,13 +251,15 @@ sold**, 50 silver), used to add the object to the guild's stock:
   repeatable, class, profession or holiday quest. The quests of a theme's
   zones give that theme's objects first (`tools/decor/build_quests.py`).
 
-**Collection.** `/gcoll`, the **Collection** button of the Customization panel
-or of the guild window: every object, owned (with how many, how many placed)
+**Collection.** A side tab of ForeverUI's guild window (beside the talents'),
+or without ForeverUI a window of its own (the **Collection** button of the
+guild window); `/gcoll` and the Customization panel's **Collection** button
+open it too: every object, owned (with how many, how many placed)
 or missing, by family, with a search; hovering one shows it turning and where
 it is found (its quest, its bosses, the dungeons and raids of its theme).
 
 **Languages.** The objects' names are the housing's own in English, French,
-German, Spanish and Russian (`tools/decor/build_locales.py`), as are the
+German, Spanish (esES) and Russian (`tools/decor/build_locales.py`), as are the
 module's texts and the interface.
 
 **What it needs on the client:** [WarcraftXL](https://github.com/WarcraftXL/wxl-core)
@@ -289,7 +292,7 @@ guild named.
 | `.guildlevel perks [$guild]` | The perks the guild's members get at its current level, then its active perks: locked, ready, or the cooldown left of the selected player (else your own) when he belongs to the guild. |
 
 All need the game master level (2). The texts are in English, French, German,
-Spanish (both) and Russian, English for the others.
+Spanish (esES) and Russian, English for the others.
 
 ## Configuration
 
@@ -328,7 +331,8 @@ their step costs climb at once, without announcement.
 | `GuildLevel.House.Decor.Paragon` | 9 | The Paragon level that opens it. |
 | `GuildLevel.House.Decor.Rank` | 1 | Highest guild rank id allowed to decorate (0: the guild master only). |
 | `GuildLevel.House.Decor.DropChance` | 10 | % for a boss to drop an object for a guild there in numbers. |
-| `GuildLevel.House.Decor.ThemeChance` | 60 | % for that object to be of the instance's theme (else one of no theme). |
+| `GuildLevel.House.Decor.ThemeChance` | 60 | % for each object to be of the instance's theme (else one of no theme). |
+| `GuildLevel.House.Decor.Drops.Dungeon` / `.Raid10` / `.Raid25` | 1 / 2 / 3 | Objects a drop gives, one member each. |
 | `GuildLevel.House.Decor.Members.Dungeon` / `.Raid10` / `.Raid25` | 4 / 8 / 20 | Guildmates needed at the kill. |
 | `GuildLevel.Active.<Perk>.Level` | 21 to 25 | Guild level of each active perk (Raid, Rez, Bank, Vendor, Home). |
 | `GuildLevel.Active.<Perk>.Cooldown` | 3600 (Rez 600, Home 0) | Seconds; 0 = none. |

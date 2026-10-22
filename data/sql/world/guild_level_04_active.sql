@@ -27,7 +27,6 @@ INSERT INTO `creature_template_locale` (`entry`, `locale`, `Name`, `Title`, `Ver
 (92001, 'frFR', 'Fournisseur de la guilde', 'Composants et réparations', 0),
 (92001, 'deDE', 'Gildenlieferant', 'Reagenzien und Reparaturen', 0),
 (92001, 'esES', 'Proveedor de la hermandad', 'Componentes y reparaciones', 0),
-(92001, 'esMX', 'Proveedor de la hermandad', 'Componentes y reparaciones', 0),
 (92001, 'ruRU', 'Поставщик гильдии', 'Реагенты и ремонт', 0);
 
 -- The reagents of every class, unlimited, at their usual prices.
@@ -161,30 +160,6 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 142, 'esES', 'Casa de hermandad'),
 ('mod-guild-level', 143, 'esES', 'Aquí no se puede invocar nada.'),
 
-('mod-guild-level', 120, 'esMX', 'Tu hermandad debe ser de nivel {} para esta ventaja.'),
-('mod-guild-level', 121, 'esMX', 'Esta ventaja no está lista: faltan {} min {} s.'),
-('mod-guild-level', 122, 'esMX', 'No en combate.'),
-('mod-guild-level', 123, 'esMX', 'No en un campo de batalla ni en una arena.'),
-('mod-guild-level', 124, 'esMX', 'Invocación enviada a {} miembro(s) de tu grupo.'),
-('mod-guild-level', 125, 'esMX', 'Resurrección ofrecida a {} miembro(s) muerto(s) de tu grupo.'),
-('mod-guild-level', 126, 'esMX', 'Ningún miembro de tu grupo que invocar.'),
-('mod-guild-level', 127, 'esMX', 'Ningún miembro muerto de tu grupo aquí.'),
-('mod-guild-level', 128, 'esMX', 'Un cofre de hermandad está aquí durante {} min.'),
-('mod-guild-level', 129, 'esMX', 'Un proveedor de la hermandad espera aquí durante {} min.'),
-('mod-guild-level', 130, 'esMX', 'Tu hermandad aún no tiene casa: esta ventaja llegará con la casa de hermandad.'),
-('mod-guild-level', 131, 'esMX', 'No estás en una hermandad.'),
-('mod-guild-level', 132, 'esMX', 'Debes estar en un grupo.'),
-('mod-guild-level', 133, 'esMX', 'Ventajas activas:'),
-('mod-guild-level', 134, 'esMX', '{} (.gperk {}, nivel {}): {}'),
-('mod-guild-level', 135, 'esMX', 'lista'),
-('mod-guild-level', 136, 'esMX', 'bloqueada'),
-('mod-guild-level', 137, 'esMX', 'faltan {} min {} s'),
-('mod-guild-level', 138, 'esMX', 'Invocar al grupo'),
-('mod-guild-level', 139, 'esMX', 'Resucitar al grupo'),
-('mod-guild-level', 140, 'esMX', 'Cofre de hermandad'),
-('mod-guild-level', 141, 'esMX', 'Proveedor de la hermandad'),
-('mod-guild-level', 142, 'esMX', 'Casa de hermandad'),
-('mod-guild-level', 143, 'esMX', 'Aquí no se puede invocar nada.'),
 
 ('mod-guild-level', 120, 'ruRU', 'Для этого бонуса гильдия должна быть {}-го уровня.'),
 ('mod-guild-level', 121, 'ruRU', 'Бонус ещё не готов: осталось {} мин {} с.'),

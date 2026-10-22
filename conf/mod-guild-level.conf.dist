@@ -284,6 +284,9 @@ GuildLevel.House.EmptyDelay       = 60
 #    GuildLevel.House.Decor.DropChance  % for a dungeon or raid boss to drop
 #                                     an object for a guild there in numbers
 #                                     (only its members see it in the loot).
+#    GuildLevel.House.Decor.Drops.Dungeon  how many objects such a drop gives
+#    GuildLevel.House.Decor.Drops.Raid10   (one member gets each): in a dungeon,
+#    GuildLevel.House.Decor.Drops.Raid25   a 10-player and a 25-player raid.
 #    GuildLevel.House.Decor.ThemeChance  % for that object to be one of the
 #                                     instance's theme (tools/decor/loot.json);
 #                                     else one of the objects of no theme, which
@@ -298,6 +301,9 @@ GuildLevel.House.Decor.Paragon    = 9
 GuildLevel.House.Decor.Rank       = 1
 GuildLevel.House.Decor.DropChance = 10
 GuildLevel.House.Decor.ThemeChance = 60
+GuildLevel.House.Decor.Drops.Dungeon = 1
+GuildLevel.House.Decor.Drops.Raid10  = 2
+GuildLevel.House.Decor.Drops.Raid25  = 3
 GuildLevel.House.Decor.Members.Dungeon = 4
 GuildLevel.House.Decor.Members.Raid10  = 8
 GuildLevel.House.Decor.Members.Raid25  = 20

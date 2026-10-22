@@ -13,7 +13,7 @@ locales.json is used as it is. Writes:
   * data/lua/GuildLevel/GuildHouse_Locale.lua: the families, dungeons and zones in each language,
     for the interface (the objects' names come from the server, in the player's language).
 
-esMX takes the esES texts. Retail renamed a few places since 3.3.5: OVERRIDES gives them back.
+Spanish is esES only (esMX is not supported). Retail renamed a few places since 3.3.5: OVERRIDES gives them back.
 """
 import csv
 import io
@@ -31,7 +31,7 @@ JSON = os.path.join(HERE, 'locales.json')
 SQL = os.path.join(ROOT, 'data', 'sql', 'world', 'guild_level_15_decor_locales.sql')
 LUA = os.path.join(ROOT, 'data', 'lua', 'GuildLevel', 'GuildHouse_Locale.lua')
 LOCALES = ['enUS', 'frFR', 'deDE', 'esES', 'ruRU']
-SQL_LOCALES = {'frFR': 'frFR', 'deDE': 'deDE', 'esES': 'esES', 'esMX': 'esES', 'ruRU': 'ruRU'}
+SQL_LOCALES = {'frFR': 'frFR', 'deDE': 'deDE', 'esES': 'esES', 'ruRU': 'ruRU'}
 WAGO = 'https://wago.tools/db2/%s/csv?locale=%s'
 BACKSLASH = chr(92)
 
@@ -166,7 +166,7 @@ def build():
     out = [
         '-- mod-guild-level — the Customization objects and texts in each language (tools/decor/build_locales.py).',
         '--',
-        '-- The objects\' names are the housing\'s own (HouseDecor of retail); esMX takes the esES texts.',
+        '-- The objects\' names are the housing\'s own (HouseDecor of retail).',
         '-- Idempotent: every row is deleted before being written again.',
         '',
         'DELETE FROM `item_template_locale` WHERE %s;' % item_where,
@@ -208,7 +208,6 @@ def build():
             lua.append('        },')
         lua.append('    },')
     lua.append('}')
-    lua.append('GuildHouseLocale.esMX = GuildHouseLocale.esES')
     lua.append('')
     open(LUA, 'w', encoding='utf-8', newline='\n').write('\n'.join(lua))
     print('%d objects, %d item rows, %d texts; %d maps, %d zones' % (

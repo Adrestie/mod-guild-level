@@ -113,6 +113,8 @@ def loot_rows(catalog):
     spec = json.load(open(os.path.join(HERE, 'loot.json'), encoding='utf-8'))
     rows = set()
     for e in catalog:
+        if e.get('removed'):
+            continue
         name = e['name'].lower()
         for theme in spec['themes']:
             if any(re.search(r'(^|[^a-z])' + re.escape(k), name) for k in theme['keywords']):
@@ -164,6 +166,8 @@ def main(export_dir):
             os.remove(os.path.join(ICONS, f))
     items, dbc_rows = [], []
     for n, e in enumerate(catalog):
+        if e.get('removed'):            # taken out: its number stays unused
+            continue
         number = build_decor.display_of(n)
         thumb = os.path.join(export_dir, 'thumbnails', '%d.blp' % e['decor'])
         display = FALLBACK_DISPLAY

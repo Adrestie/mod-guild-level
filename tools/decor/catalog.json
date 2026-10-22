@@ -1377,7 +1377,8 @@
   "model": 193991,
   "item": 247781,
   "thumbnail": 7116679,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 24765,
@@ -1447,7 +1448,8 @@
   "model": 940783,
   "item": 284106,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 773,
@@ -1497,7 +1499,8 @@
   "model": 2529729,
   "item": 282667,
   "thumbnail": 0,
-  "scale": 0.07500000298023224
+  "scale": 0.07500000298023224,
+  "removed": "no picture"
  },
  {
   "decor": 518,
@@ -3497,7 +3500,8 @@
   "model": 6025946,
   "item": 253524,
   "thumbnail": 7425303,
-  "scale": 1
+  "scale": 1,
+  "removed": "damaged name"
  },
  {
   "decor": 11137,
@@ -3717,7 +3721,8 @@
   "model": 193988,
   "item": 247779,
   "thumbnail": 7116675,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 15140,
@@ -3817,7 +3822,8 @@
   "model": 201124,
   "item": 247782,
   "thumbnail": 7116681,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28552,
@@ -3957,7 +3963,8 @@
   "model": 193917,
   "item": 247772,
   "thumbnail": 7116665,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 14811,
@@ -4047,7 +4054,8 @@
   "model": 2529716,
   "item": 282663,
   "thumbnail": 0,
-  "scale": 0.25
+  "scale": 0.25,
+  "removed": "no picture"
  },
  {
   "decor": 28515,
@@ -5437,7 +5445,8 @@
   "model": 1675684,
   "item": 282202,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 25326,
@@ -6037,7 +6046,8 @@
   "model": 6025944,
   "item": 253601,
   "thumbnail": 7425423,
-  "scale": 1
+  "scale": 1,
+  "removed": "damaged name"
  },
  {
   "decor": 8991,
@@ -6437,7 +6447,8 @@
   "model": 1674796,
   "item": 283311,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28476,
@@ -6477,7 +6488,8 @@
   "model": 1674745,
   "item": 283327,
   "thumbnail": 0,
-  "scale": 0.5
+  "scale": 0.5,
+  "removed": "no picture"
  },
  {
   "decor": 28477,
@@ -6597,7 +6609,8 @@
   "model": 193948,
   "item": 247775,
   "thumbnail": 7116670,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 3913,
@@ -7827,7 +7840,8 @@
   "model": 1616777,
   "item": 282136,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28437,
@@ -7927,7 +7941,8 @@
   "model": 3058263,
   "item": 284498,
   "thumbnail": 0,
-  "scale": 0.6499999761581421
+  "scale": 0.6499999761581421,
+  "removed": "no picture"
  },
  {
   "decor": 722,
@@ -11347,7 +11362,8 @@
   "model": 4551444,
   "item": 284244,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28495,
@@ -11357,7 +11373,8 @@
   "model": 1852964,
   "item": 284384,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28549,
@@ -11717,7 +11734,8 @@
   "model": 193932,
   "item": 247773,
   "thumbnail": 7116666,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 5559,
@@ -12967,7 +12985,8 @@
   "model": 6225717,
   "item": 246960,
   "thumbnail": 7109529,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 2587,
@@ -13977,7 +13996,8 @@
   "model": 1675208,
   "item": 283335,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28483,
@@ -15967,7 +15987,8 @@
   "model": 1324327,
   "item": 272129,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 21886,
@@ -16037,7 +16058,8 @@
   "model": 3189119,
   "item": 284546,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28568,
@@ -16587,7 +16609,8 @@
   "model": 1400889,
   "item": 248407,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 5560,
@@ -17047,7 +17070,8 @@
   "model": 1674746,
   "item": 283329,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 27684,
@@ -17057,7 +17081,8 @@
   "model": 3051536,
   "item": 284568,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 928,
@@ -18117,7 +18142,8 @@
   "model": 1608754,
   "item": 282130,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28466,
@@ -18337,7 +18363,8 @@
   "model": 193878,
   "item": 247771,
   "thumbnail": 7116664,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 5894,
@@ -18547,7 +18574,8 @@
   "model": 1674747,
   "item": 283289,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 941,
@@ -18727,7 +18755,8 @@
   "model": 3036098,
   "item": 282714,
   "thumbnail": 0,
-  "scale": 0.4000000059604645
+  "scale": 0.4000000059604645,
+  "removed": "no picture"
  },
  {
   "decor": 25129,
@@ -19087,7 +19116,8 @@
   "model": 6930643,
   "item": 245539,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 1909,
@@ -19107,7 +19137,8 @@
   "model": 6024532,
   "item": 253496,
   "thumbnail": 7416751,
-  "scale": 1
+  "scale": 1,
+  "removed": "damaged name"
  },
  {
   "decor": 4424,
@@ -20447,7 +20478,8 @@
   "model": 7808628,
   "item": 278374,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 22148,
@@ -21027,7 +21059,8 @@
   "model": 897156,
   "item": 283234,
   "thumbnail": 0,
-  "scale": 0.699999988079071
+  "scale": 0.699999988079071,
+  "removed": "no picture"
  },
  {
   "decor": 28320,
@@ -21187,7 +21220,8 @@
   "model": 940795,
   "item": 284108,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28497,
@@ -21287,7 +21321,8 @@
   "model": 193980,
   "item": 247777,
   "thumbnail": 7116673,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 3915,
@@ -21297,7 +21332,8 @@
   "model": 193984,
   "item": 247778,
   "thumbnail": 7116674,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 3917,
@@ -21307,7 +21343,8 @@
   "model": 193990,
   "item": 247780,
   "thumbnail": 7116677,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 3911,
@@ -21317,7 +21354,8 @@
   "model": 193937,
   "item": 247774,
   "thumbnail": 7116669,
-  "scale": 0.4000000059604645
+  "scale": 0.4000000059604645,
+  "removed": "no picture"
  },
  {
   "decor": 10855,
@@ -21487,7 +21525,8 @@
   "model": 897834,
   "item": 283224,
   "thumbnail": 0,
-  "scale": 0.4000000059604645
+  "scale": 0.4000000059604645,
+  "removed": "no picture"
  },
  {
   "decor": 27606,
@@ -21527,7 +21566,8 @@
   "model": 903764,
   "item": 283244,
   "thumbnail": 0,
-  "scale": 0.5
+  "scale": 0.5,
+  "removed": "no picture"
  },
  {
   "decor": 28629,
@@ -21577,7 +21617,8 @@
   "model": 3053186,
   "item": 283381,
   "thumbnail": 0,
-  "scale": 0.699999988079071
+  "scale": 0.699999988079071,
+  "removed": "no picture"
  },
  {
   "decor": 28329,
@@ -22247,7 +22288,8 @@
   "model": 3038709,
   "item": 283265,
   "thumbnail": 0,
-  "scale": 0.3499999940395355
+  "scale": 0.3499999940395355,
+  "removed": "no picture"
  },
  {
   "decor": 28557,
@@ -22257,7 +22299,8 @@
   "model": 3053190,
   "item": 283383,
   "thumbnail": 0,
-  "scale": 0.5
+  "scale": 0.5,
+  "removed": "no picture"
  },
  {
   "decor": 28336,
@@ -22267,7 +22310,8 @@
   "model": 970239,
   "item": 284126,
   "thumbnail": 0,
-  "scale": 1
+  "scale": 1,
+  "removed": "no picture"
  },
  {
   "decor": 28489,

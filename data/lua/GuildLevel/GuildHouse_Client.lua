@@ -155,7 +155,6 @@ local L = {
         tradable = "Предмет можно передавать и продавать; при использовании он попадает на склад гильдии.",
     },
 }
-L.esMX = L.esES
 L = L[GetLocale()] or L.enUS
 
 -- The families, dungeons and zones in the player's language (GuildHouse_Locale.lua, an addon of
@@ -762,7 +761,13 @@ Backdrop(Coll, L.collectionTitle)
 Coll.close = CreateFrame("Button", nil, Coll, "UIPanelCloseButton")
 Coll.close:SetPoint("TOPRIGHT", -4, -4)
 
-Coll.progress = Coll:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+-- What the window holds, in it or in a page of ForeverUI's guild window (below).
+local Box = CreateFrame("Frame", nil, Coll)
+Box:SetPoint("TOPLEFT")
+Box:SetWidth(660)
+Box:SetHeight(COLL_ROWS * COLL_ROW + 166)
+
+Coll.progress = Box:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 Coll.progress:SetPoint("TOPLEFT", 18, -40)
 
 -- the families: every one, then each
@@ -770,7 +775,7 @@ Coll.tabs = {}
 local families = { false }
 for _, cat in ipairs(CATEGORIES) do families[#families + 1] = cat end
 for i, cat in ipairs(families) do
-    local t = Button(Coll, cat and L.categories[cat] or L.all, 80)
+    local t = Button(Box, cat and L.categories[cat] or L.all, 80)
     t:SetPoint("TOPLEFT", 16 + ((i - 1) % 4) * 83, -60 - floor((i - 1) / 4) * 26)
     t:SetScript("OnClick", function()
         C.category = cat or nil
@@ -781,7 +786,7 @@ end
 
 Coll.filters = {}
 for i, f in ipairs({ "all", "owned", "missing" }) do
-    local b = Button(Coll, L[f], 80)
+    local b = Button(Box, L[f], 80)
     b:SetPoint("TOPLEFT", 16 + (i - 1) * 83, -116)
     b:SetScript("OnClick", function()
         C.filter = f
@@ -790,7 +795,7 @@ for i, f in ipairs({ "all", "owned", "missing" }) do
     Coll.filters[f] = b
 end
 
-Coll.search = CreateFrame("EditBox", "GuildHouseCollectionSearch", Coll, "InputBoxTemplate")
+Coll.search = CreateFrame("EditBox", "GuildHouseCollectionSearch", Box, "InputBoxTemplate")
 Coll.search:SetWidth(82)
 Coll.search:SetHeight(20)
 Coll.search:SetPoint("TOPLEFT", 270, -118)
@@ -806,7 +811,7 @@ end)
 Coll.search:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
 Coll.search:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
 
-Coll.scroll = CreateFrame("ScrollFrame", "GuildHouseCollectionScroll", Coll, "FauxScrollFrameTemplate")
+Coll.scroll = CreateFrame("ScrollFrame", "GuildHouseCollectionScroll", Box, "FauxScrollFrameTemplate")
 Coll.scroll:SetPoint("TOPLEFT", 16, -146)
 Coll.scroll:SetWidth(330)
 Coll.scroll:SetHeight(COLL_ROWS * COLL_ROW)
@@ -814,13 +819,13 @@ Coll.scroll:SetScript("OnVerticalScroll", function(self, offset)
     FauxScrollFrame_OnVerticalScroll(self, offset, COLL_ROW, function() Coll:Refresh() end)
 end)
 if FUI then
-    if FUI.Inset then FUI.Inset(Coll, Coll.scroll) end
+    if FUI.Inset then FUI.Inset(Box, Coll.scroll) end
     if FUI.Bar then FUI.Bar(_G.GuildHouseCollectionScrollScrollBar) end
 end
 
 -- The details, on the right: the object turning, its name, its family, how many the guild has,
 -- where it is found.
-local Detail = CreateFrame("Frame", nil, Coll)
+local Detail = CreateFrame("Frame", nil, Box)
 Detail:SetPoint("TOPLEFT", 372, -36)
 Detail:SetPoint("BOTTOMRIGHT", -16, 16)
 Detail.model = CreateFrame("Model", nil, Detail)
@@ -933,7 +938,7 @@ end
 
 Coll.rows = {}
 for i = 1, COLL_ROWS do
-    local r = CreateFrame("Button", nil, Coll)
+    local r = CreateFrame("Button", nil, Box)
     r:SetHeight(COLL_ROW)
     r:SetPoint("TOPLEFT", 18, -146 - (i - 1) * COLL_ROW)
     r:SetPoint("RIGHT", Coll.scroll, "RIGHT", -4, 0)
@@ -1027,11 +1032,102 @@ end
 
 Coll:SetScript("OnShow", function(self)
     self:SetScale(UIParent:GetScale())
+end)
+Box:SetScript("OnShow", function()
     AIO.Handle("GuildHouse", "Refresh")
-    self:Rebuild()
+    Coll:Rebuild()
 end)
 
-function Coll:Toggle()
+-- FOREVERUI: the collection is a page of its guild window, behind a side tab beside the talents';
+-- the window grows to hold it while it is shown, then takes its size back (as the talents do).
+local GFUI = _G.ForeverUI and _G.ForeverUI.Guild and _G.ForeverUI.Guild.registerView and _G.ForeverUI
+local VIEW = "guildcollection"
+local PAGE_W, PAGE_H = 814, 426     -- the guild page's own size, never less
+local view
+
+-- In its window of its own (in the Customization mode, without ForeverUI).
+local function Unembed()
+    if Box:GetParent() ~= Coll then
+        Box:SetParent(Coll)
+        Box:ClearAllPoints()
+        Box:SetPoint("TOPLEFT")
+    end
+end
+
+local function Window()
+    return GFUI and GFUI.Social and GFUI.Social.frame
+end
+
+-- While the page is shown, the window keeps its size: ForeverUI sets the guild page's size again
+-- whenever the page shows.
+local function Hold(self)
+    local win = Window()
+    if not win or not self.wantW or InCombatLockdown() then return end
+    if math.abs(win:GetWidth() - self.wantW) > 1 or math.abs(win:GetHeight() - self.wantH) > 1 then
+        win:SetWidth(self.wantW)
+        win:SetHeight(self.wantH)
+    end
+end
+
+local function Embed()
+    if not view then return end
+    Coll:Hide()
+    Box:SetParent(view)
+    Box:ClearAllPoints()
+    local G = GFUI.Guild
+    -- the right pane, from the guild column on (the box's own title band under the window's)
+    Box:SetPoint("TOPLEFT", G.column or view, G.column and "TOPRIGHT" or "TOPLEFT", 4, -4)
+    Box:Show()
+    local win = Window()
+    if win then
+        local left = (Box:GetLeft() and win:GetLeft()) and (Box:GetLeft() - win:GetLeft()) or 180
+        local top = (Box:GetTop() and win:GetTop()) and (win:GetTop() - Box:GetTop()) or 40
+        view.wantW = max(PAGE_W, min(left + Box:GetWidth() + 8, UIParent:GetWidth() * 0.92))
+        view.wantH = max(PAGE_H, min(top + Box:GetHeight() + 8, UIParent:GetHeight() * 0.92))
+        view:SetScript("OnUpdate", Hold)
+    end
+end
+
+if GFUI then
+    GFUI.Guild.registerView(VIEW, {
+        order = 31,
+        icon = ICONS .. "494",
+        tooltip = function() return L.collectionTitle end,
+        build = function(frame)
+            view = frame
+            Embed()
+        end,
+        show = function()
+            Embed()
+            Coll:Rebuild()
+        end,
+        hide = function()
+            if view then
+                view.wantW, view.wantH = nil, nil
+                view:SetScript("OnUpdate", nil)
+            end
+            local win = Window()
+            if win and not InCombatLockdown() then
+                win:SetWidth(PAGE_W)
+                win:SetHeight(PAGE_H)
+            end
+        end,
+        update = function()
+            if Box:IsVisible() then Coll:Rebuild() end
+        end,
+    })
+end
+
+-- The guild window's page with ForeverUI, else (or in the Customization mode, the usual interface
+-- hidden) the window of its own.
+function Coll:Toggle(own)
+    if GFUI and not own then
+        if not (FriendsFrame and FriendsFrame:IsShown()) and ToggleFriendsFrame then ToggleFriendsFrame(3) end
+        if FriendsFrame and FriendsFrame.selectedTab ~= 3 and FriendsFrameTab3 then FriendsFrameTab3:Click() end
+        GFUI.Guild.setView(VIEW)
+        return
+    end
+    Unembed()
     if self:IsShown() then self:Hide() else self:Show() end
 end
 
@@ -1039,7 +1135,7 @@ function Handlers.Sources(_, sources)
     if type(sources) ~= "table" or not sources.decor then return end
     C.sources[sources.decor] = sources
     C.asked[sources.decor] = nil
-    if Coll:IsShown() and C.shown == sources.decor then
+    if Box:IsVisible() and C.shown == sources.decor then
         Detail:Display(C.shown)
     end
 end
@@ -1047,7 +1143,7 @@ end
 -- The way in from the Customization panel: in its third row of families, beside the last one.
 local collButton = Button(Panel, L.collection, 88)
 collButton:SetPoint("TOPLEFT", 14 + 2 * 91, -36 - 2 * 26)
-collButton:SetScript("OnClick", function() Coll:Toggle() end)
+collButton:SetScript("OnClick", function() Coll:Toggle(true) end)
 
 ------------------------------------------------------------------------------
 -- The way in
@@ -1069,7 +1165,7 @@ local function Shown(state)
         UI:Leave()
     end
     if S.active then UI:Refresh() end
-    if Coll:IsShown() then Coll:Rebuild() end
+    if Box:IsVisible() then Coll:Rebuild() end
 end
 
 -- The objects' names in the player's language, a part at a time (none for English).
@@ -1079,7 +1175,7 @@ function Handlers.Names(_, part, done)
     end
     if done then
         if S.active then UI:Refresh() end
-        if Coll:IsShown() then Coll:Rebuild() end
+        if Box:IsVisible() then Coll:Rebuild() end
     end
 end
 
@@ -1134,9 +1230,9 @@ end)
 
 SLASH_GUILDHOUSECOLLECTION1 = "/gcoll"
 SLASH_GUILDHOUSECOLLECTION2 = "/gcollection"
-SlashCmdList.GUILDHOUSECOLLECTION = function() Coll:Toggle() end
+SlashCmdList.GUILDHOUSECOLLECTION = function() Coll:Toggle(S.active) end
 
--- And from the stock guild window, under the talents' button (ForeverUI's guild page: /gcoll).
+-- And from the stock guild window, under the talents' button (ForeverUI's: its side tab).
 local guildButton
 local function AttachGuildButton()
     local parent = _G.GuildFrame
@@ -1149,9 +1245,11 @@ local function AttachGuildButton()
     guildButton:SetFrameLevel(parent:GetFrameLevel() + 10)
     guildButton:SetScript("OnClick", function() Coll:Toggle() end)
 end
-if FriendsFrame then FriendsFrame:HookScript("OnShow", AttachGuildButton) end
-if FriendsFrame_Update then hooksecurefunc("FriendsFrame_Update", AttachGuildButton) end
-AttachGuildButton()
+if not GFUI then
+    if FriendsFrame then FriendsFrame:HookScript("OnShow", AttachGuildButton) end
+    if FriendsFrame_Update then hooksecurefunc("FriendsFrame_Update", AttachGuildButton) end
+    AttachGuildButton()
+end
 
 SLASH_GUILDHOUSEDECO1 = "/gdeco"
 SlashCmdList.GUILDHOUSEDECO = function()

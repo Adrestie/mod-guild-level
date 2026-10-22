@@ -11,7 +11,6 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 144, 'frFR', 'Délais des bonus actifs réinitialisés pour {}.'),
 ('mod-guild-level', 144, 'deDE', 'Abklingzeiten der aktiven Boni für {} zurückgesetzt.'),
 ('mod-guild-level', 144, 'esES', 'Tiempos de reutilización de las ventajas activas reiniciados para {}.'),
-('mod-guild-level', 144, 'esMX', 'Tiempos de reutilización de las ventajas activas reiniciados para {}.'),
 ('mod-guild-level', 144, 'ruRU', 'Время восстановления активных бонусов сброшено для {}.');
 
 DELETE FROM `command` WHERE `name` = 'gperk reset';

@@ -66,18 +66,6 @@ INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 107, 'esES', 'Hecho.'),
 ('mod-guild-level', 108, 'esES', 'El módulo está desactivado (GuildLevel.Enable = 0): ninguna hermandad gana experiencia.'),
 
-('mod-guild-level',   1, 'esMX', '[Hermandad] ¡Tu hermandad alcanzó el nivel {}!'),
-('mod-guild-level',   2, 'esMX', '[Hermandad] ¡Tu hermandad alcanzó el nivel de Paragón {}!'),
-('mod-guild-level',   3, 'esMX', '[Hermandad] ¡Tu hermandad alcanzó el nivel {}, el más alto! Su experiencia va ahora a los niveles de Paragón.'),
-('mod-guild-level',   4, 'esMX', '[Hermandad] ¡Tu hermandad alcanzó el nivel de Paragón {}, el más alto!'),
-('mod-guild-level', 101, 'esMX', 'No se encontró ninguna hermandad: nombra una (o da su id), selecciona a uno de sus miembros o pertenece a una hermandad.'),
-('mod-guild-level', 102, 'esMX', 'Hermandad {} (id {}): nivel {}/{}, Paragón {}/{}.'),
-('mod-guild-level', 103, 'esMX', 'Experiencia: {} / {} hacia el siguiente nivel.'),
-('mod-guild-level', 104, 'esMX', 'Experiencia: se alcanzaron todos los niveles.'),
-('mod-guild-level', 105, 'esMX', 'Experiencia total: {}.'),
-('mod-guild-level', 106, 'esMX', 'Fuera de rango: {} como máximo.'),
-('mod-guild-level', 107, 'esMX', 'Hecho.'),
-('mod-guild-level', 108, 'esMX', 'El módulo está desactivado (GuildLevel.Enable = 0): ninguna hermandad gana experiencia.'),
 
 ('mod-guild-level',   1, 'ruRU', '[Гильдия] Ваша гильдия достигла {}-го уровня!'),
 ('mod-guild-level',   2, 'ruRU', '[Гильдия] Ваша гильдия достигла {}-го уровня Парагона!'),

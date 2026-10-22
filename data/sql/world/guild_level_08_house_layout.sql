@@ -40,7 +40,6 @@ INSERT INTO `gameobject_template_locale` (`entry`, `locale`, `name`, `castBarCap
 (920002, 'frFR', 'Portail vers les Grottes du temps', '', 0),
 (920002, 'deDE', 'Portal zu den Höhlen der Zeit', '', 0),
 (920002, 'esES', 'Portal a las Cavernas del Tiempo', '', 0),
-(920002, 'esMX', 'Portal a las Cavernas del Tiempo', '', 0),
 (920002, 'ruRU', 'Портал в Пещеры Времени', '', 0);
 
 DELETE FROM `mod_guild_level_house_spawn` WHERE `id` BETWEEN 3 AND 999;

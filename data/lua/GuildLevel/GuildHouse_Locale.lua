@@ -1525,4 +1525,3 @@ GuildHouseLocale = {
         },
     },
 }
-GuildHouseLocale.esMX = GuildHouseLocale.esES

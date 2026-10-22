@@ -92,6 +92,9 @@ void GuildDecorMgr::LoadConfig()
     c.rank = uint8(std::min<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Rank", 1), 9));
     c.dropChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.House.Decor.DropChance", 10.0f), 0.0f, 100.0f);
     c.themeChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.House.Decor.ThemeChance", 60.0f), 0.0f, 100.0f);
+    c.dungeonDrops = std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Drops.Dungeon", 1), 1, 5);
+    c.raid10Drops = std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Drops.Raid10", 2), 1, 10);
+    c.raid25Drops = std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Drops.Raid25", 3), 1, 25);
     c.dungeonMembers = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Dungeon", 4), 1, 5));
     c.raid10Members = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Raid10", 8), 1, 10));
     c.raid25Members = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Members.Raid25", 20), 1, 25));
@@ -554,26 +557,7 @@ void GuildDecorMgr::OnCreatureKill(Player* killer, Creature* creature)
         if (!roll_chance_f(_config.dropChance))
             continue;
 
-        // which: the boss's own, else the instance's theme (ThemeChance) or one of no theme
-        uint32 decor = 0, item = 0;
-        {
-            std::lock_guard<std::mutex> guard(_lock);
-            std::vector<uint32> const* pool = nullptr;
-            auto b = _bossLoot.find(creature->GetEntry());
-            auto m = _mapLoot.find(map->GetId());
-            if (b != _bossLoot.end() && !b->second.empty())
-                pool = &b->second;
-            else if (m != _mapLoot.end() && !m->second.empty() && (_anywhere.empty() || roll_chance_f(_config.themeChance)))
-                pool = &m->second;
-            else if (!_anywhere.empty())
-                pool = &_anywhere;
-            if (!pool)
-                continue;
-            decor = Acore::Containers::SelectRandomContainerElement(*pool);
-            item = _decorItem[decor];
-        }
-
-        // seen and looted by that guild's members only: their mark, the item's condition
+        // seen and looted by that guild's members only: their mark, the items' condition
         for (Player* member : members)
             member->CastSpell(member, GUILD_DECOR_LOOT_MARK, true);
         static Condition* mark = []
@@ -585,11 +569,36 @@ void GuildDecorMgr::OnCreatureKill(Player* killer, Creature* creature)
             c->ConditionTarget = 0;
             return c;
         }();
-        LootStoreItem drop(item, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, 1, 1);
-        drop.conditions.push_back(mark);
-        creature->loot.AddItem(drop);
-        LOG_DEBUG("module", "mod-guild-level: {} dropped Customization object {} for guild {}", creature->GetEntry(),
-            decor, guildId);
+
+        // as many objects as members get one: a dungeon's group, a 10-player raid, a 25-player one;
+        // each the boss's own, else the instance's theme (ThemeChance) or one of no theme
+        uint32 const drops = !map->IsRaid() ? _config.dungeonDrops
+            : (map->Is25ManRaid() ? _config.raid25Drops : _config.raid10Drops);
+        for (uint32 i = 0; i < drops; ++i)
+        {
+            uint32 decor = 0, item = 0;
+            {
+                std::lock_guard<std::mutex> guard(_lock);
+                std::vector<uint32> const* pool = nullptr;
+                auto b = _bossLoot.find(creature->GetEntry());
+                auto m = _mapLoot.find(map->GetId());
+                if (b != _bossLoot.end() && !b->second.empty())
+                    pool = &b->second;
+                else if (m != _mapLoot.end() && !m->second.empty() && (_anywhere.empty() || roll_chance_f(_config.themeChance)))
+                    pool = &m->second;
+                else if (!_anywhere.empty())
+                    pool = &_anywhere;
+                if (!pool)
+                    break;
+                decor = Acore::Containers::SelectRandomContainerElement(*pool);
+                item = _decorItem[decor];
+            }
+            LootStoreItem drop(item, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, 1, 1);
+            drop.conditions.push_back(mark);
+            creature->loot.AddItem(drop);
+            LOG_DEBUG("module", "mod-guild-level: {} dropped Customization object {} for guild {}", creature->GetEntry(),
+                decor, guildId);
+        }
     }
 }
 

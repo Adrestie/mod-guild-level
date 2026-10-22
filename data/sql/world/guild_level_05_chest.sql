@@ -34,5 +34,4 @@ INSERT INTO `gameobject_template_locale` (`entry`, `locale`, `name`, `castBarCap
 (920000, 'frFR', 'Coffre de guilde', '', 0), (920001, 'frFR', 'Coffre de guilde', '', 0),
 (920000, 'deDE', 'Gildentruhe', '', 0),      (920001, 'deDE', 'Gildentruhe', '', 0),
 (920000, 'esES', 'Cofre de hermandad', '', 0), (920001, 'esES', 'Cofre de hermandad', '', 0),
-(920000, 'esMX', 'Cofre de hermandad', '', 0), (920001, 'esMX', 'Cofre de hermandad', '', 0),
 (920000, 'ruRU', 'Сундук гильдии', '', 0),    (920001, 'ruRU', 'Сундук гильдии', '', 0);

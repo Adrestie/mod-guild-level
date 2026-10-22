@@ -153,6 +153,9 @@ def main(export_dir):
 
     dbc_rows, sql_rows = [], []
     for n, (e, path) in enumerate(rows):
+        # an object taken out ("removed" in catalog.json) keeps its number, unused
+        if e.get('removed'):
+            continue
         box = bounds(os.path.join(out, path.split(BACKSLASH)[-1]))
         mdx = path[:-3] + '.mdx'
         fbits = [struct.unpack('<I', struct.pack('<f', v))[0] for v in box]
@@ -169,7 +172,7 @@ def main(export_dir):
         '',
         'GuildHouseDecor = {',
     ]
-    for (e, path), (_, _, _, _, box) in zip(rows, sql_rows):
+    for (e, path), (_, _, _, _, box) in zip([r for r in rows if not r[0].get('removed')], sql_rows):
         lines.append('    [%d] = { %s, %s, %s, %s, %g, %s, %d },' % (
             e['decor'], lua_string(e['category']), lua_string(e['kind']), lua_string(path), lua_string(e['name']),
             e.get('scale', 1), ', '.join('%.3f' % v for v in box), e['camera']))
