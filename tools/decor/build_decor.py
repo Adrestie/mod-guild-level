@@ -54,6 +54,26 @@ ADDITIVE = (3, 4)
 CARD_VERTICES = 8                   # a see-through section this small is a glow's card
 
 
+# a skin's FileDataID no path table holds: the plugin then reads the skin by its name beside the model
+OWN_SKIN_ID = 0x7FFF0000
+
+
+def own_skins(path):
+    """The model's skins (SFID) pointed at its own files. A model of the old world keeps the
+    FileDataIDs of its 3.3.5 skins (Coffin00.skin...): WarcraftXL resolves them (wxl-db2's
+    ModelFilePath) and the client reads the old skin against the modern vertices -- a preview from
+    inside a tangle of faces. FileDataIDs no table holds send it to the files beside the model."""
+    data = bytearray(open(path, 'rb').read())
+    i = 0
+    while i + 8 <= len(data):
+        tag, size = data[i:i + 4], struct.unpack_from('<I', data, i + 4)[0]
+        if tag == b'SFID':
+            for k in range(size // 4):
+                struct.pack_into('<I', data, i + 8 + 4 * k, OWN_SKIN_ID + k)
+        i += 8 + size
+    open(path, 'wb').write(data)
+
+
 def _array(b, off):
     return struct.unpack_from('<II', b, off)
 
@@ -187,8 +207,9 @@ def main(export_dir):
             print('not exported:', e['decor'], e['name'])
             continue
         pack.pack(os.path.join(export_dir, name, name + '.m2'), out, name, GAME_DIR, PACK_OPTIONS, None)
-        # a camera of its own for the interface's turntable preview
         m2 = os.path.join(out, name + '.m2')
+        own_skins(m2)
+        # a camera of its own for the interface's turntable preview
         data, camera = preview_camera.add(open(m2, 'rb').read(), PREVIEW_ASPECT, bounds(m2))
         open(m2, 'wb').write(data)
         e = dict(e, camera=camera)
