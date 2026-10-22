@@ -42,9 +42,9 @@ tests: [docs/GUIDE.md](docs/GUIDE.md).
 
 ## Credits
 
-* [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk), ALE, AIO (Rochet2).
+* [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk), ALE, AIO (Rochet2), WarcraftXL.
 * [wxl-housing](https://github.com/sogyboi/wxl-housing) by sogyboi, which `wxl-guildhouse` forks.
-* [WXL](https://github.com/WarcraftXL/wxl-core) (WarcraftXL).
+* [WXL](https://github.com/WarcraftXL/wxl-core).
 
 ## Licence
 
