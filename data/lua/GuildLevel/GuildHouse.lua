@@ -46,7 +46,7 @@ local function State(player)
     local guildId = player:GetGuildId()
     local state = {
         guild = guildId ~= 0, inHouse = HALLS[player:GetMapId()] == true, map = player:GetMapId(),
-        paragonNeeded = Conf("GuildLevel.House.Decor.Paragon", 9), rankAllowed = Conf("GuildLevel.House.Decor.Rank", 1),
+        paragonNeeded = Conf("GuildLevel.House.Decor.Paragon", 7), rankAllowed = Conf("GuildLevel.House.Decor.Rank", 1),
         enable = Conf("GuildLevel.House.Decor.Enable", 1) ~= 0, owned = {}, placed = {},
         members = { Conf("GuildLevel.House.Decor.Members.Dungeon", 4), Conf("GuildLevel.House.Decor.Members.Raid10", 8),
             Conf("GuildLevel.House.Decor.Members.Raid25", 20) },

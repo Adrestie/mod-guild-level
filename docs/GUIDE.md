@@ -9,7 +9,7 @@ and builds a guild house on them:
 
 * **Guild experience and levels:** members of a guild who play together earn
   guild experience; the guild climbs **25 levels**, then **Paragon levels**
-  (99 by default, the first 9 unlocking the Guild House features),
+  (99 by default, the first 7 unlocking the Guild House features),
   announced to its members with a level-up toast and shown on a bar in the
   guild window.
 * **Perks:** levels 1 to 20 give passive perks to every member (experience,
@@ -21,9 +21,9 @@ and builds a guild house on them:
   bonuses that every member gets.
 * **The guild house:** from level 25, the guild has its own house in its
   faction's PvP hall (Champions' Hall, Hall of Legends), one phase per guild;
-  Paragon 2 to 8 bring its services (supplier, banker, trainers, auction
+  Paragon 1 to 6 bring its services (supplier, banker, trainers, auction
   house, portals).
-* **Customization (Paragon 9):** the members decorate the house with the
+* **Customization (Paragon 7):** the members decorate the house with the
   furniture of the modern housing: **2443 objects** in seven families,
   dropped by dungeon and raid bosses (by theme and by boss) and given by
   **800 quests**, placed, turned and sized with a 3D editor, and listed in a
@@ -84,7 +84,7 @@ configuration, and the bar starts again from zero at each step:
 * **Paragon levels**, past level 25, up to `GuildLevel.Paragon.Max` (99 by
   default): `GuildLevel.Curve.Paragon`. By default 1,500,000 for Paragon 1 up to
   4,000,000 for Paragon 9, about 23 million in all, and 4,000,000 for each one
-  after it. The first 9 unlock the Guild House features.
+  after it. The first 7 unlock the Guild House features.
 * At the last Paragon level the guild earns nothing more; its lifetime total
   still counts.
 
@@ -93,7 +93,7 @@ character, so five guildmates bring their guild about 2,500 per kill.
 
 Each level and Paragon level reached is told to every member of the guild
 online, in the green of the guild channel and in his own language:
-`[Guild] Your guild has reached level 3!`. Level 25 and Paragon 9 have a
+`[Guild] Your guild has reached level 3!`. Level 25 and the last Paragon level have a
 message of their own.
 
 The guild's experience is kept in memory and written to `mod_guild_level`
@@ -224,13 +224,12 @@ Rows under id 1000 are the module's; a server adds its own above.
 | Paragon | What appears |
 |---|---|
 | 0 (level 25) | a mailbox by the entrance |
-| 2 | the Guild Supplier (reagents of every class, repairs) |
-| 3 | a banker of the faction's capital (Olivia Burnside / Karus) |
-| 4 | nobody (the Guild Supplier repairs) |
-| 5 | the ten class trainers of the faction's capital (the Death Knight one from Acherus) and a stable master |
-| 6 | the fourteen Grand Master profession trainers of Dalaran, who teach every recipe of Vanilla, Burning Crusade and Wrath, with a forge, an anvil and a cooking fire |
-| 7 | two auctioneers of the faction: its own auction house |
-| 8 | portals to the four capitals of the faction, Shattrath, Dalaran and the Caverns of Time (gameobject 920002 of the module: the game has no such portal) |
+| 1 | the Guild Supplier (reagents of every class, repairs) |
+| 2 | a banker of the faction's capital (Olivia Burnside / Karus) |
+| 3 | the ten class trainers of the faction's capital (the Death Knight one from Acherus) and a stable master |
+| 4 | the fourteen Grand Master profession trainers of Dalaran, who teach every recipe of Vanilla, Burning Crusade and Wrath, with a forge, an anvil and a cooking fire |
+| 5 | two auctioneers of the faction: its own auction house |
+| 6 | portals to the four capitals of the faction, Shattrath, Dalaran and the Caverns of Time (gameobject 920002 of the module: the game has no such portal) |
 
 **The layout** was proposed from the walkable floor of each hall (the
 server's mmaps). Champions' Hall, a long room: services by the entrance, class
@@ -253,9 +252,9 @@ Someone who is not a member (or whose guild has no house) and ends up in a
 hall -- a GM teleport, a login after leaving the guild -- is sent back. Game
 masters keep their own phase there (`.modify phase` shows a house).
 
-## Customization (Paragon 9)
+## Customization (Paragon 7)
 
-At **Paragon 9** the guild decorates its house with the furniture of the modern
+At **Paragon 7** the guild decorates its house with the furniture of the modern
 housing: **2443 objects** in seven families (furniture, lights, decoration,
 plants, structure, utility, miscellaneous), the models of Midnight's housing
 converted for 3.3.5a (`tools/decor`). Every guild sees only its own objects, in
@@ -374,7 +373,7 @@ their step costs climb at once, without announcement.
 | `GuildLevel.House.Paragon` | 0 | The Paragon level that opens the house, past level 25 (0: level 25 itself). |
 | `GuildLevel.House.EmptyDelay` | 60 | Seconds an empty house keeps its phase. |
 | `GuildLevel.House.Decor.Enable` | 1 | 0 = no Customization (no drop, no quest object, no edit). |
-| `GuildLevel.House.Decor.Paragon` | 9 | The Paragon level that opens it. |
+| `GuildLevel.House.Decor.Paragon` | 7 | The Paragon level that opens it. |
 | `GuildLevel.House.Decor.Rank` | 1 | Highest guild rank id allowed to decorate (0: the guild master only). |
 | `GuildLevel.House.Decor.DropChance` | 10 | % for a boss to drop an object for a guild there in numbers. |
 | `GuildLevel.House.Decor.ThemeChance` | 60 | % for each object to be of the instance's theme (else one of no theme). |
@@ -628,7 +627,7 @@ in a group, characters with a client to accept summons and resurrections.
 49. **Empty house:** everyone leaves; a minute later the phase is free again
     (a GM with `.modify phase` sees nothing there). Going back in brings the
     mailbox back.
-50. **Paragon 2 to 8:** a guild at Paragon 8: going home shows the supplier,
+50. **Paragon 1 to 6:** a guild at Paragon 6: going home shows the supplier,
     banker by the entrance, the class trainers and stable master,
     the profession trainers with forge, anvil and fire, two auctioneers and
     seven portals. At Paragon 3, only what Paragon 1 to 3 unlock. Each NPC
@@ -642,10 +641,10 @@ in a group, characters with a client to accept summons and resurrections.
 
 ### Customization
 
-53. **Way in:** a guild at Paragon 9 (`.guildlevel setparagon 9`), an officer
+53. **Way in:** a guild at Paragon 7 (`.guildlevel setparagon 7`), an officer
     goes home: the Customization button shows at the top of the screen, at
     login in the house as on arrival. A member of a lower rank, or a guild at
-    Paragon 8, gets the reason instead.
+    Paragon 6, gets the reason instead.
 54. **Stock:** `.ghouse give 494 4`: four Sturdy Wooden Chairs in the list.
     Place them: the fifth cannot be. Right click twice on one: back to the
     stock, 1 left to place.
@@ -653,7 +652,7 @@ in a group, characters with a client to accept summons and resurrections.
     its first rotation) and size it, click away: it stays as left, and another
     member of the guild sees it there after relog; size is kept.
 56. **Item:** `.additem 92100`: the item is not bound, sells for 50 silver,
-    and used by a member of a Paragon 9 guild it joins the stock ("goes into
+    and used by a member of a Paragon 7 guild it joins the stock ("goes into
     your guild's objects"). Used outside a guild: refused.
 57. **Quest:** a member of a guild hands in a quest of
     `mod_guild_level_decor_quest`: its object comes into the bags (by mail

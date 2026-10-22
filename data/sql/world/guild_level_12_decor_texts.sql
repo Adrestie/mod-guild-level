@@ -1,4 +1,4 @@
--- mod-guild-level — the texts and commands of the Customization mode (Paragon 9).
+-- mod-guild-level — the texts and commands of the Customization mode (Paragon 7).
 --
 -- Idempotent: every row is deleted before being written again.
 

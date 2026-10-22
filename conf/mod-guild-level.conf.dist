@@ -298,7 +298,7 @@ GuildLevel.House.EmptyDelay       = 60
 #
 
 GuildLevel.House.Decor.Enable     = 1
-GuildLevel.House.Decor.Paragon    = 9
+GuildLevel.House.Decor.Paragon    = 7
 GuildLevel.House.Decor.Rank       = 1
 GuildLevel.House.Decor.DropChance = 10
 GuildLevel.House.Decor.ThemeChance = 60

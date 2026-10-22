@@ -16,7 +16,7 @@
  */
 
 /*
- * mod-guild-level — the Customization mode of the guild house (Paragon 9).
+ * mod-guild-level — the Customization mode of the guild house (Paragon 7).
  *
  * THE OBJECTS: furniture of the modern housing (`mod_guild_level_decor`,
  * world: tools/decor), each one a gameobject the house shows. A guild owns
@@ -75,7 +75,7 @@ constexpr uint32 GUILD_DECOR_LOOT_MARK = 92081;         // hidden, on the member
 struct GuildDecorConfig
 {
     bool enable = true;
-    uint8 paragon = 9;                  // the Paragon level that opens the Customization
+    uint8 paragon = 7;                  // the Paragon level that opens the Customization
     uint8 rank = 1;                     // highest guild rank id allowed (0 guild master, 1 officer...)
     float dropChance = 10.0f;           // % for a boss of an eligible kill to drop an object
     float themeChance = 60.0f;          // % for an instance of a theme to drop one of its theme (else one of none)

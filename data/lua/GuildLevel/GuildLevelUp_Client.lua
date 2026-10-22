@@ -63,7 +63,7 @@ local PIECES = {
 
 local TEXTS = {
     enUS = {
-        level = "Guild level %d", paragon = "Paragon %d", talent = "A guild talent point",
+        level = "Guild level %d", paragon = "Paragon %d", talent = "A guild talent point", nothing = "The guild grows stronger",
         perks = {
             [1] = "+5% experience", [2] = "Damaged gear mended over time", [3] = "+5% honor",
             [4] = "Hearthstone cooldown 5 minutes shorter", [5] = "Lucky gathering", [6] = "Vendor prices 5% lower",
@@ -73,16 +73,17 @@ local TEXTS = {
             [16] = "Vendor prices 10% lower", [17] = "10% of looted gold to the guild bank", [18] = "+10% mounted speed",
             [19] = "+10% reputation", [20] = "Flasks, elixirs and food last 30 minutes longer",
             [21] = "New spell: Guild Rally", [22] = "New spell: Mass Resurrection", [23] = "New spell: Mobile Banking",
-            [24] = "New spell: Guild Supplier", [25] = "New spell: Guild House",
+            [24] = "New spell: Guild Supplier", [25] = "Your guild house opens",
         },
         paragons = {
-            [1] = "Your guild house opens", [2] = "A reagent vendor in the house", [3] = "A banker in the house",
-            [5] = "Class trainers and a stable master", [6] = "Profession trainers, forge and anvil",
-            [7] = "An auction house", [8] = "Portals to the capitals",
+            [1] = "A reagent vendor in the house", [2] = "A banker in the house",
+            [3] = "Class trainers and a stable master", [4] = "Profession trainers, forge and anvil",
+            [5] = "An auction house", [6] = "Portals to the capitals", [7] = "The house's Customization",
         },
     },
     frFR = {
         level = "Niveau de guilde %d", paragon = "Parangon %d", talent = "Un point de talent de guilde",
+        nothing = "La guilde gagne en puissance",
         perks = {
             [1] = "+5 % d'expérience", [2] = "Équipement réparé au fil du temps", [3] = "+5 % d'honneur",
             [4] = "Pierre de foyer : 5 minutes de recharge en moins", [5] = "Récolte chanceuse",
@@ -96,16 +97,83 @@ local TEXTS = {
             [20] = "Flacons, élixirs et nourriture : 30 minutes de plus",
             [21] = "Nouveau sort : Ralliement de guilde", [22] = "Nouveau sort : Résurrection de masse",
             [23] = "Nouveau sort : Banque mobile", [24] = "Nouveau sort : Fournisseur de guilde",
-            [25] = "Nouveau sort : Maison de guilde",
+            [25] = "Votre maison de guilde ouvre ses portes",
         },
         paragons = {
-            [1] = "Votre maison de guilde ouvre ses portes", [2] = "Un marchand de composants dans la maison",
-            [3] = "Un banquier dans la maison", [5] = "Maîtres de classe et maître des écuries",
-            [6] = "Maîtres des métiers, forge et enclume", [7] = "Un hôtel des ventes", [8] = "Des portails vers les capitales",
+            [1] = "Un marchand de composants dans la maison", [2] = "Un banquier dans la maison",
+            [3] = "Maîtres de classe et maître des écuries", [4] = "Maîtres des métiers, forge et enclume",
+            [5] = "Un hôtel des ventes", [6] = "Des portails vers les capitales", [7] = "La Personnalisation de la maison",
+        },
+    },
+    deDE = {
+        level = "Gildenstufe %d", paragon = "Paragon %d", talent = "Ein Gildentalentpunkt", nothing = "Die Gilde wird stärker",
+        perks = {
+            [1] = "+5 % Erfahrung", [2] = "Beschädigte Ausrüstung wird mit der Zeit repariert", [3] = "+5 % Ehre",
+            [4] = "Abklingzeit des Ruhesteins 5 Minuten kürzer", [5] = "Glückliches Sammeln", [6] = "Händlerpreise 5 % niedriger",
+            [7] = "5 % des erbeuteten Goldes an die Gildenbank", [8] = "+5 % Reittempo", [9] = "+5 % Ruf",
+            [10] = "Von einem Gildenmitglied mit voller Gesundheit wiederbelebt", [11] = "+15 % Erfahrung",
+            [12] = "Ausrüstung wird schneller repariert", [13] = "+15 % Ehre",
+            [14] = "Abklingzeit des Ruhesteins 15 Minuten kürzer", [15] = "Noch glücklicheres Sammeln",
+            [16] = "Händlerpreise 10 % niedriger", [17] = "10 % des erbeuteten Goldes an die Gildenbank",
+            [18] = "+10 % Reittempo", [19] = "+10 % Ruf", [20] = "Fläschchen, Elixiere und Essen wirken 30 Minuten länger",
+            [21] = "Neuer Zauber: Gildensammlung", [22] = "Neuer Zauber: Massenwiederbelebung",
+            [23] = "Neuer Zauber: Mobiles Banking", [24] = "Neuer Zauber: Gildenversorger",
+            [25] = "Euer Gildenhaus öffnet seine Tore",
+        },
+        paragons = {
+            [1] = "Ein Reagenzienhändler im Haus", [2] = "Ein Bankier im Haus",
+            [3] = "Klassenlehrer und ein Stallmeister", [4] = "Berufslehrer, Schmiede und Amboss",
+            [5] = "Ein Auktionshaus", [6] = "Portale zu den Hauptstädten", [7] = "Die Gestaltung des Hauses",
+        },
+    },
+    esES = {
+        level = "Nivel de hermandad %d", paragon = "Paragón %d", talent = "Un punto de talento de hermandad",
+        nothing = "La hermandad se hace más fuerte",
+        perks = {
+            [1] = "+5 % de experiencia", [2] = "Equipo dañado reparado con el tiempo", [3] = "+5 % de honor",
+            [4] = "Piedra de hogar: 5 minutos menos de reutilización", [5] = "Recolección afortunada",
+            [6] = "Precios de los vendedores un 5 % más bajos", [7] = "5 % del oro despojado para el banco de hermandad",
+            [8] = "+5 % de velocidad de montura", [9] = "+5 % de reputación",
+            [10] = "Resucitado por un miembro de la hermandad con toda la salud", [11] = "+15 % de experiencia",
+            [12] = "Equipo reparado más rápido", [13] = "+15 % de honor",
+            [14] = "Piedra de hogar: 15 minutos menos de reutilización", [15] = "Recolección más afortunada",
+            [16] = "Precios de los vendedores un 10 % más bajos", [17] = "10 % del oro despojado para el banco de hermandad",
+            [18] = "+10 % de velocidad de montura", [19] = "+10 % de reputación",
+            [20] = "Frascos, elixires y comida duran 30 minutos más",
+            [21] = "Nuevo hechizo: Reunión de hermandad", [22] = "Nuevo hechizo: Resurrección en masa",
+            [23] = "Nuevo hechizo: Banca móvil", [24] = "Nuevo hechizo: Proveedor de hermandad",
+            [25] = "Tu casa de hermandad abre sus puertas",
+        },
+        paragons = {
+            [1] = "Un vendedor de componentes en la casa", [2] = "Un banquero en la casa",
+            [3] = "Instructores de clase y un maestro de establos", [4] = "Instructores de profesión, forja y yunque",
+            [5] = "Una casa de subastas", [6] = "Portales a las capitales", [7] = "La Personalización de la casa",
+        },
+    },
+    ruRU = {
+        level = "Уровень гильдии %d", paragon = "Парагон %d", talent = "Очко таланта гильдии", nothing = "Гильдия становится сильнее",
+        perks = {
+            [1] = "+5% опыта", [2] = "Поврежденная экипировка постепенно чинится", [3] = "+5% чести",
+            [4] = "Камень возвращения: перезарядка на 5 минут короче", [5] = "Удачный сбор", [6] = "Цены торговцев ниже на 5%",
+            [7] = "5% добытого золота идет в банк гильдии", [8] = "+5% к скорости верхом", [9] = "+5% репутации",
+            [10] = "Воскрешение соратником с полным здоровьем", [11] = "+15% опыта", [12] = "Экипировка чинится быстрее",
+            [13] = "+15% чести", [14] = "Камень возвращения: перезарядка на 15 минут короче", [15] = "Еще более удачный сбор",
+            [16] = "Цены торговцев ниже на 10%", [17] = "10% добытого золота идет в банк гильдии", [18] = "+10% к скорости верхом",
+            [19] = "+10% репутации", [20] = "Настойки, эликсиры и еда действуют на 30 минут дольше",
+            [21] = "Новое заклинание: Сбор гильдии", [22] = "Новое заклинание: Массовое воскрешение",
+            [23] = "Новое заклинание: Мобильный банк", [24] = "Новое заклинание: Поставщик гильдии",
+            [25] = "Ваш дом гильдии открывает двери",
+        },
+        paragons = {
+            [1] = "Торговец реагентами в доме", [2] = "Банкир в доме",
+            [3] = "Учителя классов и смотритель стойл", [4] = "Учителя профессий, кузница и наковальня",
+            [5] = "Аукцион", [6] = "Порталы в столицы", [7] = "Оформление дома",
         },
     },
 }
 local L = TEXTS[GetLocale()] or TEXTS.enUS
+-- the talent points start at this Paragon level (GuildLevel.Talents.FromParagon's default)
+local TALENTS_FROM = 10
 
 local PERK_ICONS = {
     [1] = "INV_Misc_Book_11", [2] = "Trade_BlackSmithing", [3] = "INV_BannerPVP_02", [4] = "INV_Misc_Rune_01",
@@ -267,7 +335,7 @@ local function Show(level, paragon)
     if paragon > 0 then
         T.RenownLabel:SetText(fmt(L.paragon, paragon))
         T.RenownLabel:SetTextColor(0.9, 0.7, 1)     -- the Paragon purple of the guild bar
-        T.RewardDescription:SetText(L.paragons[paragon] or L.talent)
+        T.RewardDescription:SetText(L.paragons[paragon] or (paragon >= TALENTS_FROM and L.talent) or L.nothing)
         SetPortraitToTexture(T.RewardIcon, L.paragons[paragon] and "Interface\\Icons\\INV_Misc_Rune_06"
             or "Interface\\Icons\\Ability_Marksmanship")
     else

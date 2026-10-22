@@ -88,7 +88,7 @@ void GuildDecorMgr::LoadConfig()
 {
     GuildDecorConfig c;
     c.enable = sConfigMgr->GetOption<bool>("GuildLevel.House.Decor.Enable", true);
-    c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Paragon", 9), 0, GUILD_PARAGON_LIMIT));
+    c.paragon = uint8(std::clamp<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Paragon", 7), 0, GUILD_PARAGON_LIMIT));
     c.rank = uint8(std::min<uint32>(sConfigMgr->GetOption<uint32>("GuildLevel.House.Decor.Rank", 1), 9));
     c.dropChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.House.Decor.DropChance", 10.0f), 0.0f, 100.0f);
     c.themeChance = std::clamp(sConfigMgr->GetOption<float>("GuildLevel.House.Decor.ThemeChance", 60.0f), 0.0f, 100.0f);
