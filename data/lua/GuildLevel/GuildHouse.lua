@@ -196,3 +196,19 @@ function Handlers.Sources(player, decor)
     end
     AIO.Handle(player, "GuildHouse", "Sources", sources)
 end
+
+-- For a game master checking the previews: .gdecoshots <object> [<object>...] shows each one in
+-- the Collection window and takes a screenshot of it (Screenshots folder of the game).
+local function OnCommand(_, player, command)
+    if not (player and command) then return end
+    local args = command:lower():match("^gdecoshots%s*(.*)$")
+    if not args then return end
+    if player:GetGMRank() < 2 then return end
+    local ids = {}
+    for id in args:gmatch("%d+") do ids[#ids + 1] = tonumber(id) end
+    AIO.Handle(player, "GuildHouse", "Shots", ids)
+    return false
+end
+
+RegisterPlayerEvent(42, OnCommand)          -- PLAYER_EVENT_ON_COMMAND
+
