@@ -206,6 +206,10 @@ def main(export_dir):
         if not name:
             print('not exported:', e['decor'], e['name'])
             continue
+        if e.get('removed'):
+            # taken out: its number stays (the rows' order), its files are not written
+            rows.append((e, None))
+            continue
         pack.pack(os.path.join(export_dir, name, name + '.m2'), out, name, GAME_DIR, PACK_OPTIONS, None)
         m2 = os.path.join(out, name + '.m2')
         own_skins(m2)
