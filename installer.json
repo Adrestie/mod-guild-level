@@ -171,6 +171,7 @@
         "mod_guild_level_decor_quest"
       ],
       "kept_on_update": [
+        "mod_guild_level_house_spawn",
         "mod_guild_level_talent_node",
         "mod_guild_level_talent_link"
       ]

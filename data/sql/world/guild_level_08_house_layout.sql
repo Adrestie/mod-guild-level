@@ -21,7 +21,7 @@
 --   Paragon 8  portals: the four capitals of the faction, Shattrath, Dalaran
 --              and the Caverns of Time
 --
--- Idempotent: the module's rows (ids under 1000) are written again.
+-- Idempotent: the module's rows (ids under 1000) are added when missing, never written over.
 
 -- THE PORTAL TO THE CAVERNS OF TIME, which the game has not: the Dalaran
 -- portal's look, casting Teleport to Caverns of Time (46343). Gameobject
@@ -42,8 +42,9 @@ INSERT INTO `gameobject_template_locale` (`entry`, `locale`, `name`, `castBarCap
 (920002, 'esES', 'Portal a las Cavernas del Tiempo', '', 0),
 (920002, 'ruRU', 'Портал в Пещеры Времени', '', 0);
 
-DELETE FROM `mod_guild_level_house_spawn` WHERE `id` BETWEEN 3 AND 999;
-INSERT INTO `mod_guild_level_house_spawn` (`id`, `map`, `paragon`, `kind`, `entry`, `x`, `y`, `z`, `o`, `comment`) VALUES
+-- Only the rows missing are added: what a game master moved in the game (.guildlevel house move)
+-- stays where he put it.
+INSERT IGNORE INTO `mod_guild_level_house_spawn` (`id`, `map`, `paragon`, `kind`, `entry`, `x`, `y`, `z`, `o`, `comment`) VALUES
 (3, 449, 2, 0, 92001, -6.80, 7.45, -0.26, 0.099, 'Paragon 2: Guild Supplier'),
 (4, 449, 3, 0, 2455, -6.50, 5.50, -0.05, 0.077, 'Paragon 3: Banker'),
 (6, 449, 5, 0, 914, -5.74, 46.84, 1.06, 0.085, 'Paragon 5: Warrior trainer'),

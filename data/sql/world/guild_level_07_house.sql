@@ -3,8 +3,8 @@
 -- Champions' Hall (map 449) for the Alliance, Hall of Legends (map 450) for
 -- the Horde: one phase of the hall per open guild house (src/GuildHouse.h).
 --
--- Idempotent: the table is created once, its rows and the texts are written
--- again.
+-- Idempotent: the table is created once, its rows added when missing (never written over), the
+-- texts written again.
 
 -- WHAT STANDS IN A HOUSE, unlocked Paragon level by Paragon level. kind 0 is
 -- a creature, 1 a gameobject. Each guild's copy is placed in its own phase
@@ -25,8 +25,9 @@ CREATE TABLE IF NOT EXISTS `mod_guild_level_house_spawn` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='GuildLevel: creatures and objects of the guild houses';
 
-DELETE FROM `mod_guild_level_house_spawn` WHERE `id` < 1000;
-INSERT INTO `mod_guild_level_house_spawn` (`id`, `map`, `paragon`, `kind`, `entry`, `x`, `y`, `z`, `o`, `comment`) VALUES
+-- Only the rows missing are added: what a game master moved in the game (.guildlevel house move)
+-- stays where he put it.
+INSERT IGNORE INTO `mod_guild_level_house_spawn` (`id`, `map`, `paragon`, `kind`, `entry`, `x`, `y`, `z`, `o`, `comment`) VALUES
 (1, 449, 1, 1, 32349, -3.5, 4.4, -0.256, 0, 'Paragon 1: mailbox, Alliance'),
 (2, 450, 1, 1, 32349, 218.0, 72.5, 25.721, 0.485, 'Paragon 1: mailbox, Horde');
 
