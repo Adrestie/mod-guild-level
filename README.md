@@ -1,53 +1,67 @@
 # mod-guild-level
 
-An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm
-and builds a guild house on them. Members who play together earn guild
-experience; the guild climbs 25 levels, then Paragon levels, unlocking perks,
-a house of its own at level 25, the furniture to decorate it at Paragon 7 and
-talents from Paragon 10.
+**WORK IN PROGRESS**
 
-## Features
+An AzerothCore module (WoW 3.3.5a) that brings the guild levels of Cataclysm and builds a guild house on them: members who play together earn guild experience, unlocking perks, a guild house and guild talents.
 
-* **Levels 1-25:** passive perks for every member (experience, honor, mount speed, cheaper vendors...).
-* **Active perks 21-25:** summon or resurrect the raid, a guild bank chest, a supplier, the way to the Guild House.
-* **Paragon levels:** past level 25, the guild keeps climbing Paragon levels (up to 99 by default); the first 7 unlock the Guild House features.
-* **Guild talents:** from Paragon 10, the guild earns talent points to spend on raising its members' stats.
-* **Guild House decoration:** 2443 objects to decorate the Guild House, obtainable through quests, dungeons and raids.
-* **Languages:** English, French, German, Spanish (esES) and Russian.
+## Key features
 
-## Main commands
-
-| Command | Effect |
-|---|---|
-| `.gperk raid\|rez\|bank\|vendor\|home\|leave\|list` | the active perks |
-| `.gtalent` | the talent window |
-| `/gdeco`, `/gcoll` | the Customization mode, the Collection |
-| `.guildlevel info\|setlevel\|setparagon\|addxp [$guild]` | GM: a guild's level |
-| `.ghouse give $object $count [$guild]` | GM: objects for a guild's stock |
+- Levels 1-25: passive perks for every member (experience, honor, mount speed, cheaper vendors...).
+- Active perks at levels 21-25: summon or resurrect the raid, a guild bank chest, a supplier, the way to the Guild House.
+- Paragon levels past 25, the first ones unlocking the Guild House features.
+- Guild talents from Paragon 10, raising the members' stats.
+- Guild House decoration: 2443 objects, from quests, dungeons and raids, placed in a Customization mode.
+- Texts in English, French, German, Spanish and Russian.
 
 ## Dependencies
 
-| What | Role |
+| Dependency | For |
 |---|---|
-| AzerothCore WotLK | the server the module is compiled into (required) |
-| [ALE](https://github.com/azerothcore/mod-ale) + [AIO](https://github.com/Rochet2/AIO) | the windows (server and client); without them, commands only |
-| [WarcraftXL](https://github.com/WarcraftXL/wxl-core) + its Modern M2 plugin | the client draws the furniture and the level-up effects |
-| [ForeverUI](https://github.com/Adrestie/mod-forever-ui) | optional: its look, talents and Collection in its guild page |
+| [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk) (WotLK 3.3.5a) | the server |
+| [mod-ale](https://github.com/azerothcore/mod-ale) | the windows (server side); without it, commands only |
+| [AIO](https://github.com/Rochet2/AIO) | the windows: `AIO_Server` in `lua_scripts`, and the `AIO_Client` addon on every client |
+| [WarcraftXL](https://github.com/WarcraftXL/wxl-core) and its Modern M2 plugin | the client draws the furniture and the level-up effects |
+| [mod-forever-ui](https://github.com/Adrestie/mod-forever-ui) | optional: its look, and talents and Collection in its guild page |
 
-## Installation
+## How to install
 
-Point the [WoW-mods](https://github.com/Adrestie/WoW-mods) installer at this
-folder: it installs the module, SQL, configuration, Lua scripts, client patch
-and extension. Manual steps, options, ID ranges (92000-94599) and in-game
-tests: [docs/GUIDE.md](docs/GUIDE.md).
+1. Download `installer.exe` from the [WoW-mods-installer releases](https://github.com/Adrestie/WoW-mods-installer/releases).
+2. Stop the worldserver and close the game.
+3. Run `installer.exe`, give it this folder and the folders it asks for, click **Check**, then **Install**.
+4. Rebuild the worldserver. On its next start, the core applies the module's SQL.
+5. The installer writes the client patch into `Data\patch-Z.MPQ` and the `wxl-guildhouse` extension into the game's `Extensions`: give both to the other players.
+
+## How to update
+
+Same steps with the new version's folder, choosing **Update** instead of **Install**. The guilds' levels, talents, decoration stock and placed furniture, and your `mod-guild-level.conf` settings, are kept. Rebuild the worldserver.
+
+## How to uninstall
+
+Same steps, choosing **Remove**. Everything goes, database included: every guild loses its level and its house. Rebuild the worldserver.
 
 ## Credits
 
-* [AzerothCore](https://github.com/azerothcore/azerothcore-wotlk), ALE, AIO (Rochet2), WarcraftXL.
-* [wxl-housing](https://github.com/sogyboi/wxl-housing) by sogyboi, which `wxl-guildhouse` forks.
-* [WXL](https://github.com/WarcraftXL/wxl-core).
+- [wxl-housing](https://github.com/sogyboi/wxl-housing) by sogyboi, which the `wxl-guildhouse` extension forks.
+- [WarcraftXL](https://github.com/WarcraftXL/wxl-core), ALE and AIO (Rochet2), on which it builds.
 
-## Licence
+## Configuration
 
-The module: GPL-2.0-or-later ([LICENSE](LICENSE)). The extension
-`wxl-guildhouse`: GPL-3.0-or-later.
+`mod-guild-level.conf` sets:
+
+- the module on or off, the members needed together, and the experience rates (kills, quests, bosses by family);
+- the level and Paragon curves, and the highest Paragon level;
+- each passive perk, and the level, cooldown and duration of each active perk;
+- the Guild House, its decoration, and the drop chances of decoration objects;
+- the guild talents: when they start, points per level, tier thresholds and reset cost.
+
+## Commands
+
+| Command | |
+|---|---|
+| `.gperk raid \| rez \| bank \| vendor \| home \| leave \| list` | the active perks |
+| `/gtalent` | the guild talent window |
+| `/gdeco` | the Customization mode of the Guild House |
+| `/gcoll` | the Collection (also `/gcollection`) |
+| `.ghouse begin \| place \| cancel \| remove` | placing furniture |
+| `.guildlevel info \| setlevel \| setparagon \| addxp [guild]` | game master: a guild's level |
+| `.ghouse give <object> <count> [guild]` | game master: objects for a guild's stock |
