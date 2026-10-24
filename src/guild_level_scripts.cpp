@@ -20,6 +20,7 @@
  */
 
 #include "Chat.h"
+#include "GuildText.h"
 #include "Guild.h"
 #include "GuildActivePerks.h"
 #include "GuildDecor.h"
@@ -395,9 +396,9 @@ class spell_guild_decor_collect : public SpellScript
         // told why, the item kept
         ChatHandler handler(player->GetSession());
         if (r == GuildDecorResult::Locked)
-            handler.PSendModuleSysMessage(GUILD_LEVEL_MODULE, GuildDecorMgr::TextOf(r), uint32(sGuildDecorMgr->Config().paragon));
+            GuildSay(&handler, GuildDecorMgr::TextOf(r), uint32(sGuildDecorMgr->Config().paragon));
         else if (uint32 text = GuildDecorMgr::TextOf(r))
-            handler.PSendModuleSysMessage(GUILD_LEVEL_MODULE, text);
+            GuildSay(&handler, text);
         return SPELL_FAILED_DONT_REPORT;
     }
 
@@ -409,7 +410,7 @@ class spell_guild_decor_collect : public SpellScript
             return;
         uint32 decor = 0, owned = 0;
         if (sGuildDecorMgr->Collect(player, item->GetEntry(), decor, owned) == GuildDecorResult::Ok)
-            ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_DECOR_COLLECTED,
+            GuildTell(player, GUILD_LEVEL_STR_DECOR_COLLECTED,
                 sGuildDecorMgr->NameOf(decor, player->GetSession()->GetSessionDbLocaleIndex()), owned);
     }
 

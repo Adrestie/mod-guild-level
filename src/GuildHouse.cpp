@@ -16,6 +16,7 @@
  */
 
 #include "GuildHouse.h"
+#include "GuildText.h"
 #include "GuildDecor.h"
 #include "GuildActivePerks.h"
 #include "GuildLevel.h"
@@ -47,7 +48,7 @@ namespace
     template<typename... Args>
     void Say(ChatHandler* handler, uint32 id, Args&&... args)
     {
-        handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, id, std::forward<Args>(args)...));
+        GuildSay(handler, id, std::forward<Args>(args)...);
     }
 
 }
@@ -455,7 +456,7 @@ void GuildHouseMgr::OnMapUpdate(Map* map, uint32 diff)
     for (ObjectGuid const& guid : out)
         if (Player* player = ObjectAccessor::GetPlayer(map, guid))
         {
-            ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_HOUSE_NOT_YOURS);
+            GuildTell(player, GUILD_LEVEL_STR_HOUSE_NOT_YOURS);
             SendBack(player);
         }
 

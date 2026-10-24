@@ -10,7 +10,7 @@ INSERT INTO `command` (`name`, `security`, `help`) VALUES
 ('ghouse remove', 0, 'Syntax: .ghouse remove $placed\n\nTakes a placed object away, back to the guild''s stock.'),
 ('ghouse give', 2, 'Syntax: .ghouse give $object $count [$guild]\n\nAdds $count (or takes away, negative) of an object to the stock of a guild (its name or id; else the selected player''s, else yours). 0 for $object: every object.');
 
-DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 170 AND 189;
+DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 170 AND 177;
 INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level', 170, 'Your guild decorates its house from Paragon level {}.'),
 ('mod-guild-level', 171, 'Only the guild ranks up to {} may decorate the house (0 is the guild master).'),
@@ -21,7 +21,9 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level', 176, 'This object cannot be placed there.'),
 ('mod-guild-level', 177, '{} of object {} (0: every object) given to the guild {}.');
 
-DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 170 AND 189;
+-- frFR only, its own ids: 178 and 179 are guild_level_13's and 14's, the other languages
+-- guild_level_15's; a re-run of this file must not wipe them.
+DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 170 AND 177 AND `locale` = 'frFR';
 INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 170, 'frFR', 'Votre guilde décore sa maison à partir du niveau de Parangon {}.'),
 ('mod-guild-level', 171, 'frFR', 'Seuls les rangs de guilde jusqu''à {} peuvent décorer la maison (0 est le maître de guilde).'),

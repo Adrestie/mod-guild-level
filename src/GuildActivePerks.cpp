@@ -16,6 +16,7 @@
  */
 
 #include "GuildActivePerks.h"
+#include "GuildText.h"
 #include "GuildHouse.h"
 #include "GuildLevel.h"
 #include "GuildPerks.h"
@@ -51,7 +52,7 @@ namespace
     template<typename... Args>
     void Say(ChatHandler* handler, uint32 id, Args&&... args)
     {
-        handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, id, std::forward<Args>(args)...));
+        GuildSay(handler, id, std::forward<Args>(args)...);
     }
 
     int64 Now()
@@ -419,13 +420,13 @@ void GuildActivePerkMgr::List(ChatHandler* handler, uint8 guildLevel, Player* pl
         GuildActivePerk const perk = GuildActivePerk(i);
         std::string state;
         if (guildLevel < _config.level[i])
-            state = handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_ACTIVE_LOCKED);
+            state = GuildText(handler, GUILD_LEVEL_STR_ACTIVE_LOCKED);
         else if (uint32 const left = Remaining(player, perk))
-            state = handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_ACTIVE_LEFT, left / MINUTE, left % MINUTE);
+            state = GuildText(handler, GUILD_LEVEL_STR_ACTIVE_LEFT, left / MINUTE, left % MINUTE);
         else
-            state = handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_ACTIVE_READY);
+            state = GuildText(handler, GUILD_LEVEL_STR_ACTIVE_READY);
 
-        std::string const name = handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_ACTIVE_NAME + i);
+        std::string const name = GuildText(handler, GUILD_LEVEL_STR_ACTIVE_NAME + i);
         Say(handler, GUILD_LEVEL_STR_ACTIVE_LINE, name, SUBCOMMANDS[i], uint32(_config.level[i]), state);
     }
 }

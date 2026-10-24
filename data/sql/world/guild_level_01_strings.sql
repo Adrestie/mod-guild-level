@@ -7,10 +7,11 @@
 --               green of the guild channel. {} is the level reached.
 --   101 to 199  answers of the GM commands (.guildlevel).
 --
--- Regenerable: the module's rows are deleted before being written again, so
--- the file may be replayed at will.
+-- Regenerable: its rows are deleted before being written again, so the file
+-- may be replayed at will.
 
-DELETE FROM `module_string` WHERE `module` = 'mod-guild-level';
+-- Only its own texts: the other files write theirs, and a re-run of this one must not wipe them.
+DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` IN (1, 2, 3, 4, 101, 102, 103, 104, 105, 106, 107, 108);
 INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level',   1, '[Guild] Your guild has reached level {}!'),
 ('mod-guild-level',   2, '[Guild] Your guild has reached Paragon level {}!'),
@@ -25,7 +26,7 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level', 107, 'Done.'),
 ('mod-guild-level', 108, 'The module is turned off (GuildLevel.Enable = 0): no guild earns experience.');
 
-DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level';
+DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` IN (1, 2, 3, 4, 101, 102, 103, 104, 105, 106, 107, 108);
 INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level',   1, 'frFR', '[Guilde] Votre guilde atteint le niveau {} !'),
 ('mod-guild-level',   2, 'frFR', '[Guilde] Votre guilde atteint le niveau de Parangon {} !'),

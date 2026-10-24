@@ -16,6 +16,7 @@
  */
 
 #include "GuildTalents.h"
+#include "GuildText.h"
 #include "GuildLevel.h"
 
 #include "Chat.h"
@@ -88,7 +89,7 @@ namespace
     template<typename... Args>
     void Say(ChatHandler* handler, uint32 id, Args&&... args)
     {
-        handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, id, std::forward<Args>(args)...));
+        GuildSay(handler, id, std::forward<Args>(args)...);
     }
 
     void TellAddon(Player* player, std::string const& message)

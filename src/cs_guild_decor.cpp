@@ -23,6 +23,7 @@
  */
 
 #include "Chat.h"
+#include "GuildText.h"
 #include "ChatCommand.h"
 #include "Guild.h"
 #include "GuildDecor.h"
@@ -39,7 +40,7 @@ namespace
     template<typename... Args>
     void Say(ChatHandler* handler, uint32 id, Args&&... args)
     {
-        handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, id, std::forward<Args>(args)...));
+        GuildSay(handler, id, std::forward<Args>(args)...);
     }
 
     // Told only when refused.

@@ -243,7 +243,7 @@ def main(export_dir):
         "DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` = 178;",
         "INSERT INTO `module_string` (`module`, `id`, `string`) VALUES",
         "('mod-guild-level', 178, '{} goes into your guild''s objects: it owns {} of them.');",
-        "DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` = 178;",
+        "DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` = 178 AND `locale` = 'frFR';",
         "INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES",
         "('mod-guild-level', 178, 'frFR', '{} rejoint les objets de votre guilde : elle en possède {}.');",
         '',

@@ -22,6 +22,7 @@
  */
 
 #include "Chat.h"
+#include "GuildText.h"
 #include "ChatCommand.h"
 #include "GuildActivePerks.h"
 #include "GuildHouse.h"
@@ -64,7 +65,7 @@ public:
         Player* player = handler->GetPlayer();
         if (!player->GetGuildId())
         {
-            handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_ACTIVE_NO_GUILD));
+            handler->SendSysMessage(GuildText(handler, GUILD_LEVEL_STR_ACTIVE_NO_GUILD));
             return true;
         }
         sGuildActivePerkMgr->List(handler, sGuildLevelMgr->Get(player->GetGuildId()).level, player);
@@ -105,7 +106,7 @@ public:
             return false;
 
         sGuildActivePerkMgr->ResetCooldowns(target->GetGUID());
-        handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_ACTIVE_RESET, target->GetName()));
+        handler->SendSysMessage(GuildText(handler, GUILD_LEVEL_STR_ACTIVE_RESET, target->GetName()));
         return true;
     }
 

@@ -75,7 +75,7 @@ INSERT INTO `command` (`name`, `security`, `help`) VALUES
 ('gtalent clear', 2, 'Syntax: .gtalent clear [$guild]\n\nGives a guild back every talent point, for free.');
 
 -- THE TEXTS.
-DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 150 AND 169;
+DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 150 AND 166;
 INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level', 150, 'The guild talents are disabled.'),
 ('mod-guild-level', 151, 'Only the guild master and the officers (ranks up to {}) spend the guild''s talent points.'),
@@ -95,7 +95,8 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-guild-level', 165, 'Nothing changed: unknown talent or values that do not hold.'),
 ('mod-guild-level', 166, 'Your guild has not spent enough points yet for this tier of talents.');
 
-DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 150 AND 169;
+-- frFR only: the other languages are guild_level_18's, which a re-run of this file must not wipe.
+DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` BETWEEN 150 AND 166 AND `locale` = 'frFR';
 INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES
 ('mod-guild-level', 150, 'frFR', 'Les talents de guilde sont désactivés.'),
 ('mod-guild-level', 151, 'frFR', 'Seuls le maître de guilde et les officiers (rangs jusqu''à {}) dépensent les points de talent de la guilde.'),

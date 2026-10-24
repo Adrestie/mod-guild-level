@@ -16,6 +16,7 @@
  */
 
 #include "GuildPerks.h"
+#include "GuildText.h"
 #include "GuildTalents.h"
 #include "GuildActivePerks.h"
 #include "GuildLevel.h"
@@ -484,7 +485,7 @@ void GuildPerkMgr::Show(ChatHandler* handler, uint8 level) const
 {
     auto say = [handler](uint32 id, auto&&... args)
     {
-        handler->SendSysMessage(handler->PGetParseModuleString(GUILD_LEVEL_MODULE, id, args...));
+        GuildSay(handler, id, args...);
     };
 
     if (!_config.enable)
@@ -493,8 +494,8 @@ void GuildPerkMgr::Show(ChatHandler* handler, uint8 level) const
         return;
     }
 
-    std::string const on = handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_PERKS_ON);
-    std::string const off = handler->PGetParseModuleString(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_PERKS_OFF);
+    std::string const on = GuildText(handler, GUILD_LEVEL_STR_PERKS_ON);
+    std::string const off = GuildText(handler, GUILD_LEVEL_STR_PERKS_OFF);
 
     say(GUILD_LEVEL_STR_PERKS_TITLE, uint32(level));
     say(GUILD_LEVEL_STR_PERKS_GAINS, Amount(GUILD_PERK_XP, level), Amount(GUILD_PERK_HONOR, level),

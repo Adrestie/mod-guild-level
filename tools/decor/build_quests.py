@@ -174,7 +174,7 @@ def main(server_folder):
         "DELETE FROM `module_string` WHERE `module` = 'mod-guild-level' AND `id` = 179;",
         "INSERT INTO `module_string` (`module`, `id`, `string`) VALUES",
         "('mod-guild-level', 179, 'For your guild, this quest also brings an object of its house: {}.');",
-        "DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` = 179;",
+        "DELETE FROM `module_string_locale` WHERE `module` = 'mod-guild-level' AND `id` = 179 AND `locale` = 'frFR';",
         "INSERT INTO `module_string_locale` (`module`, `id`, `locale`, `string`) VALUES",
         "('mod-guild-level', 179, 'frFR', 'Pour votre guilde, cette quête rapporte aussi un objet de sa maison : {}.');",
         '',

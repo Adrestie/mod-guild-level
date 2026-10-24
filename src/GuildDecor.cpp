@@ -16,6 +16,7 @@
  */
 
 #include "GuildDecor.h"
+#include "GuildText.h"
 
 #include "Chat.h"
 
@@ -631,6 +632,6 @@ void GuildDecorMgr::OnQuestRewarded(Player* player, uint32 questId)
             .SendMailTo(trans, MailReceiver(player), MailSender(MAIL_NORMAL, player->GetGUID().GetCounter(), MAIL_STATIONERY_GM));
         CharacterDatabase.CommitTransaction(trans);
     }
-    ChatHandler(player->GetSession()).PSendModuleSysMessage(GUILD_LEVEL_MODULE, GUILD_LEVEL_STR_DECOR_QUEST,
+    GuildTell(player, GUILD_LEVEL_STR_DECOR_QUEST,
         NameOf(decor, player->GetSession()->GetSessionDbLocaleIndex()));
 }
